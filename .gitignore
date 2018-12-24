@@ -219,5 +219,6 @@ pip-log.txt
 ## LogParser
 ############
 
-bin64/
+bin64_core/
+bin64_console/
 resources/
