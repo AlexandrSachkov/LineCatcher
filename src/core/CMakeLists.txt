@@ -23,14 +23,20 @@ ENDIF(MSVC)
 # =====================================================================================
 
 SET(HEADERS       
+    FilePager.h
     FileSystemManager.h
     PLPCore.h
+    TaskRunner.h
+    Thread.h
+    Timer.h
     Utils.h
     )
 
 SET(SOURCES 
+    FilePager.cpp
     FileSystemManager.cpp
     PLPCore.cpp
+    Thread.cpp
     Utils.cpp
     )
 
@@ -57,29 +63,37 @@ IF(LUA_LIBRARY_RELEASE_PATH STREQUAL "")
 	MESSAGE(SEND_ERROR "Lua library release path must be specified")
 ENDIF(LUA_LIBRARY_RELEASE_PATH STREQUAL "")
 
-# GLFW
-#SET(NLE_GLFW_INCLUDE_PATH
-#    "" CACHE PATH "NLE GLFW include path")
 
-#IF(NLE_GLFW_INCLUDE_PATH STREQUAL "")
-#    MESSAGE(SEND_ERROR "NLE GLFW include path must be specified")
-#ENDIF(NLE_GLFW_INCLUDE_PATH STREQUAL "")
+#lua-intf
+SET(LUA_INTF_INCLUDE_PATH
+	"" CACHE PATH "LUA_INTF include path")
 
-#SET(NLE_GLFW_LIBRARY_DEBUG_PATH
-#    "" CACHE PATH "NLE GLFW library debug path")
-
-#IF(NLE_GLFW_LIBRARY_DEBUG_PATH STREQUAL "")
-#    MESSAGE(SEND_ERROR "NLE GLFW library debug path must be specified")
-#ENDIF(NLE_GLFW_LIBRARY_DEBUG_PATH STREQUAL "")
-
-#SET(NLE_GLFW_LIBRARY_RELEASE_PATH
-#    "" CACHE PATH "NLE GLFW library release path")
-
-#IF(NLE_GLFW_LIBRARY_RELEASE_PATH STREQUAL "")
-#    MESSAGE(SEND_ERROR "NLE GLFW library release path must be specified")
-#ENDIF(NLE_GLFW_LIBRARY_RELEASE_PATH STREQUAL "")
+IF(LUA_INTF_INCLUDE_PATH STREQUAL "")
+	MESSAGE(SEND_ERROR "LUA_INTF include path must be specified")
+ENDIF(LUA_INTF_INCLUDE_PATH STREQUAL "")
 
 
+# TBB
+SET(TBB_INCLUDE_PATH
+	"" CACHE PATH "TBB include path")
+
+IF(TBB_INCLUDE_PATH STREQUAL "")
+	MESSAGE(SEND_ERROR "TBB include path must be specified")
+ENDIF(TBB_INCLUDE_PATH STREQUAL "")
+
+SET(TBB_LIBRARY_DEBUG_PATH
+	"" CACHE PATH "TBB library debug path")
+
+IF(TBB_LIBRARY_DEBUG_PATH STREQUAL "")
+	MESSAGE(SEND_ERROR "TBB library debug path must be specified")
+ENDIF(TBB_LIBRARY_DEBUG_PATH STREQUAL "")
+
+SET(TBB_LIBRARY_RELEASE_PATH
+	"" CACHE PATH "TBB library release path")
+
+IF(TBB_LIBRARY_RELEASE_PATH STREQUAL "")
+	MESSAGE(SEND_ERROR "TBB library release path must be specified")
+ENDIF(TBB_LIBRARY_RELEASE_PATH STREQUAL "")
 
 SET(HEADERS
         ${HEADERS}
@@ -105,6 +119,8 @@ SET(HEADERS
 
 INCLUDE_DIRECTORIES(
     ${LUA_INCLUDE_PATH}
+    ${LUA_INTF_INCLUDE_PATH}
+    ${TBB_INCLUDE_PATH}
     #${NLE_D3D11_INCLUDE_PATH}
     #${P3D_GLM_INCLUDE_PATH}
     )
@@ -116,8 +132,8 @@ ADD_DEFINITIONS(
 LINK_DIRECTORIES(
     ${LUA_LIBRARY_DEBUG_PATH}
     ${LUA_LIBRARY_RELEASE_PATH}
-    #${NLE_D3D11_LIBRARY_DEBUG_PATH}
-    #${NLE_D3D11_LIBRARY_RELEASE_PATH}
+    ${TBB_LIBRARY_DEBUG_PATH}
+    ${TBB_LIBRARY_RELEASE_PATH}
     )
 
 add_library (PLPCORE STATIC
@@ -129,10 +145,8 @@ TARGET_LINK_LIBRARIES(PLPCORE
     debug lua51
     optimized lua51
 
-    #debug d3d11.lib
-    #optimized d3d11.lib
-    #debug d3dcompiler.lib
-    #optimized d3dcompiler.lib
+    debug tbb_debug
+	optimized tbb
     )
 
 set_target_properties(PLPCORE PROPERTIES DEBUG_POSTFIX _d)

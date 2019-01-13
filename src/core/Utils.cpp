@@ -13,4 +13,38 @@ namespace PLP {
         std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
         return converter.to_bytes(wstr);
     }
+
+    const char* findLastLineEnding(const char* buff, size_t buffSize, const char* currPos) {
+        if (currPos >= buff + buffSize) {
+            return nullptr;
+        }
+
+        char* pos = const_cast<char*>(currPos);
+        while (pos > buff && *pos != '\n') {
+            pos--;
+        }
+
+        if (*pos != '\n' && pos == buff) {
+            return nullptr;
+        }
+
+        return pos;
+    }
+
+    const char* findNextLineEnding(const char* buff, size_t buffSize, size_t startOffsetBytes) {
+        if (startOffsetBytes >= buffSize) {
+            return nullptr;
+        }
+
+        char* pos = const_cast<char*>(buff) + startOffsetBytes;
+        while (pos < buff + buffSize && *pos != '\n') {
+            pos++;
+        }
+
+        if (pos == buff + buffSize) {
+            return nullptr;
+        }
+
+        return pos;
+    }
 }
