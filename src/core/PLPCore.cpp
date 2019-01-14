@@ -4,10 +4,21 @@
 #include "Timer.h"
 #include "FilePager.h"
 #include "MemMappedFilePager.h"
+#include "LineParser.h"
 
 #include "lua.hpp"
+#include "LuaIntf/LuaCompat.h"
+#include "LuaIntf/LuaIntf.h"
+#include "LuaIntf/LuaRef.h"
+
+#include "LuaIntf/LuaContext.h"
+#include "LuaIntf/LuaState.h"
 #include <fstream>
 #include <cstring>
+
+namespace LuaIntf {
+    LUA_USING_SHARED_PTR_TYPE(std::shared_ptr)
+}
 
 namespace PLP {
     PLPCore::PLPCore() {}
@@ -27,17 +38,11 @@ namespace PLP {
         }
 
         luaL_openlibs(_state);
+        attachLuaBindings(_state);
 
-        _fileOpThread.reset(new Thread(1000000)); //1 ms
-        TaskStatus status;
-        _fileOpThread->runAsync([]() {
-            printf("From task");
-        }, status);
+        _fileOpThread.reset(new Thread(1000000)); //1 ms sleep
         if (!_fileOpThread->start()) {
             return false;
-        }
-        while (!status.isCompleted()) {
-
         }
 
         _buffSizeBytes = searchBuffSizeBytes;
@@ -55,6 +60,12 @@ namespace PLP {
         if (scriptLua.empty()) {
             return true;
         }
+
+        auto module = LuaIntf::LuaBinding(_state).beginModule("PLP");
+        module.addFunction("core", [this] {
+            return this;
+        });
+        module.endModule();
 
         lua_settop(_state, 0);
         if (luaL_loadstring(_state, wstring_to_string(scriptLua).c_str())) {
@@ -87,7 +98,7 @@ namespace PLP {
             }
             lineNum++;
             if (lineNum % 1000000 == 0) {
-                printf("%i\n",lineNum);
+                printf("%i\n", lineNum);
             }
         }
         double numSeconds = timer.deltaT() / 1000000000;
@@ -103,6 +114,52 @@ namespace PLP {
 
         FilePager pager;
         if (!pager.initialize(path, _searchBuff, *_fileOpThread)) {
+            return false;
+        }
+
+        LineParser lineParser;
+        if (!lineParser.initialize(pager)) {
+            return false;
+        }
+
+        Timer timer;
+
+        char* lineStart;
+        unsigned int lineSize;
+        while (lineParser.nextLine(lineStart, lineSize)) {
+            unsigned long long lineNum = lineParser.getLineNumber();
+            
+        }
+        /*unsigned long numPages = 0;
+        unsigned long lineNum = 0;
+        unsigned long long pageSize;
+        do {
+            const char* data = pager.getNextPage(pageSize);
+            numPages++;
+
+            unsigned long long pageOffset = 0;
+            char* lineEnd = nullptr;
+            while ((lineEnd = (char*)findNextLineEnding(data, pageSize, pageOffset)) != nullptr) {
+                pageOffset = lineEnd - data + 1;
+                lineNum++;
+            }
+            printf("Page loaded: %lu\n", numPages);
+            printf("%lu\n", lineNum);
+        } while (pageSize > 0);*/
+
+        double numSeconds = timer.deltaT() / 1000000000;
+        printf("Completed in: %f seconds\n", numSeconds);
+
+        return true;
+    }
+
+    bool PLPCore::searchLineContainsWithPreloadMM(const std::wstring path, const std::wstring& substr, unsigned int& numMatches) {
+        std::string substring = wstring_to_string(substr);
+        const char* cSubstr = substring.c_str();
+        numMatches = 0;
+
+        MemMappedFilePager pager;
+        if (!pager.initialize(path, _buffSizeBytes, *_fileOpThread)) {
             return false;
         }
 
@@ -131,47 +188,50 @@ namespace PLP {
         return true;
     }
 
-    bool PLPCore::searchLineContainsWithPreloadMM(const std::wstring path, const std::wstring& substr, unsigned int& numMatches) {
-        std::string substring = wstring_to_string(substr);
-        const char* cSubstr = substring.c_str();
-        numMatches = 0;
-
-        for (int i = 0; i < 2; i++) {
-            MemMappedFilePager pager;
-            if (!pager.initialize(path, _buffSizeBytes, *_fileOpThread)) {
-                return false;
-            }
-
-            Timer timer;
-
-            unsigned long numPages = 0;
-            unsigned long lineNum = 0;
-            size_t pageSize;
-            do {
-                const char* data = pager.getNextPage(pageSize);
-                numPages++;
-
-                size_t pageOffset = 0;
-                char* lineEnd = nullptr;
-                while ((lineEnd = (char*)findNextLineEnding(data, pageSize, pageOffset)) != nullptr) {
-                    pageOffset = lineEnd - data + 1;
-                    lineNum++;
-                    if (lineNum == 6384880) {
-                        bool zzz = true;
-                    }
-                }
-                printf("Page loaded: %lu\n", numPages);
-                printf("%lu\n", lineNum);
-            } while (pageSize > 0);
-
-            double numSeconds = timer.deltaT() / 1000000000;
-            printf("Completed in: %f seconds\n", numSeconds);
-        }
+    bool PLPCore::search(const std::wstring path, const std::wstring& frameFilterScriptLua, std::wstring& errMsg) {
+        auto module = LuaIntf::LuaBinding(_state).beginModule("PLP");
+        module.addConstant("Core", this);
+        module.endModule();
 
         return true;
     }
 
-    bool PLPCore::search(const std::wstring path, const std::wstring& frameFilterScriptLua, std::wstring& errMsg) {
+    std::shared_ptr<FileReader> PLPCore::createFileReader(
+        const std::string& path,
+        unsigned long long preferredBuffSizeBytes
+    ) {
+        std::shared_ptr<FileReader> fReader(new FileReader());
+        if (!fReader->initialize(string_to_wstring(path), preferredBuffSizeBytes, *_fileOpThread)) {
+            return nullptr;
+        }
+        return fReader;
+    }
+
+    FileReader* PLPCore::createFileReaderW(
+        const std::string& path,
+        unsigned long long preferredBuffSizeBytes
+    ) {
+        return nullptr;
+    }
+
+    bool PLPCore::test(const std::string& val) {
         return true;
+    }
+
+    void PLPCore::attachLuaBindings(lua_State* state) {
+        auto module = LuaIntf::LuaBinding(state).beginModule("PLP");
+
+        auto plpClass = module.beginClass<PLPCore>("Core");
+        plpClass.addFunction("test", &PLPCore::test);
+        plpClass.addFunction("createFileReader", &PLPCore::createFileReader);
+        plpClass.endClass();
+
+        auto fileReaderClass = module.beginClass<FileReader>("FileReader");
+        std::tuple<bool, std::string>(FileReader::*nextLine)() = &FileReader::nextLine;
+        fileReaderClass.addFunction("nextLine", nextLine);
+        fileReaderClass.addFunction("lineNumber", &FileReader::getLineNumber);
+        fileReaderClass.endClass();
+
+        module.endModule();
     }
 }

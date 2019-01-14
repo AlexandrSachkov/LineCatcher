@@ -14,7 +14,7 @@ namespace PLP {
         return converter.to_bytes(wstr);
     }
 
-    const char* findLastLineEnding(const char* buff, size_t buffSize, const char* currPos) {
+    const char* findLastLineEnding(const char* buff, unsigned long long buffSize, const char* currPos) {
         if (currPos >= buff + buffSize) {
             return nullptr;
         }
@@ -31,7 +31,7 @@ namespace PLP {
         return pos;
     }
 
-    const char* findNextLineEnding(const char* buff, size_t buffSize, size_t startOffsetBytes) {
+    const char* findNextLineEnding(const char* buff, unsigned long long buffSize, unsigned long long startOffsetBytes) {
         if (startOffsetBytes >= buffSize) {
             return nullptr;
         }

@@ -33,14 +33,14 @@ namespace PLP {
         _preloadNextPage = [&]() {
             _currentPageLD.backtracked = false;
 
-            size_t fileOffset = _lastPageLD.fileOffsetBytes + _lastPageLD.buffStartOffsetBytes + _lastPageLD.buffSizeBytes;
-            size_t bytesTillEnd = _fileSize - fileOffset;
+            unsigned long long fileOffset = _lastPageLD.fileOffsetBytes + _lastPageLD.buffStartOffsetBytes + _lastPageLD.buffSizeBytes;
+            unsigned long long bytesTillEnd = _fileSize - fileOffset;
             if (0 == bytesTillEnd) {
                 _currentPageLD.endOfFile = true;
                 return;
             }
             
-            size_t bytesToRead = bytesTillEnd > _pageSizeBytes ? _pageSizeBytes : bytesTillEnd;
+            unsigned long long bytesToRead = bytesTillEnd > _pageSizeBytes ? _pageSizeBytes : bytesTillEnd;
 
             _ifs.seekg(fileOffset);
             _ifs.read(_backBuff, bytesToRead);
@@ -50,7 +50,7 @@ namespace PLP {
             }
 
             const char* lastLineEnd = findLastLineEnding(_backBuff, bytesToRead, _backBuff + bytesToRead - 1);
-            size_t usefulBytesRead = 0;
+            unsigned long long usefulBytesRead = 0;
             if (lastLineEnd) {
                 usefulBytesRead = lastLineEnd - _backBuff + 1;
             }
@@ -67,7 +67,7 @@ namespace PLP {
         return true;
     }
 
-    const char* FilePager::getNextPage(size_t& size) {
+    const char* FilePager::getNextPage(unsigned long long& size) {
         if (!_lastPageLD.backtracked && (_lastPageLD.endOfFile || _lastPageLD.readErrorOccurred)) {
             size = 0;
             return nullptr;

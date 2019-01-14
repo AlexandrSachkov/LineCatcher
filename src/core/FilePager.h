@@ -17,17 +17,17 @@ namespace PLP {
         ~FilePager();
 
         bool initialize(const std::wstring& path, std::vector<char>& buffer, TaskRunner& asyncTaskRunner);
-        const char* getNextPage(size_t& size);
-        const char* getPreviousPage(size_t& size);
+        const char* getNextPage(unsigned long long& size);
+        const char* getPreviousPage(unsigned long long& size);
         
-        static const size_t OPTIMAL_BLOCK_SIZE_BYTES = 64 * 1024; //64 KBytes 
+        static const unsigned long long OPTIMAL_BLOCK_SIZE_BYTES = 64 * 1024; //64 KBytes 
         //https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-2000-server/cc938632(v=technet.10)
 
     private:
         struct LoadingData {
-            size_t fileOffsetBytes = 0;
-            size_t buffStartOffsetBytes = 0;
-            size_t buffSizeBytes = 0;
+            unsigned long long fileOffsetBytes = 0;
+            unsigned long long buffStartOffsetBytes = 0;
+            unsigned long long buffSizeBytes = 0;
             bool backtracked = false;
             bool endOfFile = false;
             bool readErrorOccurred = false;
@@ -41,9 +41,9 @@ namespace PLP {
         std::vector<char>* _buffer;
         TaskRunner* _asyncTaskRunner;
         std::ifstream _ifs;
-        size_t _fileSize;
+        unsigned long long _fileSize;
 
-        size_t _pageSizeBytes;
+        unsigned long long _pageSizeBytes;
         char* _frontBuff;
         char* _backBuff;
         
