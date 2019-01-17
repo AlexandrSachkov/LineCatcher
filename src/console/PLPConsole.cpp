@@ -47,6 +47,7 @@ int main() {
 
     std::wstring script5 =
         L"local fileReader = PLP:core():createFileReader(\"D:/Repositories/LogParser/resources/ShadowOfTombRaider_Vega_18.12.2_RS4_2_SOTTR_64_4b1d4982_1_11950.dump\", 4000000000);\n"
+        "local fileWriter = PLP:core():createFileWriter(\"D:/Repositories/LogParser/resources/searchResults.txt\", 1000000);\n"
         "if (fileReader == nil) then\n"
         "   print(\"failed\")\n"
         "   return\n"
@@ -57,7 +58,24 @@ int main() {
         "   if (line:find(\"ID3D12GraphicsCommandList[0x00000003dcf2a690]::DiscardResource\", 1, true)) then\n"
         "       numResults = numResults + 1;\n"
         "       print(fileReader:lineNumber(), \" \",line)\n"
+        "       fileWriter:appendLine(fileReader:lineNumber() .. \"  \" .. line)\n"
         "   end\n"
+        "   lineValid, line = fileReader:nextLine();\n"
+        "end\n"
+        "print(\"NUM RESULTS: \",numResults)"
+        ;
+
+    std::wstring script6 =
+        L"local fileReader = PLP:core():createFileReader(\"D:/Repositories/LogParser/resources/test.txt\", 1000000);\n"
+        "local fileWriter = PLP:core():createFileWriter(\"D:/Repositories/LogParser/resources/searchResults.txt\", 1000000);\n"
+        "if (fileReader == nil or fileWriter == nil) then\n"
+        "   print(\"failed\")\n"
+        "   return\n"
+        "end\n"
+        "local numResults = 0;\n"
+        "local lineValid, line = fileReader:nextLine();\n"
+        "while lineValid == true do\n"
+        "   fileWriter:appendLine(fileReader:lineNumber() .. \"  \" .. line)\n"
         "   lineValid, line = fileReader:nextLine();\n"
         "end\n"
         "print(\"NUM RESULTS: \",numResults)"
@@ -65,7 +83,7 @@ int main() {
 
     PLP::Timer timer;
 
-    if (!core.runScript(script5, err)) {
+    if (!core.runScript(script6, err)) {
         return 1;
     }
 

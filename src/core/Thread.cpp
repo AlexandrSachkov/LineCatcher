@@ -19,6 +19,7 @@ namespace PLP
 	}
 
     void Thread::runAsync(std::function<void()> task, TaskStatus& status) {
+        status.setCompleted(false);
         _tasks.push(std::make_pair(task, &status));
     }
 

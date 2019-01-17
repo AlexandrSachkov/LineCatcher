@@ -19,9 +19,6 @@ namespace PLP {
         bool initialize(const std::wstring& path, std::vector<char>& buffer, TaskRunner& asyncTaskRunner);
         const char* getNextPage(unsigned long long& size);
         const char* getPreviousPage(unsigned long long& size);
-        
-        static const unsigned long long OPTIMAL_BLOCK_SIZE_BYTES = 64 * 1024; //64 KBytes 
-        //https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-2000-server/cc938632(v=technet.10)
 
     private:
         struct LoadingData {

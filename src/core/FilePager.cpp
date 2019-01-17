@@ -12,6 +12,12 @@ namespace PLP {
         _buffer = &buffer;
         _asyncTaskRunner = &asyncTaskRunner;
 
+        //buffer size must be a multiple of (OPTIMAL_BLOCK_SIZE_BYTES * 2) for efficiency
+        unsigned long long buffSize = buffer.size();
+        if (buffSize == 0 || (buffSize > 0 && buffSize % (OPTIMAL_BLOCK_SIZE_BYTES * 2) != 0)) {
+            return false;
+        }
+
         _ifs.open(path, std::ifstream::in | std::ifstream::binary);
         if (!_ifs.good()) {
             return false;
@@ -20,11 +26,6 @@ namespace PLP {
         _ifs.seekg(0, _ifs.end);
         _fileSize = _ifs.tellg();
         _ifs.seekg(0, _ifs.beg);
-
-        //buffer size must be a multiple of (OPTIMAL_BLOCK_SIZE_BYTES * 2) for efficiency
-        /*if (buffer.size() > 0 && buffer.size() % (OPTIMAL_BLOCK_SIZE_BYTES * 2) != 0) { 
-            return false;
-        }*/
 
         _pageSizeBytes = buffer.size() / 2;
         _backBuff = &buffer[0];

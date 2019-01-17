@@ -4,6 +4,8 @@
 
 #include "Thread.h"
 #include "FileReader.h"
+#include "ResultSet.h"
+#include "FileWriter.h"
 
 #include <string>
 #include <memory>
@@ -32,12 +34,15 @@ namespace PLP {
             unsigned long long preferredBuffSizeBytes
         );
 
-        FileReader* createFileReaderW(
+        std::shared_ptr<ResultSet> createResultSet(
             const std::string& path,
             unsigned long long preferredBuffSizeBytes
         );
 
-        bool test(const std::string& val);
+        std::shared_ptr<FileWriter> createFileWriter(
+            const std::string& path,
+            unsigned long long preferredBuffSizeBytes
+        );
 
     private:
         static void attachLuaBindings(lua_State* state);

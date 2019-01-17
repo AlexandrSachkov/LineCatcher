@@ -1,4 +1,5 @@
 #include "FileReader.h"
+#include "Utils.h"
 
 namespace PLP {
     FileReader::FileReader() {}
@@ -10,7 +11,7 @@ namespace PLP {
         TaskRunner& asyncTaskRunner) {
 
         try {
-            unsigned long long optimalSize = preferredBuffSizeBytes / (FilePager::OPTIMAL_BLOCK_SIZE_BYTES * 2) * (FilePager::OPTIMAL_BLOCK_SIZE_BYTES * 2);
+            unsigned long long optimalSize = preferredBuffSizeBytes / (OPTIMAL_BLOCK_SIZE_BYTES * 2) * (OPTIMAL_BLOCK_SIZE_BYTES * 2);
             if (optimalSize == 0) {
                 return false;
             }

@@ -7,7 +7,7 @@ namespace PLP {
     class TaskStatus {
     public:
         TaskStatus() {
-            setCompleted(false);
+            setCompleted(true);
         }
         ~TaskStatus() {}
 

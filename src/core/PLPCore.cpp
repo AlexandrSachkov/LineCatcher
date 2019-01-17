@@ -5,6 +5,7 @@
 #include "FilePager.h"
 #include "MemMappedFilePager.h"
 #include "LineParser.h"
+#include "FileWriter.h"
 
 #include "lua.hpp"
 #include "LuaIntf/LuaCompat.h"
@@ -47,7 +48,7 @@ namespace PLP {
 
         _buffSizeBytes = searchBuffSizeBytes;
         try {
-            unsigned long long optimalSize = searchBuffSizeBytes / (FilePager::OPTIMAL_BLOCK_SIZE_BYTES * 2) * (FilePager::OPTIMAL_BLOCK_SIZE_BYTES * 2);
+            unsigned long long optimalSize = searchBuffSizeBytes / (OPTIMAL_BLOCK_SIZE_BYTES * 2) * (OPTIMAL_BLOCK_SIZE_BYTES * 2);
             _searchBuff.resize(optimalSize, 0);
         } catch (std::bad_alloc&) {
             return false;
@@ -207,23 +208,35 @@ namespace PLP {
         return fReader;
     }
 
-    FileReader* PLPCore::createFileReaderW(
+    std::shared_ptr<ResultSet> PLPCore::createResultSet(
         const std::string& path,
         unsigned long long preferredBuffSizeBytes
     ) {
-        return nullptr;
+        std::shared_ptr<ResultSet> resSet(new ResultSet());
+        if (!resSet->initialize(string_to_wstring(path), preferredBuffSizeBytes, *_fileOpThread)) {
+            return nullptr;
+        }
+        return resSet;
     }
 
-    bool PLPCore::test(const std::string& val) {
-        return true;
+    std::shared_ptr<FileWriter> PLPCore::createFileWriter(
+        const std::string& path,
+        unsigned long long preferredBuffSizeBytes
+    ) {
+        std::shared_ptr<FileWriter> fileWriter(new FileWriter());
+        if (!fileWriter->initialize(string_to_wstring(path), preferredBuffSizeBytes, *_fileOpThread)) {
+            return nullptr;
+        }
+        return fileWriter;
     }
 
     void PLPCore::attachLuaBindings(lua_State* state) {
         auto module = LuaIntf::LuaBinding(state).beginModule("PLP");
 
         auto plpClass = module.beginClass<PLPCore>("Core");
-        plpClass.addFunction("test", &PLPCore::test);
         plpClass.addFunction("createFileReader", &PLPCore::createFileReader);
+        plpClass.addFunction("createResultSet", &PLPCore::createResultSet);
+        plpClass.addFunction("createFileWriter", &PLPCore::createFileWriter);
         plpClass.endClass();
 
         auto fileReaderClass = module.beginClass<FileReader>("FileReader");
@@ -231,6 +244,18 @@ namespace PLP {
         fileReaderClass.addFunction("nextLine", nextLine);
         fileReaderClass.addFunction("lineNumber", &FileReader::getLineNumber);
         fileReaderClass.endClass();
+
+        auto resultSetClass = module.beginClass<ResultSet>("ResultSet");
+        resultSetClass.addFunction("append", &ResultSet::append);
+        resultSetClass.endClass();
+
+        auto fileWriterClass = module.beginClass<FileWriter>("FileWriter");
+        bool(FileWriter::*append)(const std::string&) = &FileWriter::append;
+        bool(FileWriter::*appendLine)(const std::string&) = &FileWriter::appendLine;
+        fileWriterClass.addFunction("append", append);
+        fileWriterClass.addFunction("appendLine", appendLine);
+        fileWriterClass.addFunction("flush", &FileWriter::flush);
+        fileWriterClass.endClass();
 
         module.endModule();
     }
