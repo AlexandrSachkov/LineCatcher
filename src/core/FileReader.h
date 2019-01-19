@@ -1,6 +1,6 @@
 #pragma once
 #include "TaskRunner.h"
-#include "FilePager.h"
+#include "PagedReader.h"
 #include "LineParser.h"
 
 #include <string>
@@ -22,7 +22,7 @@ namespace PLP {
         std::tuple<bool, std::string> nextLine();
         unsigned long long getLineNumber();
     private:
-        FilePager _pager;
+        PagedReader _pager;
         LineParser _lineParser;
         std::vector<char> _buff;
     };

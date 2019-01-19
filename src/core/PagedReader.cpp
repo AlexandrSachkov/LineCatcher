@@ -1,14 +1,14 @@
-#include "FilePager.h"
+#include "PagedReader.h"
 
 #include "Utils.h"
 
 namespace PLP {
-    FilePager::FilePager() {}
-    FilePager::~FilePager() {
+    PagedReader::PagedReader() {}
+    PagedReader::~PagedReader() {
         _ifs.close();
     }
 
-    bool FilePager::initialize(const std::wstring& path, std::vector<char>& buffer, TaskRunner& asyncTaskRunner) {
+    bool PagedReader::initialize(const std::wstring& path, std::vector<char>& buffer, TaskRunner& asyncTaskRunner) {
         _buffer = &buffer;
         _asyncTaskRunner = &asyncTaskRunner;
 
@@ -68,7 +68,7 @@ namespace PLP {
         return true;
     }
 
-    const char* FilePager::getNextPage(unsigned long long& size) {
+    const char* PagedReader::getNextPage(unsigned long long& size) {
         if (!_lastPageLD.backtracked && (_lastPageLD.endOfFile || _lastPageLD.readErrorOccurred)) {
             size = 0;
             return nullptr;
@@ -107,19 +107,19 @@ namespace PLP {
         return nullptr;
     }
 
-    const char* FilePager::getPreviousPage(size_t& size) {
+    const char* PagedReader::getPreviousPage(size_t& size) {
         return nullptr;
     }
     
-    void FilePager::swapBuffers() {
+    void PagedReader::swapBuffers() {
 
     }
 
-    void FilePager::preloadNextPage() {
+    void PagedReader::preloadNextPage() {
 
     }
 
-    void FilePager::preloadPreviousPage() {
+    void PagedReader::preloadPreviousPage() {
 
     }
 }

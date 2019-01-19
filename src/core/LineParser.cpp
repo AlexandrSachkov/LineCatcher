@@ -5,7 +5,7 @@ namespace PLP {
     LineParser::LineParser() {}
     LineParser::~LineParser() {}
 
-    bool LineParser::initialize(FilePager& pager) {
+    bool LineParser::initialize(PagedReader& pager) {
         _pager = &pager;
         return true;
     }

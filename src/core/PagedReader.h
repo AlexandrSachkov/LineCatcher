@@ -11,10 +11,10 @@
 namespace PLP {
     class TaskRunner;
 
-    class FilePager {
+    class PagedReader {
     public:
-        FilePager();
-        ~FilePager();
+        PagedReader();
+        ~PagedReader();
 
         bool initialize(const std::wstring& path, std::vector<char>& buffer, TaskRunner& asyncTaskRunner);
         const char* getNextPage(unsigned long long& size);

@@ -4,8 +4,9 @@
 
 #include "Thread.h"
 #include "FileReader.h"
-#include "ResultSet.h"
 #include "FileWriter.h"
+#include "ResultReader.h"
+#include "ResultWriter.h"
 
 #include <string>
 #include <memory>
@@ -34,12 +35,17 @@ namespace PLP {
             unsigned long long preferredBuffSizeBytes
         );
 
-        std::shared_ptr<ResultSet> createResultSet(
+        std::shared_ptr<FileWriter> createFileWriter(
             const std::string& path,
             unsigned long long preferredBuffSizeBytes
         );
 
-        std::shared_ptr<FileWriter> createFileWriter(
+        std::shared_ptr<ResultReader> createResultReader(
+            const std::string& path,
+            unsigned long long preferredBuffSizeBytes
+        );
+
+        std::shared_ptr<ResultWriter> createResultWriter(
             const std::string& path,
             unsigned long long preferredBuffSizeBytes
         );

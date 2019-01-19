@@ -1,5 +1,5 @@
 #pragma once
-#include "FilePager.h"
+#include "PagedReader.h"
 
 namespace PLP {
     class LineParser {
@@ -7,11 +7,11 @@ namespace PLP {
         LineParser();
         ~LineParser();
 
-        bool initialize(FilePager& pager);
+        bool initialize(PagedReader& pager);
         bool nextLine(char*& lineStart, unsigned int& length);
         unsigned long long getLineNumber();
     private:
-        FilePager* _pager = nullptr;
+        PagedReader* _pager = nullptr;
         char* _pageData = nullptr;
         unsigned long long _pageSize = 0;
         unsigned long long _pageOffset = 0;
