@@ -2,10 +2,10 @@
 #include "PagedReader.h"
 
 namespace PLP {
-    class LineParser {
+    class LineReader {
     public:
-        LineParser();
-        ~LineParser();
+        LineReader();
+        ~LineReader();
 
         bool initialize(PagedReader& pager);
         bool nextLine(char*& lineStart, unsigned int& length);

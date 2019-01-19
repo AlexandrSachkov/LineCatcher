@@ -4,7 +4,7 @@
 #include "Timer.h"
 #include "PagedReader.h"
 #include "MemMappedFilePager.h"
-#include "LineParser.h"
+#include "LineReader.h"
 #include "FileWriter.h"
 
 #include "lua.hpp"
@@ -118,8 +118,8 @@ namespace PLP {
             return false;
         }
 
-        LineParser lineParser;
-        if (!lineParser.initialize(pager)) {
+        LineReader lineReader;
+        if (!lineReader.initialize(pager)) {
             return false;
         }
 
@@ -127,8 +127,8 @@ namespace PLP {
 
         char* lineStart;
         unsigned int lineSize;
-        while (lineParser.nextLine(lineStart, lineSize)) {
-            unsigned long long lineNum = lineParser.getLineNumber();
+        while (lineReader.nextLine(lineStart, lineSize)) {
+            unsigned long long lineNum = lineReader.getLineNumber();
             
         }
         /*unsigned long numPages = 0;

@@ -1,16 +1,16 @@
-#include "LineParser.h"
+#include "LineReader.h"
 #include "Utils.h"
 
 namespace PLP {
-    LineParser::LineParser() {}
-    LineParser::~LineParser() {}
+    LineReader::LineReader() {}
+    LineReader::~LineReader() {}
 
-    bool LineParser::initialize(PagedReader& pager) {
+    bool LineReader::initialize(PagedReader& pager) {
         _pager = &pager;
         return true;
     }
 
-    bool LineParser::nextLine(char*& lineStart, unsigned int& length) {
+    bool LineReader::nextLine(char*& lineStart, unsigned int& length) {
         if (!_pageData || _pageSize == 0 || _pageOffset == _pageSize) {
             _pageOffset = 0;
             unsigned long long size;
@@ -41,7 +41,7 @@ namespace PLP {
         return true;
     }
 
-    unsigned long long LineParser::getLineNumber() {
+    unsigned long long LineReader::getLineNumber() {
         return _lineNum;
     }
 }

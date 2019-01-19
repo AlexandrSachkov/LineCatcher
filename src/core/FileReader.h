@@ -1,7 +1,7 @@
 #pragma once
 #include "TaskRunner.h"
 #include "PagedReader.h"
-#include "LineParser.h"
+#include "LineReader.h"
 
 #include <string>
 #include <vector>
@@ -23,7 +23,7 @@ namespace PLP {
         unsigned long long getLineNumber();
     private:
         PagedReader _pager;
-        LineParser _lineParser;
+        LineReader _lineParser;
         std::vector<char> _buff;
     };
 }
