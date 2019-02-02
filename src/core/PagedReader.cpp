@@ -9,6 +9,7 @@ namespace PLP {
     }
 
     bool PagedReader::initialize(const std::wstring& path, std::vector<char>& buffer, TaskRunner& asyncTaskRunner) {
+        _filePath = path;
         _buffer = &buffer;
         _asyncTaskRunner = &asyncTaskRunner;
 
@@ -121,5 +122,28 @@ namespace PLP {
 
     void PagedReader::preloadPreviousPage() {
 
+    }
+
+    unsigned long long PagedReader::getFileSize() {
+        return _fileSize;
+    }
+
+    std::wstring PagedReader::getFilePath() {
+        return _filePath;
+    }
+
+    unsigned long long PagedReader::getCurrentPageFileOffset() {
+        return _currentPageLD.fileOffsetBytes + _currentPageLD.buffStartOffsetBytes;
+    }
+
+    void PagedReader::resetToBeginning() {
+        while (!_currPageLoadStatus.isCompleted()) {
+        }
+
+        _currentPageLD = LoadingData();
+        _lastPageLD = LoadingData();
+        _currPageLoadStatus = TaskStatus();
+
+        _asyncTaskRunner->runAsync(_preloadNextPage, _currPageLoadStatus);
     }
 }

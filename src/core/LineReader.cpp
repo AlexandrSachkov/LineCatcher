@@ -44,4 +44,19 @@ namespace PLP {
     unsigned long long LineReader::getLineNumber() {
         return _lineNum;
     }
+
+    unsigned long long LineReader::getCurrentFileOffset() {
+        return _pager->getCurrentPageFileOffset() + _pageOffset;
+    }
+
+    void LineReader::resetToBeginning() {
+        _pager->resetToBeginning();
+
+        _pageData = nullptr;
+        _pageSize = 0;
+        _pageOffset = 0;
+
+        _numPages = 0;
+        _lineNum = 0;
+    }
 }

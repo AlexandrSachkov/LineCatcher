@@ -22,10 +22,17 @@ ENDIF(MSVC)
 
 # =====================================================================================
 
-SET(HEADERS       
-    FilePager.h
-    FileSystemManager.h
+SET(HEADERS  
+    IndexedLineReader.h
+    PagedReader.h
+    FileReader.h
+    FileWriter.h
+    LineReader.h
+    MemMappedFilePager.h
+    PagedWriter.h
     PLPCore.h
+    ResultReader.h
+    ResultWriter.h
     TaskRunner.h
     Thread.h
     Timer.h
@@ -33,9 +40,16 @@ SET(HEADERS
     )
 
 SET(SOURCES 
-    FilePager.cpp
-    FileSystemManager.cpp
+    IndexedLineReader.cpp
+    PagedReader.cpp
+    FileReader.cpp
+    FileWriter.cpp
+    LineReader.cpp
+    MemMappedFilePager.cpp
+    PagedWriter.cpp
     PLPCore.cpp
+    ResultReader.cpp
+    ResultWriter.cpp
     Thread.cpp
     Utils.cpp
     )
@@ -71,6 +85,15 @@ SET(LUA_INTF_INCLUDE_PATH
 IF(LUA_INTF_INCLUDE_PATH STREQUAL "")
 	MESSAGE(SEND_ERROR "LUA_INTF include path must be specified")
 ENDIF(LUA_INTF_INCLUDE_PATH STREQUAL "")
+
+
+#C++ Cereal
+SET(CEREAL_INCLUDE_PATH
+	"" CACHE PATH "Cereal include path")
+
+IF(CEREAL_INCLUDE_PATH STREQUAL "")
+	MESSAGE(SEND_ERROR "Cereal include path must be specified")
+ENDIF(CEREAL_INCLUDE_PATH STREQUAL "")
 
 
 # TBB
@@ -121,6 +144,7 @@ INCLUDE_DIRECTORIES(
     ${LUA_INCLUDE_PATH}
     ${LUA_INTF_INCLUDE_PATH}
     ${TBB_INCLUDE_PATH}
+    ${CEREAL_INCLUDE_PATH}
     #${NLE_D3D11_INCLUDE_PATH}
     #${P3D_GLM_INCLUDE_PATH}
     )

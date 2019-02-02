@@ -6,6 +6,10 @@ namespace PLP {
     std::wstring string_to_wstring(const std::string& str);
     std::string wstring_to_string(const std::wstring& wstr);
 
+    std::wstring getFileDirectory(const std::wstring& path);
+    std::wstring getFileName(const std::wstring& path);
+    std::wstring getFileNameNoExt(const std::wstring& path);
+
     const char* findLastLineEnding(const char* buff, unsigned long long buffSize, const char* currPos);
     const char* findNextLineEnding(const char* buff, unsigned long long buffSize, unsigned long long startOffsetBytes);
 

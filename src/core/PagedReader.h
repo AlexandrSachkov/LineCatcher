@@ -19,7 +19,10 @@ namespace PLP {
         bool initialize(const std::wstring& path, std::vector<char>& buffer, TaskRunner& asyncTaskRunner);
         const char* getNextPage(unsigned long long& size);
         const char* getPreviousPage(unsigned long long& size);
-
+        void resetToBeginning();
+        unsigned long long getFileSize();
+        std::wstring getFilePath();
+        unsigned long long getCurrentPageFileOffset();
     private:
         struct LoadingData {
             unsigned long long fileOffsetBytes = 0;
@@ -35,6 +38,7 @@ namespace PLP {
         void preloadPreviousPage();
 
         Timer timer;
+        std::wstring _filePath;
         std::vector<char>* _buffer;
         TaskRunner* _asyncTaskRunner;
         std::ifstream _ifs;
