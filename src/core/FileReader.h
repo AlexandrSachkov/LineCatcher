@@ -13,14 +13,18 @@ namespace PLP {
 
         bool initialize(
             const std::wstring& path, 
-            unsigned long long preferredBuffSizeBytes
+            unsigned long long preferredBuffSizeBytes,
+            bool requireRandomAccess
         );
 
         bool nextLine(char*& lineStart, unsigned int& length);
+        bool getLine(unsigned long long lineNumber, char*& data, unsigned int& size);
         std::tuple<bool, std::string> nextLine();
+        std::tuple<bool, std::string> getLine(unsigned long long lineNumber);
         unsigned long long getLineNumber();
     private:
         std::unique_ptr<PagedReader> _pager = nullptr;
         std::unique_ptr<LineReader> _lineReader = nullptr;
+        bool _enableRandomAccess = false;
     };
 }

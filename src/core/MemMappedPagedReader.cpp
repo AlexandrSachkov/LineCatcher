@@ -19,7 +19,7 @@ namespace PLP {
             0, 
             NULL, 
             OPEN_EXISTING, 
-            FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, //https://blogs.msdn.microsoft.com/oldnewthing/20120120-00/?p=8493
+            FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS, //https://blogs.msdn.microsoft.com/oldnewthing/20120120-00/?p=8493
             NULL
         );
 

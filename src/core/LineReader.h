@@ -12,7 +12,7 @@ namespace PLP {
         unsigned long long getLineNumber();
         unsigned long long getCurrentFileOffset();
         void resetToBeginning();
-    private:
+    protected:
         bool appendPageBoundaryLineBuff(const char* data, unsigned int size);
         void resetPageBoundaryLineBuff();
 
@@ -21,7 +21,7 @@ namespace PLP {
         unsigned long long _pageSize = 0;
         unsigned long long _fileOffset = 0;
         unsigned long long _pageOffset = 0;
-        unsigned long long _lineNum = 0;
+        unsigned long long _lineCount = 0;
 
         std::vector<char> _pageBoundaryLineBuff;
     };

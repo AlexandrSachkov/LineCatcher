@@ -128,6 +128,25 @@ namespace PLP {
         return true;
     }
 
+    bool PLPCore::searchLineContainsMMIndexed(const std::wstring path, const std::wstring& substr, unsigned int& numMatches) {
+        std::string substring = wstring_to_string(substr);
+        const char* cSubstr = substring.c_str();
+        numMatches = 0;
+
+        std::shared_ptr<FileReader> fileReader = createFileReader(wstring_to_string(path), 0, true);
+
+        char* lineStart;
+        unsigned int lineSize;
+        while (fileReader->nextLine(lineStart, lineSize)) {
+            if (fileReader->getLineNumber() % 10000000 == 0) {
+                printf("%llu\n", fileReader->getLineNumber());
+            }
+        }
+        printf("TOTAL LINES: %llu\n", fileReader->getLineNumber() + 1);
+
+        return true;
+    }
+
     bool PLPCore::search(const std::wstring path, const std::wstring& frameFilterScriptLua, std::wstring& errMsg) {
         auto module = LuaIntf::LuaBinding(_state).beginModule("PLP");
         module.addConstant("Core", this);
@@ -138,10 +157,11 @@ namespace PLP {
 
     std::shared_ptr<FileReader> PLPCore::createFileReader(
         const std::string& path,
-        unsigned long long preferredBuffSizeBytes
+        unsigned long long preferredBuffSizeBytes,
+        bool requireRandomAccess
     ) {
         std::shared_ptr<FileReader> fReader(new FileReader());
-        if (!fReader->initialize(string_to_wstring(path), preferredBuffSizeBytes)) {
+        if (!fReader->initialize(string_to_wstring(path), preferredBuffSizeBytes, requireRandomAccess)) {
             return nullptr;
         }
         return fReader;
@@ -192,7 +212,9 @@ namespace PLP {
 
         auto fileReaderClass = module.beginClass<FileReader>("FileReader");
         std::tuple<bool, std::string>(FileReader::*nextLine)() = &FileReader::nextLine;
+        std::tuple<bool, std::string>(FileReader::*getLine)(unsigned long long) = &FileReader::getLine;
         fileReaderClass.addFunction("nextLine", nextLine);
+        fileReaderClass.addFunction("getLine", getLine);
         fileReaderClass.addFunction("lineNumber", &FileReader::getLineNumber);
         fileReaderClass.endClass();
 

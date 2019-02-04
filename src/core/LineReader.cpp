@@ -54,7 +54,7 @@ namespace PLP {
             unsigned int length = (unsigned int)(lineEnd - lineStart + 1);
             _pageOffset += length;
             _fileOffset += length;
-            _lineNum++;
+            _lineCount++;
 
             data = lineStart;
             size = length;
@@ -83,7 +83,10 @@ namespace PLP {
     }
 
     unsigned long long LineReader::getLineNumber() {
-        return _lineNum;
+        if (_lineCount == 0) {
+            return 0;
+        }
+        return _lineCount - 1;
     }
 
     unsigned long long LineReader::getCurrentFileOffset() {
@@ -94,6 +97,7 @@ namespace PLP {
         _pageData = nullptr;
         _pageSize = 0;
         _pageOffset = 0;
-        _lineNum = 0;
+        _fileOffset = 0;
+        _lineCount = 0;
     }
 }

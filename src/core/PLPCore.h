@@ -25,11 +25,13 @@ namespace PLP {
         bool runScript(const std::wstring& scriptLua, std::wstring& errMsg);
         bool searchLineContains(const std::wstring path, const std::wstring& substr, unsigned int& numMatches);
         bool searchLineContainsMM(const std::wstring path, const std::wstring& substr, unsigned int& numMatches);
+        bool searchLineContainsMMIndexed(const std::wstring path, const std::wstring& substr, unsigned int& numMatches);
         bool search(const std::wstring path, const std::wstring& frameFilterScriptLua, std::wstring& errMsg);
 
         std::shared_ptr<FileReader> createFileReader(
             const std::string& path,
-            unsigned long long preferredBuffSizeBytes
+            unsigned long long preferredBuffSizeBytes,
+            bool requireRandomAccess
         );
 
         std::shared_ptr<FileWriter> createFileWriter(

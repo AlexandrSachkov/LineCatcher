@@ -90,7 +90,11 @@ int main() {
     const std::wstring largeFile = L"D:/Repositories/LogParser/resources/ShadowOfTombRaider_Vega_18.12.2_RS4_2_SOTTR_64_4b1d4982_1_11950.dump";
 
     unsigned int numMatches = 0;
-    if (!core.searchLineContainsMM(largeFile, L"0x00000003dcf2a690", numMatches)) {
+    /*if (!core.searchLineContainsMM(largeFile, L"0x00000003dcf2a690", numMatches)) {
+        return 1;
+    }*/
+
+    if (!core.searchLineContainsMMIndexed(smallFile, L"0x00000003dcf2a690", numMatches)) {
         return 1;
     }
     

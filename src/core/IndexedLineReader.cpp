@@ -2,6 +2,7 @@
 #include "Utils.h"
 
 #include "cereal/types/unordered_map.hpp"
+#include "cereal/types/string.hpp"
 #include "cereal/archives/binary.hpp"
 
 #include <fstream>
@@ -10,11 +11,10 @@ namespace PLP {
     IndexedLineReader::IndexedLineReader() {}
     IndexedLineReader::~IndexedLineReader() {}
 
-    bool IndexedLineReader::initialize(PagedReader& pagedReader, unsigned long long preferredIndexSize) {
+    bool IndexedLineReader::initialize(PagedReader& pagedReader) {
         if (!LineReader::initialize(pagedReader)) {
             return false;
         }
-        _pager = &pagedReader;
 
         std::wstring indexPath = getIndexFilePath(pagedReader.getFilePath());
         if (!loadIndex(indexPath)) {
@@ -23,7 +23,6 @@ namespace PLP {
             }
         }
 
-        
         return true;
     }
 
@@ -44,11 +43,11 @@ namespace PLP {
 
         unsigned int indexVersion = 0;
         iarchive(indexVersion);
-        if (indexVersion != INDEX_VERSION) { // might have a different format
+        if (indexVersion != INDEX_VERSION) { // might have a different format. TODO: can we handle legacy formats?
             return false;
         }
 
-        iarchive(_fileIndex);
+        iarchive(_indexHeader, _fileIndex);
         return true;
     }
 
@@ -56,11 +55,13 @@ namespace PLP {
         char* lineStart;
         unsigned int length;
         unsigned long long lineStartFileOffset = 0;
+        unsigned long long numLines = 0;
         while (nextLine(lineStart, length)) {
-            if (getLineNumber() % LINE_INDEX_FREQUENCY == 0) {
+            if (getLineNumber() > 0 && getLineNumber() % LINE_INDEX_FREQUENCY == 0) {
                 _fileIndex.insert({ getLineNumber(), lineStartFileOffset });
             }
             lineStartFileOffset = getCurrentFileOffset();
+            numLines++;
         }
         resetToBeginning();
 
@@ -69,8 +70,50 @@ namespace PLP {
         if (!fs.good()) {
             return false;
         }
+
+        _indexHeader.filePath = wstring_to_string(dataFilePath);
+        _indexHeader.lineIndexFreq = LINE_INDEX_FREQUENCY;
+        _indexHeader.numLines = numLines;
+
         cereal::BinaryOutputArchive oarchive(fs);
-        oarchive(INDEX_VERSION, _fileIndex);
+        oarchive(INDEX_VERSION, _indexHeader, _fileIndex);
+
+        return true;
+    }
+
+    bool IndexedLineReader::getLine(unsigned long long lineNumber, char*& data, unsigned int& size) {
+        if (lineNumber < 0 || lineNumber > _indexHeader.numLines - 1) {
+            return false;
+        }
+
+        unsigned long long prevIndexedLineNum = lineNumber / _indexHeader.lineIndexFreq * _indexHeader.lineIndexFreq;
+        unsigned long long prevIndexedLineFileOffset;
+        if (prevIndexedLineNum == 0) {
+            prevIndexedLineFileOffset = 0;
+        } else {
+            auto it = _fileIndex.find(prevIndexedLineNum);
+            if (it == _fileIndex.end()) {
+                return false; //broken indexer
+            }
+            prevIndexedLineFileOffset = it->second;
+        }
+        
+        _pageData = nullptr;
+        _pageSize = 0;
+
+        _lineCount = prevIndexedLineNum - 1;
+        _fileOffset = prevIndexedLineFileOffset;
+        
+        char* lineData = nullptr;
+        unsigned int length = 0;
+        while (getLineNumber() < lineNumber) {
+            if (!nextLine(lineData, length)) {
+                return false;
+            }
+        }
+
+        data = lineData;
+        size = length;
 
         return true;
     }
