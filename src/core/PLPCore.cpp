@@ -3,7 +3,7 @@
 #include "Utils.h"
 #include "Timer.h"
 #include "PagedReader.h"
-#include "MemMappedFilePager.h"
+#include "MemMappedPagedReader.h"
 #include "LineReader.h"
 #include "FileWriter.h"
 
@@ -30,9 +30,7 @@ namespace PLP {
         }
     }
 
-    bool PLPCore::initialize(
-        unsigned long long searchBuffSizeBytes
-    ) {
+    bool PLPCore::initialize() {
         _state = luaL_newstate();
         if (!_state) {
             return false;
@@ -43,14 +41,6 @@ namespace PLP {
 
         _fileOpThread.reset(new Thread(1000000)); //1 ms sleep
         if (!_fileOpThread->start()) {
-            return false;
-        }
-
-        _buffSizeBytes = searchBuffSizeBytes;
-        try {
-            unsigned long long optimalSize = searchBuffSizeBytes / (OPTIMAL_BLOCK_SIZE_BYTES * 2) * (OPTIMAL_BLOCK_SIZE_BYTES * 2);
-            _searchBuff.resize(optimalSize, 0);
-        } catch (std::bad_alloc&) {
             return false;
         }
 
@@ -108,13 +98,13 @@ namespace PLP {
         return true;
     }
 
-    bool PLPCore::searchLineContainsWithPreload(const std::wstring path, const std::wstring& substr, unsigned int& numMatches) {
+    bool PLPCore::searchLineContainsMM(const std::wstring path, const std::wstring& substr, unsigned int& numMatches) {
         std::string substring = wstring_to_string(substr);
         const char* cSubstr = substring.c_str();
         numMatches = 0;
 
-        PagedReader pager;
-        if (!pager.initialize(path, _searchBuff, *_fileOpThread)) {
+        MemMappedPagedReader pager;
+        if (!pager.initialize(path)) {
             return false;
         }
 
@@ -123,68 +113,17 @@ namespace PLP {
             return false;
         }
 
-        Timer timer;
+        unsigned long long lineNum = 0;
 
         char* lineStart;
         unsigned int lineSize;
         while (lineReader.nextLine(lineStart, lineSize)) {
-            unsigned long long lineNum = lineReader.getLineNumber();
-            
-        }
-        /*unsigned long numPages = 0;
-        unsigned long lineNum = 0;
-        unsigned long long pageSize;
-        do {
-            const char* data = pager.getNextPage(pageSize);
-            numPages++;
-
-            unsigned long long pageOffset = 0;
-            char* lineEnd = nullptr;
-            while ((lineEnd = (char*)findNextLineEnding(data, pageSize, pageOffset)) != nullptr) {
-                pageOffset = lineEnd - data + 1;
-                lineNum++;
+            lineNum++;
+            if (lineNum % 10000000 == 0) {
+                printf("%llu\n", lineNum);
             }
-            printf("Page loaded: %lu\n", numPages);
-            printf("%lu\n", lineNum);
-        } while (pageSize > 0);*/
-
-        double numSeconds = timer.deltaT() / 1000000000;
-        printf("Completed in: %f seconds\n", numSeconds);
-
-        return true;
-    }
-
-    bool PLPCore::searchLineContainsWithPreloadMM(const std::wstring path, const std::wstring& substr, unsigned int& numMatches) {
-        std::string substring = wstring_to_string(substr);
-        const char* cSubstr = substring.c_str();
-        numMatches = 0;
-
-        MemMappedFilePager pager;
-        if (!pager.initialize(path, _buffSizeBytes, *_fileOpThread)) {
-            return false;
         }
-
-        Timer timer;
-
-        unsigned long numPages = 0;
-        unsigned long lineNum = 0;
-        size_t pageSize;
-        do {
-            const char* data = pager.getNextPage(pageSize);
-            numPages++;
-
-            size_t pageOffset = 0;
-            char* lineEnd = nullptr;
-            while ((lineEnd = (char*)findNextLineEnding(data, pageSize, pageOffset)) != nullptr) {
-                pageOffset = lineEnd - data + 1;
-                lineNum++;
-            }
-            printf("Page loaded: %lu\n", numPages);
-            printf("%lu\n", lineNum);
-        } while (pageSize > 0);
-
-        double numSeconds = timer.deltaT() / 1000000000;
-        printf("Completed in: %f seconds\n", numSeconds);
+        printf("TOTAL LINES: %llu\n", lineNum);
 
         return true;
     }
@@ -202,7 +141,7 @@ namespace PLP {
         unsigned long long preferredBuffSizeBytes
     ) {
         std::shared_ptr<FileReader> fReader(new FileReader());
-        if (!fReader->initialize(string_to_wstring(path), preferredBuffSizeBytes, *_fileOpThread)) {
+        if (!fReader->initialize(string_to_wstring(path), preferredBuffSizeBytes)) {
             return nullptr;
         }
         return fReader;

@@ -1,14 +1,14 @@
-#include "PagedReader.h"
+#include "FStreamPagedReader.h"
 
 #include "Utils.h"
 
 namespace PLP {
-    PagedReader::PagedReader() {}
-    PagedReader::~PagedReader() {
+    FStreamPagedReader::FStreamPagedReader() {}
+    FStreamPagedReader::~FStreamPagedReader() {
         _ifs.close();
     }
 
-    bool PagedReader::initialize(const std::wstring& path, std::vector<char>& buffer, TaskRunner& asyncTaskRunner) {
+    bool FStreamPagedReader::initialize(const std::wstring& path, std::vector<char>& buffer, TaskRunner& asyncTaskRunner) {
         _filePath = path;
         _buffer = &buffer;
         _asyncTaskRunner = &asyncTaskRunner;
@@ -69,7 +69,7 @@ namespace PLP {
         return true;
     }
 
-    const char* PagedReader::getNextPage(unsigned long long& size) {
+    const char* FStreamPagedReader::getNextPage(unsigned long long& size) {
         if (!_lastPageLD.backtracked && (_lastPageLD.endOfFile || _lastPageLD.readErrorOccurred)) {
             size = 0;
             return nullptr;
@@ -108,35 +108,19 @@ namespace PLP {
         return nullptr;
     }
 
-    const char* PagedReader::getPreviousPage(size_t& size) {
-        return nullptr;
-    }
-    
-    void PagedReader::swapBuffers() {
-
-    }
-
-    void PagedReader::preloadNextPage() {
-
-    }
-
-    void PagedReader::preloadPreviousPage() {
-
-    }
-
-    unsigned long long PagedReader::getFileSize() {
+    unsigned long long FStreamPagedReader::getFileSize() {
         return _fileSize;
     }
 
-    std::wstring PagedReader::getFilePath() {
+    std::wstring FStreamPagedReader::getFilePath() {
         return _filePath;
     }
 
-    unsigned long long PagedReader::getCurrentPageFileOffset() {
+    unsigned long long FStreamPagedReader::getCurrentPageFileOffset() {
         return _currentPageLD.fileOffsetBytes + _currentPageLD.buffStartOffsetBytes;
     }
 
-    void PagedReader::resetToBeginning() {
+    void FStreamPagedReader::resetToBeginning() {
         while (!_currPageLoadStatus.isCompleted()) {
         }
 

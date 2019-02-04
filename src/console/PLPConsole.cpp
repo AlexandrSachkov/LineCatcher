@@ -3,7 +3,7 @@
 
 int main() {
     PLP::PLPCore core;
-    if (!core.initialize(100000)) {
+    if (!core.initialize()) {
         return 1;
     }
 
@@ -83,17 +83,19 @@ int main() {
 
     PLP::Timer timer;
 
-    if (!core.runScript(script6, err)) {
-        return 1;
-    }
-
-    double numSeconds = timer.deltaT() / 1000000000;
-    printf("Completed in: %f seconds\n", numSeconds);
-
-    /*unsigned int numMatches = 0;
-    if (!core.searchLineContainsWithPreload(L"D:/Repositories/LogParser/resources/ShadowOfTombRaider_Vega_18.12.2_RS4_2_SOTTR_64_4b1d4982_1_11950.dump", L"0x00000003dcf2a690", numMatches)) {
+    /*if (!core.runScript(script6, err)) {
         return 1;
     }*/
+    const std::wstring smallFile = L"D:/Repositories/LogParser/resources/test.txt";
+    const std::wstring largeFile = L"D:/Repositories/LogParser/resources/ShadowOfTombRaider_Vega_18.12.2_RS4_2_SOTTR_64_4b1d4982_1_11950.dump";
+
+    unsigned int numMatches = 0;
+    if (!core.searchLineContainsMM(largeFile, L"0x00000003dcf2a690", numMatches)) {
+        return 1;
+    }
+    
+    double numSeconds = timer.deltaT() / 1000000000;
+    printf("Completed in: %f seconds\n", numSeconds);
     //printf("Num matches: %i\n", numMatches);
     return 0;
 }

@@ -1,12 +1,11 @@
 #pragma once
-#include "TaskRunner.h"
-#include "PagedReader.h"
-#include "LineReader.h"
 
 #include <string>
-#include <vector>
+#include <tuple>
 
 namespace PLP {
+    class PagedReader;
+    class LineReader;
     class FileReader {
     public:
         FileReader();
@@ -14,16 +13,14 @@ namespace PLP {
 
         bool initialize(
             const std::wstring& path, 
-            unsigned long long preferredBuffSizeBytes, 
-            TaskRunner& asyncTaskRunner
+            unsigned long long preferredBuffSizeBytes
         );
 
         bool nextLine(char*& lineStart, unsigned int& length);
         std::tuple<bool, std::string> nextLine();
         unsigned long long getLineNumber();
     private:
-        PagedReader _pager;
-        LineReader _lineParser;
-        std::vector<char> _buff;
+        std::unique_ptr<PagedReader> _pager = nullptr;
+        std::unique_ptr<LineReader> _lineReader = nullptr;
     };
 }

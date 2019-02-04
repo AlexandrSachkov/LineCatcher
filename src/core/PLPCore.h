@@ -20,14 +20,11 @@ namespace PLP {
         PLPCore();
         ~PLPCore();
 
-        bool initialize(
-            unsigned long long searchBuffSizeBytes
-        );
+        bool initialize();
 
         bool runScript(const std::wstring& scriptLua, std::wstring& errMsg);
         bool searchLineContains(const std::wstring path, const std::wstring& substr, unsigned int& numMatches);
-        bool searchLineContainsWithPreload(const std::wstring path, const std::wstring& substr, unsigned int& numMatches);
-        bool searchLineContainsWithPreloadMM(const std::wstring path, const std::wstring& substr, unsigned int& numMatches);
+        bool searchLineContainsMM(const std::wstring path, const std::wstring& substr, unsigned int& numMatches);
         bool search(const std::wstring path, const std::wstring& frameFilterScriptLua, std::wstring& errMsg);
 
         std::shared_ptr<FileReader> createFileReader(
@@ -55,7 +52,5 @@ namespace PLP {
 
         lua_State* _state;
         std::unique_ptr<Thread> _fileOpThread;
-        std::vector<char> _searchBuff;
-        unsigned long long _buffSizeBytes;
     };
 }

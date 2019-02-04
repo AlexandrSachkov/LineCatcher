@@ -1,44 +1,85 @@
 #include "LineReader.h"
+#include "PagedReader.h"
 #include "Utils.h"
 
+#include <Windows.h>
+
 namespace PLP {
-    LineReader::LineReader() {}
     LineReader::~LineReader() {}
 
     bool LineReader::initialize(PagedReader& pager) {
         _pager = &pager;
+        try {
+            _pageBoundaryLineBuff.reserve(200);
+        } catch (std::bad_alloc&) {
+            return false;
+        }
+        
         return true;
     }
 
-    bool LineReader::nextLine(char*& lineStart, unsigned int& length) {
-        if (!_pageData || _pageSize == 0 || _pageOffset == _pageSize) {
-            _pageOffset = 0;
-            unsigned long long size;
-            char* data = const_cast<char*>(_pager->getNextPage(size));
+    bool LineReader::nextLine(char*& data, unsigned int& size) {
+        bool loadNextPage = false;
+        do {
+            //load a new page if required
+            if (!_pageData || _pageSize == 0 || _pageOffset >= _pageSize || loadNextPage) {
+                _pageOffset = 0;
+                _pageData = const_cast<char*>(_pager->read(_fileOffset, _pageSize));
+                if (!_pageData || _pageSize == 0) {
+                    return false;
+                }
+                loadNextPage = false;
+            }
 
-            if (!data || size == 0) {
+            char* lineStart = _pageData + _pageOffset;
+            char* lineEnd = nullptr;
+
+            // find line ending. If does not exist, the end is on the next page
+            __try {
+                lineEnd = (char*)findNextLineEnding(_pageData, _pageSize, _pageOffset);
+            }
+            __except (GetExceptionCode() == EXCEPTION_IN_PAGE_ERROR) {
+                printf("Failed during line processing");
                 return false;
             }
-            _pageData = data;
-            _pageSize = size;
-            _numPages++;
 
-            printf("Page loaded: %llu\n", _numPages);
-            printf("%llu\n", _lineNum);
-        }
+            // if this line does not end on EOF
+            if (lineEnd == nullptr && (_pager->getFileSize() - _fileOffset) > (_pageSize - _pageOffset)) {
+                loadNextPage = true;
+                continue;
+            } else if (lineEnd == nullptr && (_pager->getFileSize() - _fileOffset) == (_pageSize - _pageOffset)){ //process last line as usual
+                lineEnd = _pageData + _pageSize - 1;
+            }
+                
+            unsigned int length = (unsigned int)(lineEnd - lineStart + 1);
+            _pageOffset += length;
+            _fileOffset += length;
+            _lineNum++;
 
-        char* lineEnd = (char*)findNextLineEnding(_pageData, _pageSize, _pageOffset);
-        if (lineEnd == nullptr) {
-            return false;
-        }
+            data = lineStart;
+            size = length;
 
-        lineStart = _pageData + _pageOffset;
-        length = (unsigned int)(lineEnd - lineStart);
-
-        _pageOffset = lineEnd - _pageData + 1;
-        _lineNum++;
+        } while (loadNextPage);
 
         return true;
+    }
+
+    bool LineReader::appendPageBoundaryLineBuff(const char* data, unsigned int size) {
+        unsigned int requiredSize = (unsigned int)_pageBoundaryLineBuff.size() + size;
+        if (requiredSize > _pageBoundaryLineBuff.capacity()) {
+            try {
+                _pageBoundaryLineBuff.reserve(requiredSize * 2);
+            } catch (std::bad_alloc&) {
+                return false;
+            }
+        }
+
+        _pageBoundaryLineBuff.insert(_pageBoundaryLineBuff.end(), data, data + size);
+        return true;
+    }
+
+    void LineReader::resetPageBoundaryLineBuff() {
+        _pageBoundaryLineBuff.clear();
     }
 
     unsigned long long LineReader::getLineNumber() {
@@ -46,17 +87,13 @@ namespace PLP {
     }
 
     unsigned long long LineReader::getCurrentFileOffset() {
-        return _pager->getCurrentPageFileOffset() + _pageOffset;
+        return _fileOffset;
     }
 
     void LineReader::resetToBeginning() {
-        _pager->resetToBeginning();
-
         _pageData = nullptr;
         _pageSize = 0;
         _pageOffset = 0;
-
-        _numPages = 0;
         _lineNum = 0;
     }
 }
