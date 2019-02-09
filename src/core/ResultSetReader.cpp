@@ -1,11 +1,11 @@
-#include "ResultReader.h"
+#include "ResultSetReader.h"
 
 namespace PLP {
-    ResultReader::ResultReader() {}
+    ResultSetReader::ResultSetReader() {}
 
-    ResultReader::~ResultReader() {}
+    ResultSetReader::~ResultSetReader() {}
 
-    bool ResultReader::initialize(
+    bool ResultSetReader::initialize(
         std::wstring& path,
         unsigned long long preferredBufferSizeBytes,
         TaskRunner& asyncTaskRunner

@@ -1,5 +1,6 @@
 #include "PLPCore.h"
 #include "Timer.h"
+#include "Utils.h"
 
 int main() {
     PLP::PLPCore core;
@@ -94,10 +95,29 @@ int main() {
         return 1;
     }*/
 
-    if (!core.searchLineContainsMMIndexed(smallFile, L"0x00000003dcf2a690", numMatches)) {
+    /*if (!core.searchLineContainsMMIndexed(smallFile, L"0x00000003dcf2a690", numMatches)) {
+        return 1;
+    }*/
+
+    /*auto fReader = core.createFileReader(PLP::wstring_to_string(largeFile), 0, true);
+    char* line;
+    unsigned int lineSize;
+    if (!fReader->getLine(100000000, line, lineSize)) {
         return 1;
     }
-    
+    if (!fReader->getLine(100, line, lineSize)) {
+        return 1;
+    }*/
+
+    auto fReader = core.createFileReader(PLP::wstring_to_string(smallFile), 0, true);
+    auto rWriter = core.createResultSetWriter("results.txt", 0, *fReader);
+    char* line;
+    unsigned int lineSize;
+    while (fReader->nextLine(line, lineSize)) {
+        if (!rWriter->appendCurrentLine(*fReader)) {
+            return 1;
+        }
+    }
     double numSeconds = timer.deltaT() / 1000000000;
     printf("Completed in: %f seconds\n", numSeconds);
     //printf("Num matches: %i\n", numMatches);

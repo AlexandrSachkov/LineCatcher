@@ -5,8 +5,8 @@
 #include "Thread.h"
 #include "FileReader.h"
 #include "FileWriter.h"
-#include "ResultReader.h"
-#include "ResultWriter.h"
+#include "ResultSetReader.h"
+#include "ResultSetWriter.h"
 
 #include <string>
 #include <memory>
@@ -23,10 +23,10 @@ namespace PLP {
         bool initialize();
 
         bool runScript(const std::wstring& scriptLua, std::wstring& errMsg);
-        bool searchLineContains(const std::wstring path, const std::wstring& substr, unsigned int& numMatches);
+        /*bool searchLineContains(const std::wstring path, const std::wstring& substr, unsigned int& numMatches);
         bool searchLineContainsMM(const std::wstring path, const std::wstring& substr, unsigned int& numMatches);
         bool searchLineContainsMMIndexed(const std::wstring path, const std::wstring& substr, unsigned int& numMatches);
-        bool search(const std::wstring path, const std::wstring& frameFilterScriptLua, std::wstring& errMsg);
+        bool search(const std::wstring path, const std::wstring& frameFilterScriptLua, std::wstring& errMsg);*/
 
         std::shared_ptr<FileReader> createFileReader(
             const std::string& path,
@@ -39,14 +39,15 @@ namespace PLP {
             unsigned long long preferredBuffSizeBytes
         );
 
-        std::shared_ptr<ResultReader> createResultReader(
+        std::shared_ptr<ResultSetReader> createResultSetReader(
             const std::string& path,
             unsigned long long preferredBuffSizeBytes
         );
 
-        std::shared_ptr<ResultWriter> createResultWriter(
+        std::shared_ptr<ResultSetWriter> createResultSetWriter(
             const std::string& path,
-            unsigned long long preferredBuffSizeBytes
+            unsigned long long preferredBuffSizeBytes,
+            const FileReader& fReader
         );
 
     private:

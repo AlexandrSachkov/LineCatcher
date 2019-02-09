@@ -25,15 +25,16 @@ ENDIF(MSVC)
 SET(HEADERS  
     IndexedLineReader.h
     PagedReader.h
+    PagedWriter.h
     FStreamPagedReader.h
     FileReader.h
     FileWriter.h
     LineReader.h
     MemMappedPagedReader.h
-    PagedWriter.h
+    FStreamPagedWriter.h
     PLPCore.h
-    ResultReader.h
-    ResultWriter.h
+    ResultSetReader.h
+    ResultSetWriter.h
     TaskRunner.h
     Thread.h
     Timer.h
@@ -47,10 +48,10 @@ SET(SOURCES
     FileWriter.cpp
     LineReader.cpp
     MemMappedPagedReader.cpp
-    PagedWriter.cpp
+    FStreamPagedWriter.cpp
     PLPCore.cpp
-    ResultReader.cpp
-    ResultWriter.cpp
+    ResultSetReader.cpp
+    ResultSetWriter.cpp
     Thread.cpp
     Utils.cpp
     )

@@ -29,7 +29,7 @@ namespace PLP {
         };
 
         static const unsigned int INDEX_VERSION = 1; // increment if format changes
-        static const unsigned int LINE_INDEX_FREQUENCY = 2;//1000;
+        static const unsigned int LINE_INDEX_FREQUENCY = 1000;
 
         std::unordered_map<unsigned long long, unsigned long long> _fileIndex;
         IndexHeader _indexHeader;

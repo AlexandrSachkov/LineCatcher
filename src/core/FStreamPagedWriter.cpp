@@ -1,25 +1,30 @@
-#include "PagedWriter.h"
+#include "FStreamPagedWriter.h"
 #include "Utils.h"
 
 namespace PLP {
-    PagedWriter::PagedWriter() {}
-    PagedWriter::~PagedWriter() {
+    FStreamPagedWriter::FStreamPagedWriter() {}
+    FStreamPagedWriter::~FStreamPagedWriter() {
+        flush();
         _ofs.close();
     }
 
-    bool PagedWriter::initialize(const std::wstring& path, std::vector<char>& buffer, TaskRunner& asyncTaskRunner) {
-        _buffer = &buffer;
+    bool FStreamPagedWriter::initialize(const std::wstring& path, unsigned long long preferredBuffSize, TaskRunner& asyncTaskRunner) {
         _asyncTaskRunner = &asyncTaskRunner;
 
-        //buffer size must be a multiple of (OPTIMAL_BLOCK_SIZE_BYTES * 2) for efficiency
-        unsigned long long buffSize = buffer.size();
-        if (buffSize == 0 || (buffSize > 0 && buffSize % (OPTIMAL_BLOCK_SIZE_BYTES * 2) != 0)) {
+        unsigned long long buffSize = preferredBuffSize / (OPTIMAL_BLOCK_SIZE_BYTES * 2) * (OPTIMAL_BLOCK_SIZE_BYTES * 2);
+        if (buffSize == 0) {
+            buffSize = OPTIMAL_BLOCK_SIZE_BYTES * 2;
+        }
+
+        try {
+            _buffer.resize(buffSize, 0);
+        } catch (std::bad_alloc&) {
             return false;
         }
 
-        _pageSizeBytes = buffer.size() / 2;
-        _backBuff = &buffer[0];
-        _frontBuff = &buffer[0] + _pageSizeBytes;
+        _pageSizeBytes = _buffer.size() / 2;
+        _backBuff = &_buffer[0];
+        _frontBuff = &_buffer[0] + _pageSizeBytes;
         _frontBuffContentSize = 0;
 
         _ofs.open(path, std::ofstream::app | std::ofstream::binary);
@@ -39,7 +44,7 @@ namespace PLP {
         return true;
     }
 
-    bool PagedWriter::write(const char* data, unsigned long long size) {
+    bool FStreamPagedWriter::write(const char* data, unsigned long long size) {
         if (!data || size == 0 || _writeError) {
             return false;
         }
@@ -72,7 +77,7 @@ namespace PLP {
         return true;
     }
 
-    bool PagedWriter::flush() {
+    bool FStreamPagedWriter::flush() {
         if (_writeError) {
             return false;
         }
@@ -91,7 +96,7 @@ namespace PLP {
         return true;
     }
 
-    void PagedWriter::swapBuffers() {
+    void FStreamPagedWriter::swapBuffers() {
         char* temp = _frontBuff;
         _frontBuff = _backBuff;
         _backBuff = temp;

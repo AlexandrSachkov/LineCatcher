@@ -5,8 +5,10 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace PLP {
+    class PagedWriter;
     class FileWriter {
     public:
         FileWriter();
@@ -24,7 +26,7 @@ namespace PLP {
         bool appendLine(const char* data, unsigned long long size);
         bool flush();
     private:
-        PagedWriter _writer;
+        std::unique_ptr<PagedWriter> _writer;
         std::vector<char> _buff;
     };
 }

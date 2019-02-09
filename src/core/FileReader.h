@@ -21,7 +21,9 @@ namespace PLP {
         bool getLine(unsigned long long lineNumber, char*& data, unsigned int& size);
         std::tuple<bool, std::string> nextLine();
         std::tuple<bool, std::string> getLine(unsigned long long lineNumber);
-        unsigned long long getLineNumber();
+        unsigned long long getLineNumber() const;
+        unsigned long long getLineFileOffset() const;
+        std::wstring getFilePath() const;
     private:
         std::unique_ptr<PagedReader> _pager = nullptr;
         std::unique_ptr<LineReader> _lineReader = nullptr;

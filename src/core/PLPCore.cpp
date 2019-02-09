@@ -70,7 +70,7 @@ namespace PLP {
         return true;
     }
 
-    bool PLPCore::searchLineContains(const std::wstring path, const std::wstring& substr, unsigned int& numMatches) {
+    /*bool PLPCore::searchLineContains(const std::wstring path, const std::wstring& substr, unsigned int& numMatches) {
         std::ifstream fs(wstring_to_string(path), std::ifstream::in | std::ifstream::binary);
         if (!fs.good()) {
             return false;
@@ -153,7 +153,7 @@ namespace PLP {
         module.endModule();
 
         return true;
-    }
+    }*/
 
     std::shared_ptr<FileReader> PLPCore::createFileReader(
         const std::string& path,
@@ -178,23 +178,27 @@ namespace PLP {
         return fileWriter;
     }
 
-    std::shared_ptr<ResultReader> PLPCore::createResultReader(
+    std::shared_ptr<ResultSetReader> PLPCore::createResultSetReader(
         const std::string& path,
         unsigned long long preferredBuffSizeBytes
     ) {
-        std::shared_ptr<ResultReader> resSet(new ResultReader());
+        std::shared_ptr<ResultSetReader> resSet(new ResultSetReader());
         if (!resSet->initialize(string_to_wstring(path), preferredBuffSizeBytes, *_fileOpThread)) {
             return nullptr;
         }
         return resSet;
     }
 
-    std::shared_ptr<ResultWriter> PLPCore::createResultWriter(
+    std::shared_ptr<ResultSetWriter> PLPCore::createResultSetWriter(
         const std::string& path,
-        unsigned long long preferredBuffSizeBytes
+        unsigned long long preferredBuffSizeBytes,
+        const FileReader& fReader
     ) {
-        std::shared_ptr<ResultWriter> resSet(new ResultWriter());
-        if (!resSet->initialize(string_to_wstring(path), preferredBuffSizeBytes, *_fileOpThread)) {
+        std::shared_ptr<ResultSetWriter> resSet(new ResultSetWriter());
+        if (!resSet->initialize(
+            string_to_wstring(path), 
+            fReader.getFilePath(), 
+            preferredBuffSizeBytes, *_fileOpThread)) {
             return nullptr;
         }
         return resSet;
@@ -206,8 +210,8 @@ namespace PLP {
         auto plpClass = module.beginClass<PLPCore>("Core");
         plpClass.addFunction("createFileReader", &PLPCore::createFileReader);
         plpClass.addFunction("createFileWriter", &PLPCore::createFileWriter);
-        plpClass.addFunction("createResultReader", &PLPCore::createResultReader);
-        plpClass.addFunction("createResultWriter", &PLPCore::createResultWriter);
+        plpClass.addFunction("createResultSetReader", &PLPCore::createResultSetReader);
+        plpClass.addFunction("createResultSetWriter", &PLPCore::createResultSetWriter);
         plpClass.endClass();
 
         auto fileReaderClass = module.beginClass<FileReader>("FileReader");
@@ -218,10 +222,13 @@ namespace PLP {
         fileReaderClass.addFunction("lineNumber", &FileReader::getLineNumber);
         fileReaderClass.endClass();
 
-        auto resultReaderClass = module.beginClass<ResultReader>("ResultReader");
+        auto resultReaderClass = module.beginClass<ResultSetReader>("ResultSetReader");
         resultReaderClass.endClass();
 
-        auto resultWriterClass = module.beginClass<ResultWriter>("ResultWriter");
+        auto resultWriterClass = module.beginClass<ResultSetWriter>("ResultSetWriter");
+        resultWriterClass.addFunction("appendCurrentLine", &ResultSetWriter::appendCurrentLine);
+        resultWriterClass.addFunction("getNumResults", &ResultSetWriter::getNumResults);
+        resultWriterClass.addFunction("flush", &ResultSetWriter::flush);
         resultWriterClass.endClass();
 
         auto fileWriterClass = module.beginClass<FileWriter>("FileWriter");

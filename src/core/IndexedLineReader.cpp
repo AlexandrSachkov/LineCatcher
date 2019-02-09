@@ -101,7 +101,7 @@ namespace PLP {
         _pageData = nullptr;
         _pageSize = 0;
 
-        _lineCount = prevIndexedLineNum - 1;
+        _lineCount = prevIndexedLineNum;
         _fileOffset = prevIndexedLineFileOffset;
         
         char* lineData = nullptr;

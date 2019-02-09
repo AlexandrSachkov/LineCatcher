@@ -4,10 +4,10 @@
 #include <string>
 
 namespace PLP {
-    class ResultReader {
+    class ResultSetReader {
     public:
-        ResultReader();
-        ~ResultReader();
+        ResultSetReader();
+        ~ResultSetReader();
 
         bool initialize(
             std::wstring& path, 

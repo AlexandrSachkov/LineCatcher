@@ -1,28 +1,19 @@
 #include "FileWriter.h"
+#include "FStreamPagedWriter.h"
 #include "Utils.h"
 
 namespace PLP {
     FileWriter::FileWriter() {}
-    FileWriter::~FileWriter() {
-        flush();
-    }
+    FileWriter::~FileWriter() {}
 
     bool FileWriter::initialize(
         const std::wstring& path,
         unsigned long long preferredBuffSizeBytes,
         TaskRunner& asyncTaskRunner
     ) {
-        try {
-            unsigned long long optimalSize = preferredBuffSizeBytes / (OPTIMAL_BLOCK_SIZE_BYTES * 2) * (OPTIMAL_BLOCK_SIZE_BYTES * 2);
-            if (optimalSize == 0) {
-                return false;
-            }
-            _buff.resize(optimalSize, 0);
-        } catch (std::bad_alloc&) {
-            return false;
-        }
-
-        if (!_writer.initialize(path, _buff, asyncTaskRunner)) {
+        FStreamPagedWriter* writer = new FStreamPagedWriter();
+        _writer.reset(writer);
+        if (!writer->initialize(path, preferredBuffSizeBytes, asyncTaskRunner)) {
             return false;
         }
 
@@ -46,10 +37,10 @@ namespace PLP {
     }
 
     bool FileWriter::append(const char* data, unsigned long long size) {
-        return _writer.write(data, size);
+        return _writer->write(data, size);
     }
 
     bool FileWriter::flush() {
-        return _writer.flush();
+        return _writer->flush();
     }
 }

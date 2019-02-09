@@ -54,7 +54,7 @@ namespace PLP {
 
     bool FileReader::getLine(unsigned long long lineNumber, char*& data, unsigned int& size) {
         if (!_enableRandomAccess) {
-            return false; //no random access enabled
+            return false;
         }
         return static_cast<IndexedLineReader*>(_lineReader.get())->getLine(lineNumber, data, size);
     }
@@ -69,7 +69,15 @@ namespace PLP {
         return { true, std::string(lineStart, length) };
     }
 
-    unsigned long long FileReader::getLineNumber() {
+    unsigned long long FileReader::getLineNumber() const {
         return _lineReader->getLineNumber();
+    }
+
+    unsigned long long FileReader::getLineFileOffset() const {
+        return _lineReader->getCurrentLineFileOffset();
+    }
+
+    std::wstring FileReader::getFilePath() const {
+        return _pager->getFilePath();
     }
 }
