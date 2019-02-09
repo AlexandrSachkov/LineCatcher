@@ -9,6 +9,12 @@ namespace PLP {
 
         bool initialize(PagedReader& pager);
         bool nextLine(char*& data, unsigned int& size);
+        bool getLineUnverified( //only use if you know what you are doing. Incorrect lineNum/fileOffset can cause undefined behavior
+            unsigned long long lineNum, 
+            unsigned long long fileOffset, 
+            char*& data, 
+            unsigned int& size
+        );
         unsigned long long getLineNumber();
         unsigned long long getCurrentFileOffset();
         unsigned long long getCurrentLineFileOffset();

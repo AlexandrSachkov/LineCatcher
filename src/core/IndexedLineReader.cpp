@@ -77,6 +77,7 @@ namespace PLP {
 
         cereal::BinaryOutputArchive oarchive(fs);
         oarchive(INDEX_VERSION, _indexHeader, _fileIndex);
+        fs.close();
 
         return true;
     }

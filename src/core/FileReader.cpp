@@ -4,6 +4,7 @@
 #include "LineReader.h"
 #include "IndexedLineReader.h"
 #include "Utils.h"
+#include "ResultSetReader.h"
 
 namespace PLP {
     FileReader::FileReader() {}
@@ -59,6 +60,10 @@ namespace PLP {
         return static_cast<IndexedLineReader*>(_lineReader.get())->getLine(lineNumber, data, size);
     }
 
+    bool FileReader::getLineFromResult(const ResultSetReader& rsReader, char*& data, unsigned int& size) {
+        return _lineReader->getLineUnverified(rsReader.getLineNumber(), rsReader.getLineFileOffset(), data, size);
+    }
+
     std::tuple<bool, std::string> FileReader::getLine(unsigned long long lineNumber) {
         char* lineStart = nullptr;
         unsigned int length = 0;
@@ -79,5 +84,9 @@ namespace PLP {
 
     std::wstring FileReader::getFilePath() const {
         return _pager->getFilePath();
+    }
+
+    void FileReader::resetToBeginning() {
+        _lineReader->resetToBeginning();
     }
 }

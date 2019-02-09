@@ -1,6 +1,7 @@
 #pragma once
 
 #include "TaskRunner.h"
+#include "ResultSetShared.h"
 #include <string>
 #include <memory>
 #include <sstream>
@@ -17,35 +18,24 @@ namespace PLP {
             std::wstring& path,
             std::wstring& dataFilePath,
             unsigned long long preferredBufferSizeBytes,
+            bool overwriteIfExists,
             TaskRunner& asyncTaskRunner
         );
+
+        void release();
 
         bool appendCurrentLine(const FileReader& fReader);
         unsigned long long getNumResults();
         bool flush();
 
     private:
-        struct Result {
-            Result(unsigned long long lineNum, unsigned long long fileOffset) : 
-                lineNum(lineNum), fileOffset(fileOffset) {}
-
-            unsigned long long lineNum = 0;
-            unsigned long long fileOffset = 0;
-
-            template<class Archive>
-            void serialize(Archive& archive) {
-                archive(lineNum, fileOffset);
-            }
-        };
-
-        static const unsigned int RESULT_SET_VERSION = 1; // increment if format changes
+        bool updateResultCount();
 
         std::unique_ptr<PagedWriter> _writer = nullptr;
-        std::ostringstream _serialBuff;
         std::wstring _path;
-        std::wstring _dataFilePath;
-
-        unsigned long long _resultCount = 0;
+        std::string _dataFilePath;
+        
         unsigned long long _prevLineNum = 0;
+        unsigned long long _resultCount = 0;
     };
 }

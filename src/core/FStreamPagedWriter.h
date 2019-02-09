@@ -13,20 +13,27 @@ namespace PLP {
         FStreamPagedWriter();
         ~FStreamPagedWriter();
 
-        bool initialize(const std::wstring& path, unsigned long long preferredBuffSize, TaskRunner& asyncTaskRunner);
+        bool initialize(
+            const std::wstring& path, 
+            unsigned long long preferredBuffSize, 
+            bool overwriteIfExists, 
+            TaskRunner& asyncTaskRunner
+        );
         bool write(const char* data, unsigned long long size);
+        bool setPosition(unsigned long long fileOffset);
+        bool setPositionEnd();
         bool flush();
     private:
         void swapBuffers();
 
         std::vector<char> _buffer;
-        TaskRunner* _asyncTaskRunner;
-        std::ofstream _ofs;
+        TaskRunner* _asyncTaskRunner = nullptr;
+        std::fstream _ofs;
 
-        unsigned long long _pageSizeBytes;
-        char* _frontBuff;
-        char* _backBuff;
-        unsigned long long _frontBuffContentSize;
+        unsigned long long _pageSizeBytes = 0;
+        char* _frontBuff = nullptr;
+        char* _backBuff = nullptr;
+        unsigned long long _frontBuffContentSize = 0;
 
         TaskStatus _backBuffLoadStatus;
         std::function<void()> _writeBackBuff;

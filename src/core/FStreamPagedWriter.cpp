@@ -8,7 +8,11 @@ namespace PLP {
         _ofs.close();
     }
 
-    bool FStreamPagedWriter::initialize(const std::wstring& path, unsigned long long preferredBuffSize, TaskRunner& asyncTaskRunner) {
+    bool FStreamPagedWriter::initialize(
+        const std::wstring& path, 
+        unsigned long long preferredBuffSize, 
+        bool overwriteIfExists, 
+        TaskRunner& asyncTaskRunner) {
         _asyncTaskRunner = &asyncTaskRunner;
 
         unsigned long long buffSize = preferredBuffSize / (OPTIMAL_BLOCK_SIZE_BYTES * 2) * (OPTIMAL_BLOCK_SIZE_BYTES * 2);
@@ -27,7 +31,14 @@ namespace PLP {
         _frontBuff = &_buffer[0] + _pageSizeBytes;
         _frontBuffContentSize = 0;
 
-        _ofs.open(path, std::ofstream::app | std::ofstream::binary);
+        _ofs.open(path, std::fstream::in | std::fstream::binary); //check file existence
+        if (_ofs.good() && !overwriteIfExists) {
+            _ofs.close();
+            return false;
+        }
+
+        _ofs.close();
+        _ofs.open(path, std::fstream::out | std::fstream::binary);
         if (!_ofs.good()) {
             return false;
         }
@@ -100,5 +111,30 @@ namespace PLP {
         char* temp = _frontBuff;
         _frontBuff = _backBuff;
         _backBuff = temp;
+    }
+
+    bool FStreamPagedWriter::setPosition(unsigned long long fileOffset) {
+        if (!flush()) {
+            return false;
+        }
+
+        unsigned long long currFileOffset = _ofs.tellg();
+        _ofs.seekg(0, std::ios::end);
+        unsigned long long fileSize = _ofs.tellg();
+
+        if (fileOffset > fileSize) {
+            _ofs.seekg(currFileOffset);
+            return false;
+        }
+        _ofs.seekg(fileOffset);
+        return true;
+    }
+
+    bool FStreamPagedWriter::setPositionEnd() {
+        if (!flush()) {
+            return false;
+        }
+        _ofs.seekg(0, std::ios::end);
+        return true;
     }
 }

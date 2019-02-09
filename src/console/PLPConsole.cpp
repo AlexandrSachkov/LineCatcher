@@ -110,11 +110,27 @@ int main() {
     }*/
 
     auto fReader = core.createFileReader(PLP::wstring_to_string(smallFile), 0, true);
-    auto rWriter = core.createResultSetWriter("results.txt", 0, *fReader);
+    auto rWriter = core.createResultSetWriter("results.txt", 0, *fReader, true);
     char* line;
     unsigned int lineSize;
     while (fReader->nextLine(line, lineSize)) {
         if (!rWriter->appendCurrentLine(*fReader)) {
+            return 1;
+        }
+    }
+
+    rWriter->release();
+
+    auto rReader = core.createResultSetReader("results.txt", 0);
+    std::string dataPAth = rReader->getDataFilePath();
+    unsigned long long numResults = rReader->getNumResults();
+
+    char* resLine;
+    unsigned int resLineSize;
+    unsigned long long lineNum;
+    unsigned long long fileOffset;
+    while (rReader->nextResult(lineNum, fileOffset)) {
+        if (!fReader->getLineFromResult(*rReader, resLine, resLineSize)) {
             return 1;
         }
     }

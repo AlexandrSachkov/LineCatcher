@@ -9,11 +9,12 @@ namespace PLP {
     bool FileWriter::initialize(
         const std::wstring& path,
         unsigned long long preferredBuffSizeBytes,
+        bool overwriteIfExists,
         TaskRunner& asyncTaskRunner
     ) {
         FStreamPagedWriter* writer = new FStreamPagedWriter();
         _writer.reset(writer);
-        if (!writer->initialize(path, preferredBuffSizeBytes, asyncTaskRunner)) {
+        if (!writer->initialize(path, preferredBuffSizeBytes, overwriteIfExists, asyncTaskRunner)) {
             return false;
         }
 

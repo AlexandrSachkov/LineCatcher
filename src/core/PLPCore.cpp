@@ -169,10 +169,11 @@ namespace PLP {
 
     std::shared_ptr<FileWriter> PLPCore::createFileWriter(
         const std::string& path,
-        unsigned long long preferredBuffSizeBytes
+        unsigned long long preferredBuffSizeBytes,
+        bool overwriteIfExists
     ) {
         std::shared_ptr<FileWriter> fileWriter(new FileWriter());
-        if (!fileWriter->initialize(string_to_wstring(path), preferredBuffSizeBytes, *_fileOpThread)) {
+        if (!fileWriter->initialize(string_to_wstring(path), preferredBuffSizeBytes, overwriteIfExists, *_fileOpThread)) {
             return nullptr;
         }
         return fileWriter;
@@ -183,7 +184,7 @@ namespace PLP {
         unsigned long long preferredBuffSizeBytes
     ) {
         std::shared_ptr<ResultSetReader> resSet(new ResultSetReader());
-        if (!resSet->initialize(string_to_wstring(path), preferredBuffSizeBytes, *_fileOpThread)) {
+        if (!resSet->initialize(string_to_wstring(path), preferredBuffSizeBytes)) {
             return nullptr;
         }
         return resSet;
@@ -192,13 +193,14 @@ namespace PLP {
     std::shared_ptr<ResultSetWriter> PLPCore::createResultSetWriter(
         const std::string& path,
         unsigned long long preferredBuffSizeBytes,
-        const FileReader& fReader
+        const FileReader& fReader,
+        bool overwriteIfExists
     ) {
         std::shared_ptr<ResultSetWriter> resSet(new ResultSetWriter());
         if (!resSet->initialize(
             string_to_wstring(path), 
             fReader.getFilePath(), 
-            preferredBuffSizeBytes, *_fileOpThread)) {
+            preferredBuffSizeBytes, overwriteIfExists, *_fileOpThread)) {
             return nullptr;
         }
         return resSet;

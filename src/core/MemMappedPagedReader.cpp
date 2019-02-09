@@ -24,6 +24,7 @@ namespace PLP {
         );
 
         if (_fileHandle == INVALID_HANDLE_VALUE) {
+            DWORD err = GetLastError();
             return false;
         }
 

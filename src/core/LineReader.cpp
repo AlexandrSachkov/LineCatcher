@@ -65,6 +65,28 @@ namespace PLP {
         return true;
     }
 
+    bool LineReader::getLineUnverified(
+        unsigned long long lineNum,
+        unsigned long long fileOffset,
+        char*& data,
+        unsigned int& size
+    ) {
+        if (fileOffset >= _pager->getFileSize()) {
+            return false;
+        }
+
+        _pageData = nullptr;
+        _pageSize = 0;
+
+        _lineCount = lineNum;
+        _fileOffset = fileOffset;
+
+        if (!nextLine(data, size)) {
+            return false;
+        }
+        return true;
+    }
+
     bool LineReader::appendPageBoundaryLineBuff(const char* data, unsigned int size) {
         unsigned int requiredSize = (unsigned int)_pageBoundaryLineBuff.size() + size;
         if (requiredSize > _pageBoundaryLineBuff.capacity()) {

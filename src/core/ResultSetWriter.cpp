@@ -5,50 +5,104 @@
 
 #include "cereal/cereal.hpp"
 #include "cereal/archives/binary.hpp"
-#include "cereal/types/common.hpp"
+#include "cereal/types/string.hpp"
 
 namespace PLP {
-    ResultSetWriter::ResultSetWriter() {
-        //std::string buff;
-        //buff.reserve(sizeof(std::pair<unsigned long long, unsigned long long>));
-        //_serialBuff = std::ostringstream(buff);
+    ResultSetWriter::ResultSetWriter() {}
+    ResultSetWriter::~ResultSetWriter() {
+        release();
     }
-    ResultSetWriter::~ResultSetWriter() {}
 
     bool ResultSetWriter::initialize(
         std::wstring& path,
         std::wstring& dataFilePath,
         unsigned long long preferredBufferSizeBytes,
+        bool overwriteIfExists,
         TaskRunner& asyncTaskRunner
     ) {
         _path = path;
-        _dataFilePath = dataFilePath;
+        _dataFilePath = wstring_to_string(dataFilePath);
 
         FStreamPagedWriter* writer = new FStreamPagedWriter();
         _writer.reset(writer);
-        if (!writer->initialize(path, preferredBufferSizeBytes, asyncTaskRunner)) {
+        if (!writer->initialize(path, preferredBufferSizeBytes, overwriteIfExists, asyncTaskRunner)) {
             return false;
         }
+
+        if (!_writer->write(reinterpret_cast<const char*>(&RESULT_SET_VERSION), sizeof(RESULT_SET_VERSION))) {
+            return false;
+        }
+        unsigned int dataFilePathLength = static_cast<unsigned int>(_dataFilePath.length());
+        if (!_writer->write(reinterpret_cast<const char*>(&dataFilePathLength), sizeof(dataFilePathLength))) {
+            return false;
+        }
+        if (!_writer->write(_dataFilePath.c_str(), dataFilePathLength)) {
+            return false;
+        }
+        if (!_writer->write(reinterpret_cast<const char*>(&_resultCount), sizeof(_resultCount))) {
+            return false;
+        }
+        if (!_writer->flush()) {
+            return false;
+        }
+
         return true;
     }
 
-    bool ResultSetWriter::appendCurrentLine(const FileReader& fReader) {
-        _serialBuff.clear();
-        _serialBuff.seekp(0, std::ios::beg);
-        {
-            cereal::BinaryOutputArchive oarchive(_serialBuff);
-            Result result(fReader.getLineNumber(), fReader.getLineFileOffset());
-            oarchive(result);
+    void ResultSetWriter::release() {
+        if (_writer) {
+            flush();
         }
-        _serialBuff.seekp(0, std::ios::end);
-        return _writer->write(_serialBuff.str().c_str(), _serialBuff.tellp());
+        _writer.reset();
+        _path = L"";
+        _dataFilePath = "";
+        _prevLineNum = 0;
+        _resultCount = 0;
+    }
+
+    bool ResultSetWriter::appendCurrentLine(const FileReader& fReader) {
+        unsigned long long lineNum = fReader.getLineNumber();
+        if (!_writer->write(reinterpret_cast<const char*>(&lineNum), sizeof(unsigned long long))) {
+            return false;
+        }
+        unsigned long long fileOffset = fReader.getLineFileOffset();
+        if (!_writer->write(reinterpret_cast<const char*>(&fileOffset), sizeof(unsigned long long))) {
+            return false;
+        }
+
+        _resultCount++;
+        return true;
     }
 
     bool ResultSetWriter::flush() {
-        return _writer->flush();
+        if (!_writer->flush()) {
+            return false;
+        }
+        return updateResultCount();
     }
 
     unsigned long long ResultSetWriter::getNumResults() {
         return _resultCount;
+    }
+
+    bool ResultSetWriter::updateResultCount() {
+        unsigned long long resultCountFileOffset =
+            sizeof(RESULT_SET_VERSION) +
+            sizeof(unsigned int) + //length of data file path
+            _dataFilePath.length();
+
+        if (!_writer->setPosition(resultCountFileOffset)) {
+            return false;
+        }
+        if (!_writer->write(reinterpret_cast<const char*>(&_resultCount), sizeof(_resultCount))) {
+            return false;
+        }
+        if (!_writer->setPositionEnd()) {
+            return false;
+        }
+        if (!_writer->flush()) {
+            return false;
+        }
+        return true;
     }
 }

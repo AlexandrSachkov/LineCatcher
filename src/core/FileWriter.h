@@ -17,6 +17,7 @@ namespace PLP {
         bool initialize(
             const std::wstring& path,
             unsigned long long preferredBuffSizeBytes,
+            bool overwriteIfExists,
             TaskRunner& asyncTaskRunner
         );
 
