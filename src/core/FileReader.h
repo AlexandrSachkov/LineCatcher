@@ -7,6 +7,7 @@ namespace PLP {
     class PagedReader;
     class LineReader;
     class ResultSetReader;
+
     class FileReader {
     public:
         FileReader();

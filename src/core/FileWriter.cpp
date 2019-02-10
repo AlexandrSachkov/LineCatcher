@@ -1,6 +1,8 @@
 #include "FileWriter.h"
 #include "FStreamPagedWriter.h"
 #include "Utils.h"
+#include "TaskRunner.h"
+#include "PagedWriter.h"
 
 namespace PLP {
     FileWriter::FileWriter() {}

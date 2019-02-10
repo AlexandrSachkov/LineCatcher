@@ -1,7 +1,5 @@
 #pragma once
 
-#include "TaskRunner.h"
-#include "ResultSetShared.h"
 #include <string>
 #include <memory>
 

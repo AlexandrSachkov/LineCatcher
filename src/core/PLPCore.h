@@ -2,31 +2,35 @@
 
 #define _CRT_SECURE_NO_WARNINGS
 
-#include "Thread.h"
-#include "FileReader.h"
-#include "FileWriter.h"
-#include "ResultSetReader.h"
-#include "ResultSetWriter.h"
-
 #include <string>
 #include <memory>
 #include <vector>
 
+#define PLP_LIB_EXPORT __declspec(dllexport)
+#define PLP_LIB_IMPORT __declspec(dllimport)
+
+#ifdef PLP_EXPORT
+#define PLP_LIB_API PLP_LIB_EXPORT
+#else
+#define PLP_LIB_API PLP_LIB_IMPORT
+#endif
+
 struct lua_State;
 
 namespace PLP {
+    class FileReader;
+    class FileWriter;
+    class ResultSetReader;
+    class ResultSetWriter;
+    class Thread;
+
     class PLPCore {
     public:
         PLPCore();
         ~PLPCore();
 
         bool initialize();
-
         bool runScript(const std::wstring& scriptLua, std::wstring& errMsg);
-        /*bool searchLineContains(const std::wstring path, const std::wstring& substr, unsigned int& numMatches);
-        bool searchLineContainsMM(const std::wstring path, const std::wstring& substr, unsigned int& numMatches);
-        bool searchLineContainsMMIndexed(const std::wstring path, const std::wstring& substr, unsigned int& numMatches);
-        bool search(const std::wstring path, const std::wstring& frameFilterScriptLua, std::wstring& errMsg);*/
 
         std::shared_ptr<FileReader> createFileReader(
             const std::string& path,
@@ -58,4 +62,6 @@ namespace PLP {
         lua_State* _state;
         std::unique_ptr<Thread> _fileOpThread;
     };
+
+    extern PLP_LIB_API PLPCore* createCore();
 }

@@ -1,11 +1,15 @@
 #include "PLPCore.h"
 
+#include "Thread.h"
+#include "FileReader.h"
+#include "FileWriter.h"
+#include "ResultSetReader.h"
+#include "ResultSetWriter.h"
 #include "Utils.h"
 #include "Timer.h"
 #include "PagedReader.h"
 #include "MemMappedPagedReader.h"
 #include "LineReader.h"
-#include "FileWriter.h"
 
 #include "lua.hpp"
 #include "LuaIntf/LuaCompat.h"
@@ -22,6 +26,10 @@ namespace LuaIntf {
 }
 
 namespace PLP {
+    PLPCore* createCore() {
+        return new PLPCore();
+    }
+
     PLPCore::PLPCore() {}
     PLPCore::~PLPCore() {
         _fileOpThread->stopAndJoin();

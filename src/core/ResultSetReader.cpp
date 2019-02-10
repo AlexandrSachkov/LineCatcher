@@ -2,10 +2,6 @@
 #include "MemMappedPagedReader.h"
 #include "Utils.h"
 
-#include "cereal/cereal.hpp"
-#include "cereal/archives/binary.hpp"
-#include "cereal/types/string.hpp"
-
 #include <fstream>
 
 namespace PLP {

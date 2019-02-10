@@ -2,10 +2,7 @@
 #include "FStreamPagedWriter.h"
 #include "Utils.h"
 #include "FileReader.h"
-
-#include "cereal/cereal.hpp"
-#include "cereal/archives/binary.hpp"
-#include "cereal/types/string.hpp"
+#include "TaskRunner.h"
 
 namespace PLP {
     ResultSetWriter::ResultSetWriter() {}

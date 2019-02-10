@@ -22,16 +22,16 @@ ENDIF(MSVC)
 
 # =====================================================================================
 
-SET(HEADERS  
-    IndexedLineReader.h
-    PagedReader.h
-    PagedWriter.h
-    FStreamPagedReader.h
+SET(HEADERS
     FileReader.h
-    FileWriter.h
+    FileWriter.h  
+    FStreamPagedReader.h
+    FStreamPagedWriter.h
+    IndexedLineReader.h
     LineReader.h
     MemMappedPagedReader.h
-    FStreamPagedWriter.h
+    PagedReader.h
+    PagedWriter.h
     PLPCore.h
     ResultSetReader.h
     ResultSetWriter.h
@@ -42,13 +42,13 @@ SET(HEADERS
     )
 
 SET(SOURCES 
-    IndexedLineReader.cpp
-    FStreamPagedReader.cpp
     FileReader.cpp
     FileWriter.cpp
+    FStreamPagedReader.cpp
+    FStreamPagedWriter.cpp
+    IndexedLineReader.cpp
     LineReader.cpp
     MemMappedPagedReader.cpp
-    FStreamPagedWriter.cpp
     PLPCore.cpp
     ResultSetReader.cpp
     ResultSetWriter.cpp
@@ -152,7 +152,7 @@ INCLUDE_DIRECTORIES(
     )
 
 ADD_DEFINITIONS(
-
+    -DPLP_EXPORT
     )
 
 LINK_DIRECTORIES(
@@ -162,7 +162,7 @@ LINK_DIRECTORIES(
     ${TBB_LIBRARY_RELEASE_PATH}
     )
 
-add_library (PLPCORE STATIC
+add_library (PLPCORE SHARED
   ${HEADERS}
   ${SOURCES}
 )

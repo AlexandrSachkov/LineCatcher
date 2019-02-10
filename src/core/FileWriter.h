@@ -1,14 +1,13 @@
 #pragma once
 
-#include "TaskRunner.h"
-#include "PagedWriter.h"
-
 #include <string>
 #include <vector>
 #include <memory>
 
 namespace PLP {
     class PagedWriter;
+    class TaskRunner;
+
     class FileWriter {
     public:
         FileWriter();

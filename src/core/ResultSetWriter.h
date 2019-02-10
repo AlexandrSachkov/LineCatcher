@@ -1,7 +1,5 @@
 #pragma once
 
-#include "TaskRunner.h"
-#include "ResultSetShared.h"
 #include <string>
 #include <memory>
 #include <sstream>
@@ -9,6 +7,8 @@
 namespace PLP {
     class PagedWriter;
     class FileReader;
+    class TaskRunner;
+
     class ResultSetWriter {
     public:
         ResultSetWriter();
