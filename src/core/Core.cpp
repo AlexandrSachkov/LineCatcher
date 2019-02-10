@@ -262,26 +262,40 @@ namespace PLP {
         auto fileReaderClass = module.beginClass<FileReader>("FileReader");
         std::tuple<bool, std::string>(FileReader::*nextLine)() = &FileReader::nextLine;
         std::tuple<bool, std::string>(FileReader::*getLine)(unsigned long long) = &FileReader::getLine;
+        std::tuple<bool, std::string>(FileReader::*getLineFromResult)(std::shared_ptr<ResultSetReaderI>) 
+            = &FileReader::getLineFromResult;
         fileReaderClass.addFunction("nextLine", nextLine);
         fileReaderClass.addFunction("getLine", getLine);
-        fileReaderClass.addFunction("lineNumber", &FileReader::getLineNumber);
+        fileReaderClass.addFunction("getLineFromResult", getLineFromResult);
+        fileReaderClass.addFunction("getLineNumber", &FileReader::getLineNumber);
+        fileReaderClass.addFunction("restart", &FileReader::restart);
+        fileReaderClass.addFunction("release", &FileReader::release);
         fileReaderClass.endClass();
-
-        auto resultReaderClass = module.beginClass<ResultSetReader>("ResultSetReader");
-        resultReaderClass.endClass();
-
-        auto resultWriterClass = module.beginClass<ResultSetWriter>("ResultSetWriter");
-        bool(ResultSetWriter::*appendCurrLine)(std::shared_ptr<FileReaderI>) = &ResultSetWriter::appendCurrLine;
-        resultWriterClass.addFunction("appendCurrLine", appendCurrLine);
-        resultWriterClass.addFunction("getNumResults", &ResultSetWriter::getNumResults);
-        resultWriterClass.endClass();
 
         auto fileWriterClass = module.beginClass<FileWriter>("FileWriter");
         bool(FileWriter::*append)(const std::string&) = &FileWriter::append;
         bool(FileWriter::*appendLine)(const std::string&) = &FileWriter::appendLine;
         fileWriterClass.addFunction("append", append);
         fileWriterClass.addFunction("appendLine", appendLine);
+        fileWriterClass.addFunction("release", &FileWriter::release);
         fileWriterClass.endClass();
+
+        auto resultReaderClass = module.beginClass<ResultSetReader>("ResultSetReader");
+        std::tuple<bool, unsigned long long>(ResultSetReader::*nextResult)() = &ResultSetReader::nextResult;
+        resultReaderClass.addFunction("nextResult", nextResult);
+        resultReaderClass.addFunction("getLineNumber", &ResultSetReader::getLineNumber);
+        resultReaderClass.addFunction("getNumResults", &ResultSetReader::getNumResults);
+        resultReaderClass.addFunction("getDataFilePath", &ResultSetReader::getDataFilePath);
+        resultReaderClass.addFunction("restart", &ResultSetReader::restart);
+        resultReaderClass.addFunction("release", &ResultSetReader::release);
+        resultReaderClass.endClass();
+
+        auto resultWriterClass = module.beginClass<ResultSetWriter>("ResultSetWriter");
+        bool(ResultSetWriter::*appendCurrLine)(std::shared_ptr<FileReaderI>) = &ResultSetWriter::appendCurrLine;
+        resultWriterClass.addFunction("appendCurrLine", appendCurrLine);
+        resultWriterClass.addFunction("getNumResults", &ResultSetWriter::getNumResults);
+        resultWriterClass.addFunction("release", &ResultSetWriter::release);
+        resultWriterClass.endClass();
 
         module.endModule();
     }

@@ -74,7 +74,7 @@ namespace PLP {
         _pageSize = 0;
     }
 
-    bool ResultSetReader::nextResult(unsigned long long& lineNumber, unsigned long long& fileOffset) {
+    bool ResultSetReader::nextResult(unsigned long long& lineNumber) {
         if (_resultCount >= _numResults) {
             return false;
         }
@@ -94,8 +94,15 @@ namespace PLP {
         _resultCount++;
 
         lineNumber = _currLineNum;
-        fileOffset = _currLineFileOffset;
         return true;
+    }
+
+    std::tuple<bool, unsigned long long> ResultSetReader::nextResult() {
+        unsigned long long lineNum = 0;
+        if (!nextResult(lineNum)) {
+            return { false, 0 };
+        }
+        return { true, lineNum };
     }
 
     unsigned long long ResultSetReader::getNumResults() const {

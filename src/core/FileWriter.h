@@ -21,12 +21,14 @@ namespace PLP {
             bool overwriteIfExists,
             TaskRunner& asyncTaskRunner
         );
+        
+        //C++ interface
+        bool append(const char* data, unsigned long long size) override;
+        bool appendLine(const char* data, unsigned long long size) override;
 
         //Shared interface
         bool append(const std::string& data) override;
-        bool append(const char* data, unsigned long long size) override;
         bool appendLine(const std::string& line) override;
-        bool appendLine(const char* data, unsigned long long size) override;
         void release() override;
 
     private:

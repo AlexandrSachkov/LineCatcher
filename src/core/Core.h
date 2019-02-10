@@ -30,6 +30,7 @@ namespace PLP {
         bool initialize();
         bool runScript(const std::wstring& scriptLua, std::wstring& errMsg) override;
 
+        //C++ interface
         FileReader* createFileReader(
             const std::string& path,
             unsigned long long preferredBuffSizeBytes,
@@ -54,6 +55,8 @@ namespace PLP {
             bool overwriteIfExists
         ) override;
 
+
+        //Lua interface
         std::shared_ptr<FileReader> createFileReaderL(
             const std::string& path,
             unsigned long long preferredBuffSizeBytes,
