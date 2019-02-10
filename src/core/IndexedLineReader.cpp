@@ -99,14 +99,11 @@ namespace PLP {
             prevIndexedLineFileOffset = it->second;
         }
         
-        _pageData = nullptr;
-        _pageSize = 0;
-
-        _lineCount = prevIndexedLineNum;
-        _fileOffset = prevIndexedLineFileOffset;
-        
         char* lineData = nullptr;
         unsigned int length = 0;
+        if (!getLineUnverified(prevIndexedLineNum, prevIndexedLineFileOffset, lineData, length)) {
+            return false;
+        }
         while (getLineNumber() < lineNumber) {
             if (!nextLine(lineData, length)) {
                 return false;

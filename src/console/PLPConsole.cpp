@@ -103,7 +103,7 @@ int main() {
         return 1;
     }*/
 
-    /*auto fReader = core.createFileReader(PLP::wstring_to_string(largeFile), 0, true);
+    /*auto fReader = core->createFileReader(largeFile, 0, true);
     char* line;
     unsigned int lineSize;
     if (!fReader->getLine(100000000, line, lineSize)) {
