@@ -1,15 +1,16 @@
 #pragma once
 
+#include "ResultSetWriterI.h"
+
 #include <string>
 #include <memory>
 #include <sstream>
 
 namespace PLP {
     class PagedWriter;
-    class FileReader;
     class TaskRunner;
 
-    class ResultSetWriter {
+    class ResultSetWriter : public ResultSetWriterI {
     public:
         ResultSetWriter();
         ~ResultSetWriter();
@@ -22,13 +23,18 @@ namespace PLP {
             TaskRunner& asyncTaskRunner
         );
 
-        void release();
+        //C++ interface
+        bool appendCurrLine(const FileReaderI* fReader) override;
 
-        bool appendCurrentLine(const FileReader& fReader);
-        unsigned long long getNumResults();
-        bool flush();
+        //Lua interface
+        bool appendCurrLine(std::shared_ptr<FileReaderI> fReader);
+
+        //Shared interface
+        unsigned long long getNumResults() const override;
+        void release() override;
 
     private:
+        bool flush();
         bool updateResultCount();
 
         std::unique_ptr<PagedWriter> _writer = nullptr;

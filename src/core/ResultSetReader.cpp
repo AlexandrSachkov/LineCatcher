@@ -15,6 +15,7 @@ namespace PLP {
         std::wstring& path,
         unsigned long long preferredBufferSizeBytes
     ) {
+        release();
         _path = path;
 
         MemMappedPagedReader* reader = new MemMappedPagedReader();
@@ -61,16 +62,16 @@ namespace PLP {
     }
 
     void ResultSetReader::release() {
-        _reader.reset();
-        _path = L"";
-        _dataFilePath = "";
+        _reader = nullptr;
+        _path;
+        _dataFilePath;
+        _numResults = 0;
         _resultCount = 0;
         _currFileOffset = 0;
-        _numResults = 0;
-        _pageData = nullptr;
-        _pageSize = 0;
         _currLineNum = 0;
         _currLineFileOffset = 0;
+        _pageData = nullptr;
+        _pageSize = 0;
     }
 
     bool ResultSetReader::nextResult(unsigned long long& lineNumber, unsigned long long& fileOffset) {
@@ -97,15 +98,15 @@ namespace PLP {
         return true;
     }
 
-    unsigned long long ResultSetReader::getNumResults() {
+    unsigned long long ResultSetReader::getNumResults() const {
         return _numResults;
     }
 
-    std::string ResultSetReader::getDataFilePath() {
-        return _dataFilePath;
+    void ResultSetReader::getDataFilePath(std::string& path) const {
+        path = _dataFilePath;
     }
 
-    void ResultSetReader::resetToBeginning() {
+    void ResultSetReader::restart() {
         _currFileOffset = 0;
         _resultCount = 0;
         _pageData = nullptr;

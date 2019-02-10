@@ -63,7 +63,7 @@ namespace PLP {
             lineStartFileOffset = getCurrentFileOffset();
             numLines++;
         }
-        resetToBeginning();
+        restart();
 
         std::ofstream fs;
         fs.open(indexPath, std::fstream::out | std::fstream::binary);

@@ -6,7 +6,9 @@
 
 namespace PLP {
     FileWriter::FileWriter() {}
-    FileWriter::~FileWriter() {}
+    FileWriter::~FileWriter() {
+        release();
+    }
 
     bool FileWriter::initialize(
         const std::wstring& path,
@@ -14,6 +16,8 @@ namespace PLP {
         bool overwriteIfExists,
         TaskRunner& asyncTaskRunner
     ) {
+        release();
+
         FStreamPagedWriter* writer = new FStreamPagedWriter();
         _writer.reset(writer);
         if (!writer->initialize(path, preferredBuffSizeBytes, overwriteIfExists, asyncTaskRunner)) {
@@ -21,6 +25,13 @@ namespace PLP {
         }
 
         return true;
+    }
+
+    void FileWriter::release() {
+        if (_writer) {
+            _writer->flush();
+        }
+        _writer = nullptr;
     }
 
     bool FileWriter::append(const std::string& data) {
@@ -36,14 +47,10 @@ namespace PLP {
         if (!success) {
             return false;
         }
-        return append("\n", 1);
+        return append("\r\n", 1); //TODO change on linux
     }
 
     bool FileWriter::append(const char* data, unsigned long long size) {
         return _writer->write(data, size);
-    }
-
-    bool FileWriter::flush() {
-        return _writer->flush();
     }
 }

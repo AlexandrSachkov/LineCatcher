@@ -23,8 +23,12 @@ ENDIF(MSVC)
 # =====================================================================================
 
 SET(HEADERS
+    Core.h
+    CoreI.h
     FileReader.h
-    FileWriter.h  
+    FileReaderI.h
+    FileWriter.h
+    FileWriterI.h
     FStreamPagedReader.h
     FStreamPagedWriter.h
     IndexedLineReader.h
@@ -32,9 +36,10 @@ SET(HEADERS
     MemMappedPagedReader.h
     PagedReader.h
     PagedWriter.h
-    PLPCore.h
     ResultSetReader.h
+    ResultSetReaderI.h
     ResultSetWriter.h
+    ResultSetWriterI.h
     TaskRunner.h
     Thread.h
     Timer.h
@@ -42,6 +47,7 @@ SET(HEADERS
     )
 
 SET(SOURCES 
+    Core.cpp
     FileReader.cpp
     FileWriter.cpp
     FStreamPagedReader.cpp
@@ -49,7 +55,6 @@ SET(SOURCES
     IndexedLineReader.cpp
     LineReader.cpp
     MemMappedPagedReader.cpp
-    PLPCore.cpp
     ResultSetReader.cpp
     ResultSetWriter.cpp
     Thread.cpp

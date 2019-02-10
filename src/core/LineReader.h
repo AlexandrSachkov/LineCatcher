@@ -18,7 +18,7 @@ namespace PLP {
         unsigned long long getLineNumber();
         unsigned long long getCurrentFileOffset();
         unsigned long long getCurrentLineFileOffset();
-        void resetToBeginning();
+        void restart();
     protected:
         bool appendPageBoundaryLineBuff(const char* data, unsigned int size);
         void resetPageBoundaryLineBuff();

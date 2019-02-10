@@ -8,13 +8,16 @@
 
 namespace PLP {
     FileReader::FileReader() {}
-    FileReader::~FileReader() {}
+    FileReader::~FileReader() {
+        release();
+    }
 
     bool FileReader::initialize(
         const std::wstring& path, 
         unsigned long long preferredBuffSizeBytes, 
         bool requireRandomAccess
     ) {
+        release();
         _enableRandomAccess = requireRandomAccess;
 
         MemMappedPagedReader* pagedReader = new MemMappedPagedReader();
@@ -39,6 +42,12 @@ namespace PLP {
         return true;
     }
 
+    void FileReader::release() {
+        _lineReader = nullptr;
+        _pager = nullptr;
+        _enableRandomAccess = false;
+    }
+
     bool FileReader::nextLine(char*& lineStart, unsigned int& length) {
         return _lineReader->nextLine(lineStart, length);
     }
@@ -60,8 +69,20 @@ namespace PLP {
         return static_cast<IndexedLineReader*>(_lineReader.get())->getLine(lineNumber, data, size);
     }
 
-    bool FileReader::getLineFromResult(const ResultSetReader& rsReader, char*& data, unsigned int& size) {
-        return _lineReader->getLineUnverified(rsReader.getLineNumber(), rsReader.getLineFileOffset(), data, size);
+    bool FileReader::getLineFromResult(const ResultSetReaderI* rsReader, char*& data, unsigned int& size) {
+        if (!rsReader) {
+            return false;
+        }
+        return _lineReader->getLineUnverified(rsReader->getLineNumber(), rsReader->getLineFileOffset(), data, size);
+    }
+
+    std::tuple<bool, std::string> FileReader::getLineFromResult(std::shared_ptr<ResultSetReaderI> rsReader) {
+        char* lineStart = nullptr;
+        unsigned int length = 0;
+        if (!getLineFromResult(rsReader.get(), lineStart, length)) {
+            return { false, std::string() };
+        }
+        return { true, std::string(lineStart, length) };
     }
 
     std::tuple<bool, std::string> FileReader::getLine(unsigned long long lineNumber) {
@@ -82,11 +103,11 @@ namespace PLP {
         return _lineReader->getCurrentLineFileOffset();
     }
 
-    std::wstring FileReader::getFilePath() const {
-        return _pager->getFilePath();
+    void FileReader::getFilePath(std::wstring& path) const {
+        path = _pager->getFilePath();
     }
 
-    void FileReader::resetToBeginning() {
-        _lineReader->resetToBeginning();
+    void FileReader::restart() {
+        _lineReader->restart();
     }
 }

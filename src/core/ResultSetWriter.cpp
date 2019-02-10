@@ -17,6 +17,7 @@ namespace PLP {
         bool overwriteIfExists,
         TaskRunner& asyncTaskRunner
     ) {
+        release();
         _path = path;
         _dataFilePath = wstring_to_string(dataFilePath);
 
@@ -50,25 +51,33 @@ namespace PLP {
         if (_writer) {
             flush();
         }
-        _writer.reset();
+        _writer = nullptr;
         _path = L"";
         _dataFilePath = "";
         _prevLineNum = 0;
         _resultCount = 0;
     }
 
-    bool ResultSetWriter::appendCurrentLine(const FileReader& fReader) {
-        unsigned long long lineNum = fReader.getLineNumber();
+    bool ResultSetWriter::appendCurrLine(const FileReaderI* fReader) {
+        if (!fReader) {
+            return false;
+        }
+
+        unsigned long long lineNum = fReader->getLineNumber();
         if (!_writer->write(reinterpret_cast<const char*>(&lineNum), sizeof(unsigned long long))) {
             return false;
         }
-        unsigned long long fileOffset = fReader.getLineFileOffset();
+        unsigned long long fileOffset = fReader->getLineFileOffset();
         if (!_writer->write(reinterpret_cast<const char*>(&fileOffset), sizeof(unsigned long long))) {
             return false;
         }
 
         _resultCount++;
         return true;
+    }
+
+    bool ResultSetWriter::appendCurrLine(std::shared_ptr<FileReaderI> fReader) {
+        return appendCurrLine(fReader.get());
     }
 
     bool ResultSetWriter::flush() {
@@ -78,7 +87,7 @@ namespace PLP {
         return updateResultCount();
     }
 
-    unsigned long long ResultSetWriter::getNumResults() {
+    unsigned long long ResultSetWriter::getNumResults() const {
         return _resultCount;
     }
 

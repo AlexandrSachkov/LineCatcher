@@ -1,5 +1,7 @@
 #pragma once
 
+#include "FileWriterI.h"
+
 #include <string>
 #include <vector>
 #include <memory>
@@ -8,7 +10,7 @@ namespace PLP {
     class PagedWriter;
     class TaskRunner;
 
-    class FileWriter {
+    class FileWriter : public FileWriterI {
     public:
         FileWriter();
         ~FileWriter();
@@ -20,13 +22,14 @@ namespace PLP {
             TaskRunner& asyncTaskRunner
         );
 
-        bool append(const std::string& data);
-        bool append(const char* data, unsigned long long size);
-        bool appendLine(const std::string& line);
-        bool appendLine(const char* data, unsigned long long size);
-        bool flush();
+        //Shared interface
+        bool append(const std::string& data) override;
+        bool append(const char* data, unsigned long long size) override;
+        bool appendLine(const std::string& line) override;
+        bool appendLine(const char* data, unsigned long long size) override;
+        void release() override;
+
     private:
         std::unique_ptr<PagedWriter> _writer;
-        std::vector<char> _buff;
     };
 }

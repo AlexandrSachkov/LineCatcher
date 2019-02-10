@@ -1,4 +1,4 @@
-#include "PLPCore.h"
+#include "Core.h"
 
 #include "Thread.h"
 #include "FileReader.h"
@@ -26,19 +26,19 @@ namespace LuaIntf {
 }
 
 namespace PLP {
-    PLPCore* createCore() {
-        return new PLPCore();
+    PLP::CoreI* createCore() {
+        return new PLP::Core();
     }
 
-    PLPCore::PLPCore() {}
-    PLPCore::~PLPCore() {
+    Core::Core() {}
+    Core::~Core() {
         _fileOpThread->stopAndJoin();
         if (_state) {
             lua_close(_state);
         }
     }
 
-    bool PLPCore::initialize() {
+    bool Core::initialize() {
         _state = luaL_newstate();
         if (!_state) {
             return false;
@@ -55,7 +55,7 @@ namespace PLP {
         return true;
     }
 
-    bool PLPCore::runScript(const std::wstring& scriptLua, std::wstring& errMsg) {
+    bool Core::runScript(const std::wstring& scriptLua, std::wstring& errMsg) {
         if (scriptLua.empty()) {
             return true;
         }
@@ -163,65 +163,100 @@ namespace PLP {
         return true;
     }*/
 
-    std::shared_ptr<FileReader> PLPCore::createFileReader(
+    FileReader* Core::createFileReader(
         const std::string& path,
         unsigned long long preferredBuffSizeBytes,
         bool requireRandomAccess
     ) {
-        std::shared_ptr<FileReader> fReader(new FileReader());
+        FileReader* fReader = new FileReader();
         if (!fReader->initialize(string_to_wstring(path), preferredBuffSizeBytes, requireRandomAccess)) {
             return nullptr;
         }
         return fReader;
     }
 
-    std::shared_ptr<FileWriter> PLPCore::createFileWriter(
+    FileWriter* Core::createFileWriter(
         const std::string& path,
         unsigned long long preferredBuffSizeBytes,
         bool overwriteIfExists
     ) {
-        std::shared_ptr<FileWriter> fileWriter(new FileWriter());
+        FileWriter* fileWriter = new FileWriter();
         if (!fileWriter->initialize(string_to_wstring(path), preferredBuffSizeBytes, overwriteIfExists, *_fileOpThread)) {
             return nullptr;
         }
         return fileWriter;
     }
 
-    std::shared_ptr<ResultSetReader> PLPCore::createResultSetReader(
+    ResultSetReader* Core::createResultSetReader(
         const std::string& path,
         unsigned long long preferredBuffSizeBytes
     ) {
-        std::shared_ptr<ResultSetReader> resSet(new ResultSetReader());
+        ResultSetReader* resSet = new ResultSetReader();
         if (!resSet->initialize(string_to_wstring(path), preferredBuffSizeBytes)) {
             return nullptr;
         }
         return resSet;
     }
 
-    std::shared_ptr<ResultSetWriter> PLPCore::createResultSetWriter(
+    ResultSetWriter* Core::createResultSetWriter(
         const std::string& path,
         unsigned long long preferredBuffSizeBytes,
         const FileReader& fReader,
         bool overwriteIfExists
     ) {
-        std::shared_ptr<ResultSetWriter> resSet(new ResultSetWriter());
+        ResultSetWriter* resSet = new ResultSetWriter();
+        std::wstring dataPath;
+        fReader.getFilePath(dataPath);
+
         if (!resSet->initialize(
             string_to_wstring(path), 
-            fReader.getFilePath(), 
+            dataPath,
             preferredBuffSizeBytes, overwriteIfExists, *_fileOpThread)) {
             return nullptr;
         }
         return resSet;
     }
 
-    void PLPCore::attachLuaBindings(lua_State* state) {
+    std::shared_ptr<FileReader> Core::createFileReaderL(
+        const std::string& path,
+        unsigned long long preferredBuffSizeBytes,
+        bool requireRandomAccess
+    ) {
+        return std::shared_ptr<FileReader>(createFileReader(path, preferredBuffSizeBytes, requireRandomAccess));
+    }
+
+    std::shared_ptr<FileWriter> Core::createFileWriterL(
+        const std::string& path,
+        unsigned long long preferredBuffSizeBytes,
+        bool overwriteIfExists
+    ) {
+        return std::shared_ptr<FileWriter>(createFileWriter(path, preferredBuffSizeBytes, overwriteIfExists));
+    }
+
+    std::shared_ptr<ResultSetReader> Core::createResultSetReaderL(
+        const std::string& path,
+        unsigned long long preferredBuffSizeBytes
+    ) {
+        return std::shared_ptr<ResultSetReader>(createResultSetReader(path, preferredBuffSizeBytes));
+    }
+
+    std::shared_ptr<ResultSetWriter> Core::createResultSetWriterL(
+        const std::string& path,
+        unsigned long long preferredBuffSizeBytes,
+        const FileReader& fReader,
+        bool overwriteIfExists
+    ) {
+        return std::shared_ptr<ResultSetWriter>(createResultSetWriter(path, preferredBuffSizeBytes, fReader, overwriteIfExists));
+    }
+
+    void Core::attachLuaBindings(lua_State* state) {
         auto module = LuaIntf::LuaBinding(state).beginModule("PLP");
 
-        auto plpClass = module.beginClass<PLPCore>("Core");
-        plpClass.addFunction("createFileReader", &PLPCore::createFileReader);
-        plpClass.addFunction("createFileWriter", &PLPCore::createFileWriter);
-        plpClass.addFunction("createResultSetReader", &PLPCore::createResultSetReader);
-        plpClass.addFunction("createResultSetWriter", &PLPCore::createResultSetWriter);
+        auto plpClass = module.beginClass<Core>("Core");
+        plpClass.addFunction("createFileReader", &Core::createFileReaderL);
+        plpClass.addFunction("createFileWriter", &Core::createFileWriterL);
+        plpClass.addFunction("createResultSetReader", &Core::createResultSetReaderL);
+        plpClass.addFunction("createResultSetWriter", &Core::createResultSetWriterL);
         plpClass.endClass();
 
         auto fileReaderClass = module.beginClass<FileReader>("FileReader");
@@ -236,9 +271,9 @@ namespace PLP {
         resultReaderClass.endClass();
 
         auto resultWriterClass = module.beginClass<ResultSetWriter>("ResultSetWriter");
-        resultWriterClass.addFunction("appendCurrentLine", &ResultSetWriter::appendCurrentLine);
+        bool(ResultSetWriter::*appendCurrLine)(std::shared_ptr<FileReaderI>) = &ResultSetWriter::appendCurrLine;
+        resultWriterClass.addFunction("appendCurrLine", appendCurrLine);
         resultWriterClass.addFunction("getNumResults", &ResultSetWriter::getNumResults);
-        resultWriterClass.addFunction("flush", &ResultSetWriter::flush);
         resultWriterClass.endClass();
 
         auto fileWriterClass = module.beginClass<FileWriter>("FileWriter");
@@ -246,7 +281,6 @@ namespace PLP {
         bool(FileWriter::*appendLine)(const std::string&) = &FileWriter::appendLine;
         fileWriterClass.addFunction("append", append);
         fileWriterClass.addFunction("appendLine", appendLine);
-        fileWriterClass.addFunction("flush", &FileWriter::flush);
         fileWriterClass.endClass();
 
         module.endModule();

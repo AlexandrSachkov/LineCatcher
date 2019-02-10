@@ -120,7 +120,7 @@ namespace PLP {
         return _fileOffset - _currentLineLength;
     }
 
-    void LineReader::resetToBeginning() {
+    void LineReader::restart() {
         _pageData = nullptr;
         _pageSize = 0;
         _pageOffset = 0;
