@@ -1,13 +1,12 @@
 #include "Core.h"
 #include "Timer.h"
-#include "Utils.h"
 #include "FileReader.h"
 #include "FileWriter.h"
 #include "ResultSetReader.h"
 #include "ResultSetWriter.h"
 
 int main() {
-    PLP::ICore* core = PLP::createCore();
+    PLP::CoreI* core = PLP::createCore();
     //std::unique_ptr<PLP::Core> core = std::unique_ptr<PLP::Core>(createCore());
     if (!core->initialize()) {
         return 1;
@@ -92,8 +91,8 @@ int main() {
     /*if (!core.runScript(script6, err)) {
         return 1;
     }*/
-    const std::wstring smallFile = L"D:/Repositories/LogParser/resources/test.txt";
-    const std::wstring largeFile = L"D:/Repositories/LogParser/resources/ShadowOfTombRaider_Vega_18.12.2_RS4_2_SOTTR_64_4b1d4982_1_11950.dump";
+    const std::string smallFile = "D:/Repositories/LogParser/resources/test.txt";
+    const std::string largeFile = "D:/Repositories/LogParser/resources/ShadowOfTombRaider_Vega_18.12.2_RS4_2_SOTTR_64_4b1d4982_1_11950.dump";
 
     unsigned int numMatches = 0;
     /*if (!core.searchLineContainsMM(largeFile, L"0x00000003dcf2a690", numMatches)) {
@@ -114,12 +113,12 @@ int main() {
         return 1;
     }*/
 
-    /*auto fReader = core->createFileReader(PLP::wstring_to_string(smallFile), 0, true);
-    auto rWriter = core->createResultSetWriter("results.txt", 0, *fReader, true);
+    auto fReader = core->createFileReader(smallFile, 0, true);
+    auto rWriter = core->createResultSetWriter("results.txt", 0, fReader, true);
     char* line;
     unsigned int lineSize;
     while (fReader->nextLine(line, lineSize)) {
-        if (!rWriter->appendCurrentLine(*fReader)) {
+        if (!rWriter->appendCurrLine(fReader)) {
             return 1;
         }
     }
@@ -127,20 +126,20 @@ int main() {
     rWriter->release();
 
     auto rReader = core->createResultSetReader("results.txt", 0);
-    std::string dataPAth = rReader->getDataFilePath();
+    std::string dataPath;
+    rReader->getDataFilePath(dataPath);
     unsigned long long numResults = rReader->getNumResults();
 
     char* resLine;
     unsigned int resLineSize;
     unsigned long long lineNum;
-    unsigned long long fileOffset;
-    while (rReader->nextResult(lineNum, fileOffset)) {
-        if (!fReader->getLineFromResult(*rReader, resLine, resLineSize)) {
+    while (rReader->nextResult(lineNum)) {
+        if (!fReader->getLineFromResult(rReader, resLine, resLineSize)) {
             return 1;
         }
     }
     double numSeconds = timer.deltaT() / 1000000000;
     printf("Completed in: %f seconds\n", numSeconds);
-    //printf("Num matches: %i\n", numMatches);*/
+    //printf("Num matches: %i\n", numMatches);
     return 0;
 }
