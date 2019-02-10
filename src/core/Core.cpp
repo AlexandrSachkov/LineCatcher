@@ -163,7 +163,7 @@ namespace PLP {
         return true;
     }*/
 
-    FileReader* Core::createFileReader(
+    FileReaderI* Core::createFileReader(
         const std::string& path,
         unsigned long long preferredBuffSizeBytes,
         bool requireRandomAccess
@@ -175,7 +175,7 @@ namespace PLP {
         return fReader;
     }
 
-    FileWriter* Core::createFileWriter(
+    FileWriterI* Core::createFileWriter(
         const std::string& path,
         unsigned long long preferredBuffSizeBytes,
         bool overwriteIfExists
@@ -187,7 +187,7 @@ namespace PLP {
         return fileWriter;
     }
 
-    ResultSetReader* Core::createResultSetReader(
+    ResultSetReaderI* Core::createResultSetReader(
         const std::string& path,
         unsigned long long preferredBuffSizeBytes
     ) {
@@ -198,15 +198,19 @@ namespace PLP {
         return resSet;
     }
 
-    ResultSetWriter* Core::createResultSetWriter(
+    ResultSetWriterI* Core::createResultSetWriter(
         const std::string& path,
         unsigned long long preferredBuffSizeBytes,
-        const FileReader& fReader,
+        const FileReaderI* fReader,
         bool overwriteIfExists
     ) {
+        if (!fReader) {
+            return false;
+        }
+
         ResultSetWriter* resSet = new ResultSetWriter();
         std::wstring dataPath;
-        fReader.getFilePath(dataPath);
+        fReader->getFilePath(dataPath);
 
         if (!resSet->initialize(
             string_to_wstring(path), 
@@ -222,7 +226,9 @@ namespace PLP {
         unsigned long long preferredBuffSizeBytes,
         bool requireRandomAccess
     ) {
-        return std::shared_ptr<FileReader>(createFileReader(path, preferredBuffSizeBytes, requireRandomAccess));
+        return std::shared_ptr<FileReader>(
+            static_cast<FileReader*>(createFileReader(path, preferredBuffSizeBytes, requireRandomAccess))
+        );
     }
 
     std::shared_ptr<FileWriter> Core::createFileWriterL(
@@ -230,23 +236,29 @@ namespace PLP {
         unsigned long long preferredBuffSizeBytes,
         bool overwriteIfExists
     ) {
-        return std::shared_ptr<FileWriter>(createFileWriter(path, preferredBuffSizeBytes, overwriteIfExists));
+        return std::shared_ptr<FileWriter>(
+            static_cast<FileWriter*>(createFileWriter(path, preferredBuffSizeBytes, overwriteIfExists))
+        );
     }
 
     std::shared_ptr<ResultSetReader> Core::createResultSetReaderL(
         const std::string& path,
         unsigned long long preferredBuffSizeBytes
     ) {
-        return std::shared_ptr<ResultSetReader>(createResultSetReader(path, preferredBuffSizeBytes));
+        return std::shared_ptr<ResultSetReader>(
+            static_cast<ResultSetReader*>(createResultSetReader(path, preferredBuffSizeBytes))
+        );
     }
 
     std::shared_ptr<ResultSetWriter> Core::createResultSetWriterL(
         const std::string& path,
         unsigned long long preferredBuffSizeBytes,
-        const FileReader& fReader,
+        const FileReaderI* fReader,
         bool overwriteIfExists
     ) {
-        return std::shared_ptr<ResultSetWriter>(createResultSetWriter(path, preferredBuffSizeBytes, fReader, overwriteIfExists));
+        return std::shared_ptr<ResultSetWriter>(
+            static_cast<ResultSetWriter*>(createResultSetWriter(path, preferredBuffSizeBytes, fReader, overwriteIfExists))
+        );
     }
 
     void Core::attachLuaBindings(lua_State* state) {

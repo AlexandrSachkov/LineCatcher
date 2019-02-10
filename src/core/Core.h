@@ -21,6 +21,10 @@ struct lua_State;
 
 namespace PLP {
     class Thread;
+    class FileReader;
+    class FileWriter;
+    class ResultSetReader;
+    class ResultSetWriter;
 
     class Core : public CoreI {
     public:
@@ -31,27 +35,27 @@ namespace PLP {
         bool runScript(const std::wstring& scriptLua, std::wstring& errMsg) override;
 
         //C++ interface
-        FileReader* createFileReader(
+        FileReaderI* createFileReader(
             const std::string& path,
             unsigned long long preferredBuffSizeBytes,
             bool requireRandomAccess
         ) override;
 
-        FileWriter* createFileWriter(
+        FileWriterI* createFileWriter(
             const std::string& path,
             unsigned long long preferredBuffSizeBytes,
             bool overwriteIfExists
         ) override;
 
-        ResultSetReader* createResultSetReader(
+        ResultSetReaderI* createResultSetReader(
             const std::string& path,
             unsigned long long preferredBuffSizeBytes
         ) override;
 
-        ResultSetWriter* createResultSetWriter(
+        ResultSetWriterI* createResultSetWriter(
             const std::string& path,
             unsigned long long preferredBuffSizeBytes,
-            const FileReader& fReader,
+            const FileReaderI* fReader,
             bool overwriteIfExists
         ) override;
 
@@ -77,7 +81,7 @@ namespace PLP {
         std::shared_ptr<ResultSetWriter> createResultSetWriterL(
             const std::string& path,
             unsigned long long preferredBuffSizeBytes,
-            const FileReader& fReader,
+            const FileReaderI* fReader,
             bool overwriteIfExists
         );
 

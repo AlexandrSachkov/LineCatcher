@@ -3,10 +3,10 @@
 #include <string>
 
 namespace PLP {
-    class FileReader;
-    class FileWriter;
-    class ResultSetReader;
-    class ResultSetWriter;
+    class FileReaderI;
+    class FileWriterI;
+    class ResultSetReaderI;
+    class ResultSetWriterI;
 
     class CoreI {
     public:
@@ -15,27 +15,27 @@ namespace PLP {
         virtual bool initialize() = 0;
         virtual bool runScript(const std::wstring& scriptLua, std::wstring& errMsg) = 0;
 
-        virtual FileReader* createFileReader(
+        virtual FileReaderI* createFileReader(
             const std::string& path,
             unsigned long long preferredBuffSizeBytes,
             bool requireRandomAccess
         ) = 0;
 
-        virtual FileWriter* createFileWriter(
+        virtual FileWriterI* createFileWriter(
             const std::string& path,
             unsigned long long preferredBuffSizeBytes,
             bool overwriteIfExists
         ) = 0;
 
-        virtual ResultSetReader* createResultSetReader(
+        virtual ResultSetReaderI* createResultSetReader(
             const std::string& path,
             unsigned long long preferredBuffSizeBytes
         ) = 0;
 
-        virtual ResultSetWriter* createResultSetWriter(
+        virtual ResultSetWriterI* createResultSetWriter(
             const std::string& path,
             unsigned long long preferredBuffSizeBytes,
-            const FileReader& fReader,
+            const FileReaderI* fReader,
             bool overwriteIfExists
         ) = 0;
     };
