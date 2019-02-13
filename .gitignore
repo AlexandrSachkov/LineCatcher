@@ -222,3 +222,4 @@ pip-log.txt
 bin64_core/
 bin64_console/
 resources/
+src/ui/build*
