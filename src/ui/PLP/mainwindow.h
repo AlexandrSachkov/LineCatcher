@@ -1,6 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "scriptview.h"
+
 #include <QMainWindow>
 #include <QTabWidget>
 #include <QtWidgets/QVBoxLayout>
@@ -21,6 +23,7 @@ public:
 public slots:
     void closeTab(int index);
     void openFile();
+    void showScriptView();
 
 private:
     QWidget* _centralWidget;
@@ -31,7 +34,8 @@ private:
 
     //Ui::MainWindow *_ui;
     QTabWidget* _fileViewer;
-
+    QTabWidget* _resultSetViewer;
+    ScriptView* _scriptView;
 };
 
 #endif // MAINWINDOW_H

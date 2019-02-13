@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QFileDialog>
 #include <QPushButton>
+#include <QSplitter>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)//,
@@ -32,16 +33,35 @@ MainWindow::MainWindow(QWidget *parent) :
     QMenu* runMenu = new QMenu("Run", _menuBar);
     _menuBar->addMenu(runMenu);
 
+    QAction* runScript = new QAction("Script", _menuBar);
+    runMenu->addAction(runScript);
+    connect(runScript, SIGNAL(triggered(void)), this, SLOT(showScriptView(void)));
+
     QMenu* configMenu = new QMenu("Config", _menuBar);
     _menuBar->addMenu(configMenu);
 
     QMenu* helpMenu = new QMenu("Help", _menuBar);
     _menuBar->addMenu(helpMenu);
 
+    QSplitter* splitter = new QSplitter(this);
+    _mainLayout->addWidget(splitter);
+    splitter->setOrientation(Qt::Orientation::Vertical);
+    splitter->setHandleWidth(5);
+    splitter->setChildrenCollapsible(false);
+
     _fileViewer = new QTabWidget(_centralWidget);
-    _mainLayout->addWidget(_fileViewer);
+    splitter->addWidget(_fileViewer);
     _fileViewer->setTabsClosable(true);
     connect(_fileViewer, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
+
+    _resultSetViewer = new QTabWidget(splitter);
+    _resultSetViewer->setTabsClosable(true);
+    splitter->addWidget(_resultSetViewer);
+
+    _resultSetViewer->addTab(new QWidget(), "Tab test");
+
+    _scriptView = new ScriptView(this);
+    _scriptView->hide();
 }
 
 MainWindow::~MainWindow() {
@@ -66,4 +86,8 @@ void MainWindow::openFile() {
     QString fileName = path.split('/').last();
     _fileViewer->addTab(fileView, fileName);
     fileView->show();
+}
+
+void MainWindow::showScriptView() {
+    _scriptView->show();
 }

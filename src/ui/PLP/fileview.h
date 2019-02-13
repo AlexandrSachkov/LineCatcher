@@ -21,7 +21,7 @@ public slots:
 
 private:
     QTextEdit* _dataView;
-    QTabWidget* _searchResults;
+    //QTabWidget* _searchResults;
     QLabel* _fileInfo;
     FileNavControls* _fileNavControls;
 };

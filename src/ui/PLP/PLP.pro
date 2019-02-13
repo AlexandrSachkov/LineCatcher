@@ -28,12 +28,14 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     fileview.cpp \
-    filenavcontrols.cpp
+    filenavcontrols.cpp \
+    scriptview.cpp
 
 HEADERS += \
         mainwindow.h \
     fileview.h \
-    filenavcontrols.h
+    filenavcontrols.h \
+    scriptview.h
 
 FORMS += \
         mainwindow.ui \
