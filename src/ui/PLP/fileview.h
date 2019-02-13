@@ -4,7 +4,7 @@
 #include "filenavcontrols.h"
 
 #include <QWidget>
-#include <QTextEdit>
+#include <QPlainTextEdit>
 #include <QTabWidget>
 #include <QLabel>
 
@@ -20,8 +20,7 @@ signals:
 public slots:
 
 private:
-    QTextEdit* _dataView;
-    //QTabWidget* _searchResults;
+    QPlainTextEdit* _dataView;
     QLabel* _fileInfo;
     FileNavControls* _fileNavControls;
 };

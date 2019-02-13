@@ -34,12 +34,13 @@ ScriptView::ScriptView(QWidget *parent) : QWidget(parent)
     splitter->setHandleWidth(3);
     splitter->setChildrenCollapsible(false);
 
-    _scriptEditor = new QTextEdit(this);
+    _scriptEditor = new QPlainTextEdit(this);
     _scriptEditor->setReadOnly(false);
     splitter->addWidget(_scriptEditor);
 
-    _console = new QTextEdit(this);
+    _console = new QPlainTextEdit(this);
     _console->setReadOnly(true);
+    _console->setMaximumBlockCount(1000);
     splitter->addWidget(_console);
 }
 
@@ -60,6 +61,6 @@ void ScriptView::openScript(){
 void ScriptView::loadScript() {
     QFile file(_scriptPath->text());
     if (file.open(QIODevice::ReadWrite)) {
-        _scriptEditor->setText(file.readAll());
+        _scriptEditor->setPlainText(file.readAll());
     }
 }

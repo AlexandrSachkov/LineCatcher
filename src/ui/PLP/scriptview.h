@@ -2,7 +2,7 @@
 #define SCRIPTVIEW_H
 
 #include <QWidget>
-#include <QTextEdit>
+#include <QPlainTextEdit>
 #include <QTabWidget>
 #include <QLabel>
 #include <QPushButton>
@@ -27,8 +27,8 @@ private:
     QPushButton* _load;
     QPushButton* _run;
     QLineEdit* _scriptPath;
-    QTextEdit* _scriptEditor;
-    QTextEdit* _console;
+    QPlainTextEdit* _scriptEditor;
+    QPlainTextEdit* _console;
 };
 
 #endif // SCRIPTVIEW_H
