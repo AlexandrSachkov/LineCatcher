@@ -60,7 +60,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _resultSetViewer->addTab(new QWidget(), "Tab test");
 
-    _scriptView = new ScriptView(this);
+    _plpCore = PLP::createCore();
+    if(_plpCore && !_plpCore->initialize()){
+        bool zz = true;
+        //TODO
+    }
+
+    _scriptView = new ScriptView(_plpCore, this);
     _scriptView->hide();
 }
 

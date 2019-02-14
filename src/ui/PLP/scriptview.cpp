@@ -4,9 +4,16 @@
 #include <QSplitter>
 #include <QFile>
 #include <QFileDialog>
+#include <QLibrary>
+#include <QTextStream>
 
-ScriptView::ScriptView(QWidget *parent) : QWidget(parent)
+ScriptView::ScriptView(PLP::CoreI* plpCore, QWidget *parent) : QWidget(parent)
 {
+    if(!_plpCore){
+        //TODO
+    }
+    _plpCore = plpCore;
+
     QVBoxLayout* mainLayout = new QVBoxLayout();
     this->setLayout(mainLayout);
     setWindowFlags(Qt::Window);
@@ -25,8 +32,13 @@ ScriptView::ScriptView(QWidget *parent) : QWidget(parent)
     scriptLoadControlLayout->addWidget(_load);
     connect(_load, SIGNAL(clicked(void)), this, SLOT(loadScript(void)));
 
+    _save = new QPushButton("Save", this);
+    scriptLoadControlLayout->addWidget(_save);
+    connect(_save, SIGNAL(clicked(void)), this, SLOT(saveScript(void)));
+
     _run = new QPushButton("Run", this);
     mainLayout->addWidget(_run);
+    connect(_run, SIGNAL(clicked(void)), this, SLOT(runScript(void)));
 
     QSplitter* splitter = new QSplitter(this);
     mainLayout->addWidget(splitter);
@@ -59,8 +71,35 @@ void ScriptView::openScript(){
 }
 
 void ScriptView::loadScript() {
-    QFile file(_scriptPath->text());
-    if (file.open(QIODevice::ReadWrite)) {
+    QString path = _scriptPath->text().trimmed();
+    if(path.isEmpty()){
+        return;
+    }
+
+    QFile file(path);
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         _scriptEditor->setPlainText(file.readAll());
+    }
+}
+
+void ScriptView::runScript() {
+    std::wstring errMsg;
+    if(!_plpCore->runScript(_scriptEditor->toPlainText().toStdWString(), errMsg)){
+        _console->appendPlainText(QString::fromStdWString(errMsg));
+    }
+}
+
+void ScriptView::saveScript() {
+    QString path = _scriptPath->text().trimmed();
+    if(path.isEmpty()){
+        return;
+    }
+
+    QString script = _scriptEditor->toPlainText().trimmed();
+
+    QFile file(path);
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QTextStream out(&file);
+        out << script;
     }
 }

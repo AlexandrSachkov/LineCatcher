@@ -8,9 +8,7 @@
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QMenuBar>
 
-/*namespace Ui {
-class MainWindow;
-}*/
+#include "Core.h"
 
 class MainWindow : public QMainWindow
 {
@@ -36,6 +34,8 @@ private:
     QTabWidget* _fileViewer;
     QTabWidget* _resultSetViewer;
     ScriptView* _scriptView;
+
+    PLP::CoreI* _plpCore;
 };
 
 #endif // MAINWINDOW_H
