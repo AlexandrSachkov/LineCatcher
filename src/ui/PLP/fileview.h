@@ -2,6 +2,7 @@
 #define FILEVIEW_H
 
 #include "filenavcontrols.h"
+#include "pagedfileviewwidget.h"
 
 #include <QWidget>
 #include <QPlainTextEdit>
@@ -20,7 +21,7 @@ signals:
 public slots:
 
 private:
-    QPlainTextEdit* _dataView;
+    PagedFileViewWidget* _dataView;
     QLabel* _fileInfo;
     FileNavControls* _fileNavControls;
 };

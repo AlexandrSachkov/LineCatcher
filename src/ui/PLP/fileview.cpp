@@ -16,7 +16,7 @@ FileView::FileView(const QString& filePath, QWidget *parent) : QWidget(parent)
     _fileNavControls = new FileNavControls(this);
     mainLayout->addWidget(_fileNavControls);
 
-    _dataView = new QPlainTextEdit(this);
+    _dataView = new PagedFileViewWidget(nullptr, this);
     _dataView->setReadOnly(true);
     mainLayout->addWidget(_dataView);
 
