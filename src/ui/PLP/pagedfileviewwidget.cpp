@@ -2,6 +2,8 @@
 #include <QDebug>
 #include <QPainter>
 #include <QTextBlock>
+#include <QtMath>
+#include <QScrollBar>
 
 PagedFileViewWidget::PagedFileViewWidget(std::unique_ptr<PLP::FileReaderI> fileReader, QWidget *parent) : QPlainTextEdit (parent)
 {
@@ -14,12 +16,22 @@ PagedFileViewWidget::PagedFileViewWidget(std::unique_ptr<PLP::FileReaderI> fileR
     this->setLineWrapMode(LineWrapMode::NoWrap);
     this->setWordWrapMode(QTextOption::WrapMode::NoWrap);
     this->setMouseTracking(true);
+    this->setMaximumBlockCount(MAX_NUM_BLOCKS);
+
+    SignalingScrollBar* scrollBar = new SignalingScrollBar();
+    connect(scrollBar, SIGNAL(mouseReleased(void)), this, SLOT(readBlockIfRequired(void)));
+    connect(scrollBar, SIGNAL(wheelMoved(void)), this, SLOT(readBlockIfRequired(void)));
+    this->setVerticalScrollBar(scrollBar);
 
     QFont f("Courier New", 16);
     f.setStyleHint(QFont::Monospace);
     this->setFont(f);
 
     calcNumVisibleLines();
+
+    readNextBlock();
+    this->moveCursor(QTextCursor::Start);
+    this->ensureCursorVisible();
 
     updateLineNumberAreaWidth(0);
 }
@@ -29,18 +41,9 @@ void PagedFileViewWidget::resizeEvent(QResizeEvent *e){
 
     calcNumVisibleLines();
     qDebug() << "Resized" << "\n";
-    qDebug() << "Num lines: " <<_numVisibleLines <<"\n";
-
-    QPlainTextEdit::resizeEvent(e);
 
     QRect cr = contentsRect();
     _lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
-}
-
-void PagedFileViewWidget::scrollContentsBy(int dx, int dy) {
-    QPlainTextEdit::scrollContentsBy(dx, dy);
-
-    qDebug() <<"Scrolling x=" << dx <<" y=" << dy << "\n";
 }
 
 void PagedFileViewWidget::textChangedImpl() {
@@ -67,14 +70,13 @@ void PagedFileViewWidget::calcNumVisibleLines() {
 int PagedFileViewWidget::lineNumberAreaWidth()
 {
     int digits = 1;
-    int max = qMax(1, blockCount());
+    unsigned long long max = _endLineNum > 1 ? _endLineNum : 1;
     while (max >= 10) {
         max /= 10;
         ++digits;
     }
 
     int space = 3 + fontMetrics().horizontalAdvance(QLatin1Char('9')) * digits;
-
     return space;
 }
 
@@ -113,7 +115,7 @@ void PagedFileViewWidget::lineNumberAreaPaintEvent(QPaintEvent *event)
 
     while (block.isValid() && top <= event->rect().bottom()) {
         if (block.isVisible() && bottom >= event->rect().top()) {
-            QString number = QString::number(blockNumber + 1);
+            QString number = QString::number(_startLineNum + blockNumber + 1);
             painter.setPen(Qt::black);
             painter.drawText(0, top, _lineNumberArea->width(), fontMetrics().height(), Qt::AlignLeft, number);
         }
@@ -122,5 +124,35 @@ void PagedFileViewWidget::lineNumberAreaPaintEvent(QPaintEvent *event)
         top = bottom;
         bottom = top + (int) blockBoundingRect(block).height();
         ++blockNumber;
+    }
+}
+
+void PagedFileViewWidget::readNextBlock() {
+    const int currScrollbarValue = this->verticalScrollBar()->value();
+    const unsigned long long currStartLineNum = _startLineNum;
+
+    for(int i = 0; i < NUM_LINES_PER_READ; i++){
+        char* lineStart = nullptr;
+        unsigned int length;
+        if(!_fileReader->nextLine(lineStart, length)){
+            break;
+        }
+        this->moveCursor(QTextCursor::End);
+        this->insertPlainText(QString::fromUtf8(lineStart, length));
+
+        _endLineNum++;
+        _startLineNum = _endLineNum >= MAX_NUM_BLOCKS ? _endLineNum - MAX_NUM_BLOCKS : 0;
+    }
+
+    int newScrollbarValue = currScrollbarValue - (_startLineNum - currStartLineNum);
+    this->verticalScrollBar()->setValue(newScrollbarValue);
+}
+
+void PagedFileViewWidget::readBlockIfRequired() {
+    const int currScrollbarValue = this->verticalScrollBar()->value();
+    const unsigned long long currStartLineNum = _startLineNum;
+
+    if(_startLineNum + currScrollbarValue + _numVisibleLines > _endLineNum - (NUM_LINES_PER_READ / 2)){
+        readNextBlock();
     }
 }

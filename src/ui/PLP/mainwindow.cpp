@@ -7,6 +7,8 @@
 #include <QPushButton>
 #include <QSplitter>
 
+#include "Utils.h"
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)//,
     //_ui(new Ui::MainWindow)
@@ -79,6 +81,10 @@ void MainWindow::closeTab(int index) {
         return;
     }
 
+    QWidget* tab = _fileViewer->widget(index);
+    if(tab){
+        delete tab;
+    }
     _fileViewer->removeTab(index);
 }
 
@@ -88,7 +94,12 @@ void MainWindow::openFile() {
         return;
     }
 
-    FileView* fileView = new FileView(path);
+    std::unique_ptr<PLP::FileReaderI> fileReader = std::unique_ptr<PLP::FileReaderI>(_plpCore->createFileReader(path.toStdString(), PLP::OPTIMAL_BLOCK_SIZE_BYTES * 2, true));
+    if(!fileReader){
+        return;
+    }
+
+    FileView* fileView = new FileView(std::move(fileReader), this);
     QString fileName = path.split('/').last();
     _fileViewer->addTab(fileView, fileName);
     fileView->show();

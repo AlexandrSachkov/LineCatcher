@@ -5,27 +5,24 @@
 #include <QFileInfo>
 #include <QDateTime>
 
-FileView::FileView(const QString& filePath, QWidget *parent) : QWidget(parent)
+FileView::FileView(std::unique_ptr<PLP::FileReaderI> fileReader, QWidget *parent) : QWidget(parent)
 {
     QVBoxLayout* mainLayout = new QVBoxLayout();
     this->setLayout(mainLayout);
 
-    _fileInfo = new QLabel(filePath, this);
+    std::wstring path;
+    fileReader->getFilePath(path);
+    _fileInfo = new QLabel(QString::fromStdWString(path), this);
     mainLayout->addWidget(_fileInfo);
 
     _fileNavControls = new FileNavControls(this);
     mainLayout->addWidget(_fileNavControls);
 
-    _dataView = new PagedFileViewWidget(nullptr, this);
+    _dataView = new PagedFileViewWidget(std::move(fileReader), this);
     _dataView->setReadOnly(true);
     mainLayout->addWidget(_dataView);
-
-    QFile file(filePath);
-    if (file.open(QIODevice::ReadOnly)) {
-        _dataView->setPlainText(file.readAll());
-    }
 }
 
 FileView::~FileView() {
-
+    bool zz = true;
 }

@@ -9,12 +9,14 @@
 #include <QTabWidget>
 #include <QLabel>
 
+#include "FileReaderI.h"
+
 
 class FileView : public QWidget
 {
     Q_OBJECT
 public:
-    explicit FileView(const QString& filePath, QWidget *parent = nullptr);
+    explicit FileView(std::unique_ptr<PLP::FileReaderI> fileReader, QWidget *parent = nullptr);
     ~FileView();
 signals:
 
