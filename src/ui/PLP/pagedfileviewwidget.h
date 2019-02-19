@@ -30,6 +30,7 @@ protected:
 private:
     void calcNumVisibleLines();
     void readNextBlock();
+    void readPreviousBlock();
 
     static const unsigned int MAX_NUM_BLOCKS = 1000;
     static const unsigned int NUM_LINES_PER_READ = 250;
