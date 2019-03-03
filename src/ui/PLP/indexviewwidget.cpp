@@ -1,27 +1,22 @@
-#include "pagedfileviewwidget.h"
+#include "indexviewwidget.h"
 #include "signalingscrollbar.h"
 #include "linenumberarea.h"
 #include <QDebug>
-#include <QPainter>
 #include <QTextBlock>
-#include <QtMath>
 #include <QScrollBar>
+#include <QPainter>
 
-PagedFileViewWidget::PagedFileViewWidget(std::unique_ptr<PLP::FileReaderI> fileReader, QWidget *parent) : QPlainTextEdit (parent)
+
+IndexViewWidget::IndexViewWidget(std::shared_ptr<PLP::FileReaderI> fileReader, QWidget* parent) : QPlainTextEdit (parent)
 {
-    _fileReader = std::move(fileReader);
+    _fileReader = fileReader;
 
     _lineNumberArea = new LineNumberArea(this);
-    connect(_lineNumberArea, SIGNAL(paintEventOccurred(QPaintEvent*)), this, SLOT(lineNumberAreaPaintEvent(QPaintEvent*)));
+    connect(_lineNumberArea, SIGNAL(paintEventOccurred(QPaintEvent* e)), this, SLOT(lineNumberAreaPaintEvent(QPaintEvent* e)));
     connect(_lineNumberArea, SIGNAL(sizeHintRequested(void)), this, SLOT(lineNumberAreaWidth(void)));
-
-    connect(this, SIGNAL(textChanged(void)), this, SLOT(textChangedImpl(void)));
-    connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
-    connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updateLineNumberArea(QRect,int)));
 
     this->setLineWrapMode(LineWrapMode::NoWrap);
     this->setWordWrapMode(QTextOption::WrapMode::NoWrap);
-    this->setMouseTracking(true);
     this->setMaximumBlockCount(MAX_NUM_BLOCKS);
 
     SignalingScrollBar* scrollBar = new SignalingScrollBar();
@@ -34,15 +29,9 @@ PagedFileViewWidget::PagedFileViewWidget(std::unique_ptr<PLP::FileReaderI> fileR
     this->setFont(f);
 
     calcNumVisibleLines();
-
-    readNextBlock();
-    this->moveCursor(QTextCursor::Start);
-    this->ensureCursorVisible();
-
-    updateLineNumberAreaWidth(0);
 }
 
-void PagedFileViewWidget::resizeEvent(QResizeEvent *e){
+void IndexViewWidget::resizeEvent(QResizeEvent *e){
     QPlainTextEdit::resizeEvent(e);
 
     calcNumVisibleLines();
@@ -52,28 +41,17 @@ void PagedFileViewWidget::resizeEvent(QResizeEvent *e){
     _lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
 }
 
-void PagedFileViewWidget::textChangedImpl() {
+void IndexViewWidget::textChangedImpl() {
     qDebug() << "Text changed" << "\n";
     calcNumVisibleLines();
 }
 
-void PagedFileViewWidget::mouseMoveEvent(QMouseEvent *e) {
-    QTextEdit::ExtraSelection selection;
-    QColor lineColor = QColor(Qt::yellow).lighter(160);
-    selection.format.setBackground(lineColor);
-    selection.format.setProperty(QTextFormat::FullWidthSelection, true);
-    selection.cursor = this->cursorForPosition(e->pos());
-    selection.cursor.clearSelection();
-
-    this->setExtraSelections({selection});
-}
-
-void PagedFileViewWidget::calcNumVisibleLines() {
+void IndexViewWidget::calcNumVisibleLines() {
     _numVisibleLines = this->height() / this->fontMetrics().height();
     qDebug() << "Num lines: " <<_numVisibleLines <<"\n";
 }
 
-int PagedFileViewWidget::lineNumberAreaWidth() const
+int IndexViewWidget::lineNumberAreaWidth() const
 {
     int digits = 1;
     unsigned long long max = _endLineNum > 1 ? _endLineNum : 1;
@@ -88,14 +66,14 @@ int PagedFileViewWidget::lineNumberAreaWidth() const
 
 
 
-void PagedFileViewWidget::updateLineNumberAreaWidth(int /* newBlockCount */)
+void IndexViewWidget::updateLineNumberAreaWidth(int /* newBlockCount */)
 {
     setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
 }
 
 
 
-void PagedFileViewWidget::updateLineNumberArea(const QRect &rect, int dy)
+void IndexViewWidget::updateLineNumberArea(const QRect &rect, int dy)
 {
     if (dy){
         _lineNumberArea->scroll(0, dy);
@@ -108,7 +86,7 @@ void PagedFileViewWidget::updateLineNumberArea(const QRect &rect, int dy)
     }
 }
 
-void PagedFileViewWidget::lineNumberAreaPaintEvent(QPaintEvent *event)
+void IndexViewWidget::lineNumberAreaPaintEvent(QPaintEvent *event)
 {
     QPainter painter(_lineNumberArea);
     painter.fillRect(event->rect(), Qt::lightGray);
@@ -133,7 +111,7 @@ void PagedFileViewWidget::lineNumberAreaPaintEvent(QPaintEvent *event)
     }
 }
 
-void PagedFileViewWidget::readNextBlock() {
+void IndexViewWidget::readNextBlock() {
     const int currScrollbarValue = this->verticalScrollBar()->value();
     const unsigned long long currStartLineNum = _startLineNum;
 
@@ -154,7 +132,7 @@ void PagedFileViewWidget::readNextBlock() {
     this->verticalScrollBar()->setValue(newScrollbarValue);
 }
 
-void PagedFileViewWidget::readPreviousBlock() {
+void IndexViewWidget::readPreviousBlock() {
     if(_startLineNum == 0){
         return;
     }
@@ -198,7 +176,7 @@ void PagedFileViewWidget::readPreviousBlock() {
     this->verticalScrollBar()->setValue(newScrollbarValue);
 }
 
-void PagedFileViewWidget::readBlockIfRequired() {
+void IndexViewWidget::readBlockIfRequired() {
     const int currScrollbarValue = this->verticalScrollBar()->value();
     const unsigned long long currStartLineNum = _startLineNum;
 

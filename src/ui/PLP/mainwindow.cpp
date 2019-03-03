@@ -94,7 +94,8 @@ void MainWindow::openFile() {
         return;
     }
 
-    std::unique_ptr<PLP::FileReaderI> fileReader = std::unique_ptr<PLP::FileReaderI>(_plpCore->createFileReader(path.toStdString(), PLP::OPTIMAL_BLOCK_SIZE_BYTES * 2, true));
+    std::unique_ptr<PLP::FileReaderI> fileReader =
+            std::unique_ptr<PLP::FileReaderI>(_plpCore->createFileReader(path.toStdString(), PLP::OPTIMAL_BLOCK_SIZE_BYTES * 2, true));
     if(!fileReader){
         return;
     }

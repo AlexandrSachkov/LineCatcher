@@ -30,14 +30,18 @@ SOURCES += \
     fileview.cpp \
     filenavcontrols.cpp \
     scriptview.cpp \
-    pagedfileviewwidget.cpp
+    pagedfileviewwidget.cpp \
+    indexviewwidget.cpp
 
 HEADERS += \
         mainwindow.h \
     fileview.h \
     filenavcontrols.h \
     scriptview.h \
-    pagedfileviewwidget.h
+    pagedfileviewwidget.h \
+    indexviewwidget.h \
+    signalingscrollbar.h \
+    linenumberarea.h
 
 FORMS += \
         mainwindow.ui \
