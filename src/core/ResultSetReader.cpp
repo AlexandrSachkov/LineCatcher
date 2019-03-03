@@ -109,8 +109,12 @@ namespace PLP {
         return _numResults;
     }
 
-    void ResultSetReader::getDataFilePath(std::string& path) const {
-        path = _dataFilePath;
+    void ResultSetReader::getFilePath(std::wstring& path) const {
+        path = _path;
+    }
+
+    void ResultSetReader::getDataFilePath(std::wstring& path) const {
+        path = string_to_wstring(_dataFilePath);
     }
 
     void ResultSetReader::restart() {
