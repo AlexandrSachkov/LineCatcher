@@ -20,12 +20,14 @@ public:
     ~FileView();
 signals:
 
-public slots:
+private slots:
+    void closeTab(int index);
 
 private:
     PagedFileViewWidget* _dataView;
     QLabel* _fileInfo;
     FileNavControls* _fileNavControls;
+    QTabWidget* _resultSetViewer;
 };
 
 #endif // FILEVIEW_H

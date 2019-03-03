@@ -45,22 +45,10 @@ MainWindow::MainWindow(QWidget *parent) :
     QMenu* helpMenu = new QMenu("Help", _menuBar);
     _menuBar->addMenu(helpMenu);
 
-    QSplitter* splitter = new QSplitter(this);
-    _mainLayout->addWidget(splitter);
-    splitter->setOrientation(Qt::Orientation::Vertical);
-    splitter->setHandleWidth(5);
-    splitter->setChildrenCollapsible(false);
-
     _fileViewer = new QTabWidget(_centralWidget);
-    splitter->addWidget(_fileViewer);
+    _mainLayout->addWidget(_fileViewer);
     _fileViewer->setTabsClosable(true);
     connect(_fileViewer, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
-
-    _resultSetViewer = new QTabWidget(splitter);
-    _resultSetViewer->setTabsClosable(true);
-    splitter->addWidget(_resultSetViewer);
-
-    _resultSetViewer->addTab(new QWidget(), "Tab test");
 
     _plpCore = PLP::createCore();
     if(_plpCore && !_plpCore->initialize()){

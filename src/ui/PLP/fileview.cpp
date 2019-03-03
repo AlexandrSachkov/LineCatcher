@@ -18,11 +18,39 @@ FileView::FileView(std::unique_ptr<PLP::FileReaderI> fileReader, QWidget *parent
     _fileNavControls = new FileNavControls(this);
     mainLayout->addWidget(_fileNavControls);
 
-    _dataView = new PagedFileViewWidget(std::move(fileReader), this);
+    QSplitter* splitter = new QSplitter(this);
+    mainLayout->addWidget(splitter);
+    splitter->setOrientation(Qt::Orientation::Vertical);
+    splitter->setHandleWidth(5);
+    splitter->setChildrenCollapsible(false);
+    mainLayout->addWidget(splitter);
+
+    _dataView = new PagedFileViewWidget(std::move(fileReader), splitter);
     _dataView->setReadOnly(true);
-    mainLayout->addWidget(_dataView);
+    splitter->addWidget(_dataView);
+
+    _resultSetViewer = new QTabWidget(splitter);
+    _resultSetViewer->setTabsClosable(true);
+    splitter->addWidget(_resultSetViewer);
+    connect(_resultSetViewer, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
+
+    _resultSetViewer->addTab(new QWidget(), "Tab test");
+
+
 }
 
 FileView::~FileView() {
     bool zz = true;
+}
+
+void FileView::closeTab(int index) {
+    if (index == -1) {
+        return;
+    }
+
+    QWidget* tab = _resultSetViewer->widget(index);
+    if(tab){
+        delete tab;
+    }
+    _resultSetViewer->removeTab(index);
 }
