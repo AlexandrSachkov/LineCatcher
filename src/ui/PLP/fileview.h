@@ -10,7 +10,9 @@
 #include <QLabel>
 
 #include "FileReaderI.h"
+#include "ResultSetReaderI.h"
 
+#include <memory>
 
 class FileView : public QWidget
 {
@@ -18,6 +20,9 @@ class FileView : public QWidget
 public:
     explicit FileView(std::unique_ptr<PLP::FileReaderI> fileReader, QWidget *parent = nullptr);
     ~FileView();
+
+    const QString& getFilePath();
+    void openIndex(std::unique_ptr<PLP::ResultSetReaderI> indexReader);
 signals:
 
 private slots:
@@ -27,7 +32,9 @@ private:
     PagedFileViewWidget* _dataView;
     QLabel* _fileInfo;
     FileNavControls* _fileNavControls;
-    QTabWidget* _resultSetViewer;
+    QTabWidget* _indexViewer;
+
+    QString _filePath;
 };
 
 #endif // FILEVIEW_H

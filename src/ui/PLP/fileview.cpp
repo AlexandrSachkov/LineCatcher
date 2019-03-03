@@ -12,7 +12,8 @@ FileView::FileView(std::unique_ptr<PLP::FileReaderI> fileReader, QWidget *parent
 
     std::wstring path;
     fileReader->getFilePath(path);
-    _fileInfo = new QLabel(QString::fromStdWString(path), this);
+    _filePath = QString::fromStdWString(path);
+    _fileInfo = new QLabel(_filePath, this);
     mainLayout->addWidget(_fileInfo);
 
     _fileNavControls = new FileNavControls(this);
@@ -29,14 +30,10 @@ FileView::FileView(std::unique_ptr<PLP::FileReaderI> fileReader, QWidget *parent
     _dataView->setReadOnly(true);
     splitter->addWidget(_dataView);
 
-    _resultSetViewer = new QTabWidget(splitter);
-    _resultSetViewer->setTabsClosable(true);
-    splitter->addWidget(_resultSetViewer);
-    connect(_resultSetViewer, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
-
-    _resultSetViewer->addTab(new QWidget(), "Tab test");
-
-
+    _indexViewer = new QTabWidget(splitter);
+    _indexViewer->setTabsClosable(true);
+    splitter->addWidget(_indexViewer);
+    connect(_indexViewer, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
 }
 
 FileView::~FileView() {
@@ -48,9 +45,21 @@ void FileView::closeTab(int index) {
         return;
     }
 
-    QWidget* tab = _resultSetViewer->widget(index);
+    QWidget* tab = _indexViewer->widget(index);
     if(tab){
         delete tab;
     }
-    _resultSetViewer->removeTab(index);
+}
+
+const QString& FileView::getFilePath() {
+    return _filePath;
+}
+
+void FileView::openIndex(std::unique_ptr<PLP::ResultSetReaderI> indexReader){
+    std::wstring path;
+    indexReader->getFilePath(path);
+    QString qPath = QString::fromStdWString(path);
+    QString fileName = qPath.split('/').last();
+    _indexViewer->addTab(new QWidget(), fileName);
+    _indexViewer->setCurrentIndex(_indexViewer->count() - 1);
 }

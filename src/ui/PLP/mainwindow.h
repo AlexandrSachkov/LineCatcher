@@ -10,6 +10,8 @@
 
 #include "Core.h"
 
+#include <unordered_map>
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -21,6 +23,7 @@ public:
 public slots:
     void closeTab(int index);
     void openFile();
+    void openIndex();
     void showScriptView();
 
 private:
