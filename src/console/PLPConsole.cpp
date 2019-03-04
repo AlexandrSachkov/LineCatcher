@@ -113,7 +113,7 @@ int main() {
         return 1;
     }*/
 
-    auto fReader = core->createFileReader(smallFile, 0, true);
+    /*auto fReader = core->createFileReader(smallFile, 0, true);
     auto rWriter = core->createResultSetWriter("results.txt", 0, fReader, true);
     char* line;
     unsigned int lineSize;
@@ -138,6 +138,27 @@ int main() {
             return 1;
         }
     }
+    */
+
+    auto fReader = core->createFileReader(largeFile, 0, true);
+    auto rWriter = core->createResultSetWriter("largeFileResults2", 0, fReader, true);
+    char* line;
+    unsigned int lineSize;
+    while (fReader->nextLine(line, lineSize)) {
+        std::string lineData(line, lineSize);
+        if (std::string::npos != lineData.find("ID3D12GraphicsCommandList[0x00000003dcf2a690]::DiscardResource")) {
+            if (!rWriter->appendCurrLine(fReader)) {
+                return 1;
+            }
+        }
+        if (fReader->getLineNumber() % 10000000 == 0) {
+            printf("%llu\n", fReader->getLineNumber());
+            printf("Num results: %llu\n", rWriter->getNumResults());
+        }
+    }
+    rWriter->release();
+    fReader->release();
+
     double numSeconds = timer.deltaT() / 1000000000;
     printf("Completed in: %f seconds\n", numSeconds);
     //printf("Num matches: %i\n", numMatches);

@@ -6,15 +6,20 @@
 #include <QPaintEvent>
 
 #include "FileReaderI.h"
+#include "ResultSetReaderI.h"
 #include <memory>
+#include <vector>
 
 class PagedFileViewWidget : public QPlainTextEdit
 {
     Q_OBJECT
 public:
     PagedFileViewWidget(std::unique_ptr<PLP::FileReaderI> fileReader, QWidget *parent = nullptr);
-
-
+    bool getLinesFromIndex(
+            std::unique_ptr<PLP::ResultSetReaderI>& indexReader,
+            std::vector<unsigned long long>& lineNumbers,
+            std::vector<QString>& data
+    );
 signals:
 
 private slots:

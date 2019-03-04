@@ -5,6 +5,8 @@
 #include <QPlainTextEdit>
 #include <QPaintEvent>
 
+#include "pagedfileviewwidget.h"
+#include "ResultSetReaderI.h"
 #include "FileReaderI.h"
 #include <memory>
 
@@ -12,7 +14,7 @@ class IndexViewWidget : public QPlainTextEdit
 {
     Q_OBJECT
 public:
-    IndexViewWidget(std::shared_ptr<PLP::FileReaderI> fileReader, QWidget* parent = nullptr);
+    IndexViewWidget(std::unique_ptr<PLP::ResultSetReaderI> indexReader, PagedFileViewWidget* fileViewer, QWidget* parent = nullptr);
 
 protected:
     void resizeEvent(QResizeEvent *e) override;
@@ -29,12 +31,15 @@ private:
     void calcNumVisibleLines();
     void readNextBlock();
     void readPreviousBlock();
+    void loadData(std::unique_ptr<PLP::ResultSetReaderI>& indexReader);
 
     static const unsigned int MAX_NUM_BLOCKS = 100;
     static const unsigned int NUM_LINES_PER_READ = 25;
 
-    std::shared_ptr<PLP::FileReaderI> _fileReader;
+    PagedFileViewWidget* _fileViewer;
     QWidget* _lineNumberArea;
+    std::vector<unsigned long long> _indices;
+    std::vector<QString> _data;
 
     unsigned long long _startLineNum = 0;
     unsigned long long _endLineNum = 0;

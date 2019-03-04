@@ -6,6 +6,7 @@
 #include <QFileDialog>
 #include <QPushButton>
 #include <QSplitter>
+#include <QMessageBox>
 
 #include "Utils.h"
 #include "ResultSetReaderI.h"

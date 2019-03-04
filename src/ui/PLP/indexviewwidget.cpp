@@ -7,13 +7,20 @@
 #include <QPainter>
 
 
-IndexViewWidget::IndexViewWidget(std::shared_ptr<PLP::FileReaderI> fileReader, QWidget* parent) : QPlainTextEdit (parent)
-{
-    _fileReader = fileReader;
+IndexViewWidget::IndexViewWidget(
+        std::unique_ptr<PLP::ResultSetReaderI> indexReader,
+        PagedFileViewWidget* fileViewer,
+        QWidget* parent)
+    : QPlainTextEdit (parent) {
 
+    _fileViewer = fileViewer;
     _lineNumberArea = new LineNumberArea(this);
-    connect(_lineNumberArea, SIGNAL(paintEventOccurred(QPaintEvent* e)), this, SLOT(lineNumberAreaPaintEvent(QPaintEvent* e)));
+    connect(_lineNumberArea, SIGNAL(paintEventOccurred(QPaintEvent*)), this, SLOT(lineNumberAreaPaintEvent(QPaintEvent*)));
     connect(_lineNumberArea, SIGNAL(sizeHintRequested(void)), this, SLOT(lineNumberAreaWidth(void)));
+
+    connect(this, SIGNAL(textChanged(void)), this, SLOT(textChangedImpl(void)));
+    connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
+    connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updateLineNumberArea(QRect,int)));
 
     this->setLineWrapMode(LineWrapMode::NoWrap);
     this->setWordWrapMode(QTextOption::WrapMode::NoWrap);
@@ -29,6 +36,13 @@ IndexViewWidget::IndexViewWidget(std::shared_ptr<PLP::FileReaderI> fileReader, Q
     this->setFont(f);
 
     calcNumVisibleLines();
+    loadData(indexReader);
+    readNextBlock();
+
+    this->moveCursor(QTextCursor::Start);
+    this->ensureCursorVisible();
+
+    updateLineNumberAreaWidth(0);
 }
 
 void IndexViewWidget::resizeEvent(QResizeEvent *e){
@@ -53,8 +67,13 @@ void IndexViewWidget::calcNumVisibleLines() {
 
 int IndexViewWidget::lineNumberAreaWidth() const
 {
+    unsigned long long max = 1;
+    if(_indices.size() > 0){
+        unsigned long long index = _endLineNum == 0 ? 0 : _endLineNum - 1;
+        max = _indices[index] > 1 ? _indices[index] : 1;
+    }
+
     int digits = 1;
-    unsigned long long max = _endLineNum > 1 ? _endLineNum : 1;
     while (max >= 10) {
         max /= 10;
         ++digits;
@@ -99,7 +118,10 @@ void IndexViewWidget::lineNumberAreaPaintEvent(QPaintEvent *event)
 
     while (block.isValid() && top <= event->rect().bottom()) {
         if (block.isVisible() && bottom >= event->rect().top()) {
-            QString number = QString::number(_startLineNum + blockNumber + 1);
+            if(blockNumber >= _indices.size()){
+                break;
+            }
+            QString number = QString::number(_indices[blockNumber] + 1);
             painter.setPen(Qt::black);
             painter.drawText(0, top, _lineNumberArea->width(), fontMetrics().height(), Qt::AlignLeft, number);
         }
@@ -115,14 +137,18 @@ void IndexViewWidget::readNextBlock() {
     const int currScrollbarValue = this->verticalScrollBar()->value();
     const unsigned long long currStartLineNum = _startLineNum;
 
-    for(unsigned int i = 0; i < NUM_LINES_PER_READ; i++){
-        char* lineStart = nullptr;
-        unsigned int length;
-        if(!_fileReader->nextLine(lineStart, length)){
+    unsigned long long startLocation = _endLineNum;
+    if(startLocation >= _data.size()){
+        return;
+    }
+
+    for(unsigned long long i = startLocation; i < startLocation + NUM_LINES_PER_READ; i++){
+        this->moveCursor(QTextCursor::End);
+        if(i >= _data.size()){
             break;
         }
-        this->moveCursor(QTextCursor::End);
-        this->insertPlainText(QString::fromUtf8(lineStart, static_cast<int>(length)));
+
+        this->insertPlainText(_data[i]);
 
         _endLineNum++;
         _startLineNum = _endLineNum >= MAX_NUM_BLOCKS ? _endLineNum - MAX_NUM_BLOCKS : 0;
@@ -156,20 +182,14 @@ void IndexViewWidget::readPreviousBlock() {
         cursor.movePosition(QTextCursor::StartOfLine, QTextCursor::KeepAnchor);
         cursor.removeSelectedText();
         cursor.deletePreviousChar();
+        _indices.pop_back();
         _endLineNum--;
     }
 
     //insert new lines
     cursor.movePosition(QTextCursor::Start);
-    if(_fileReader->getLine(_startLineNum, lineStart, length)){
-        cursor.insertText(QString::fromUtf8(lineStart, length));
-
-        for(unsigned int i = 0; i < numLinesToRead - 1; i++){
-            if(!_fileReader->nextLine(lineStart, length)){
-                break;
-            }
-            cursor.insertText(QString::fromUtf8(lineStart, length));
-        }
+    for(unsigned long long i = _startLineNum; i < _startLineNum + numLinesToRead; i++){
+        cursor.insertText(_data[i]);
     }
 
     int newScrollbarValue = currScrollbarValue + (currStartLineNum - _startLineNum);
@@ -184,5 +204,14 @@ void IndexViewWidget::readBlockIfRequired() {
         readNextBlock();
     } else if(currScrollbarValue < (NUM_LINES_PER_READ / 2)){
         readPreviousBlock();
+    }
+}
+
+void IndexViewWidget::loadData(std::unique_ptr<PLP::ResultSetReaderI>& indexReader) {
+    _indices.reserve(indexReader->getNumResults());
+    _data.reserve(indexReader->getNumResults());
+
+    if(!_fileViewer->getLinesFromIndex(indexReader, _indices, _data)){
+        bool zz = true;
     }
 }
