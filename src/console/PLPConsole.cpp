@@ -113,7 +113,7 @@ int main() {
         return 1;
     }*/
 
-    /*auto fReader = core->createFileReader(smallFile, 0, true);
+    auto fReader = core->createFileReader(smallFile, 0, true);
     auto rWriter = core->createResultSetWriter("results.txt", 0, fReader, true);
     char* line;
     unsigned int lineSize;
@@ -126,7 +126,21 @@ int main() {
     rWriter->release();
 
     auto rReader = core->createResultSetReader("results.txt", 0);
-    std::string dataPath;
+    std::wstring dataPath;
+    rReader->getDataFilePath(dataPath);
+    unsigned long long numResults = rReader->getNumResults();
+
+    unsigned long long lineNum;
+    if (!rReader->getResult(10, lineNum)) {
+        return 1;
+    }
+
+    if (!rReader->getResult(5, lineNum)) {
+        return 1;
+    }
+
+    /*auto rReader = core->createResultSetReader("results.txt", 0);
+    std::wstring dataPath;
     rReader->getDataFilePath(dataPath);
     unsigned long long numResults = rReader->getNumResults();
 
@@ -137,10 +151,10 @@ int main() {
         if (!fReader->getLineFromResult(rReader, resLine, resLineSize)) {
             return 1;
         }
-    }
-    */
+    }*/
+    
 
-    auto fReader = core->createFileReader(largeFile, 0, true);
+    /*auto fReader = core->createFileReader(largeFile, 0, true);
     auto rWriter = core->createResultSetWriter("largeFileResults2", 0, fReader, true);
     char* line;
     unsigned int lineSize;
@@ -157,7 +171,7 @@ int main() {
         }
     }
     rWriter->release();
-    fReader->release();
+    fReader->release();*/
 
     double numSeconds = timer.deltaT() / 1000000000;
     printf("Completed in: %f seconds\n", numSeconds);

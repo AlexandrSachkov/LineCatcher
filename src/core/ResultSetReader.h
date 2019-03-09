@@ -18,9 +18,11 @@ namespace PLP {
             unsigned long long preferredBufferSizeBytes
         );
         unsigned long long getLineFileOffset() const override;
+        bool getResult(unsigned long long number, unsigned long long& lineNumber) override;
         bool nextResult(unsigned long long& lineNumber) override;
 
         //Lua interface
+        std::tuple<bool, unsigned long long> getResult(unsigned long long number);
         std::tuple<bool, unsigned long long> nextResult();
 
         //Shared interface
@@ -37,7 +39,7 @@ namespace PLP {
         std::string _dataFilePath;
         unsigned long long _numResults = 0;
         unsigned long long _resultCount = 0;
-        unsigned long long _currFileOffset = 0;
+        unsigned long long _currPageOffset = 0;
         unsigned long long _currLineNum = 0;
         unsigned long long _currLineFileOffset = 0;
 

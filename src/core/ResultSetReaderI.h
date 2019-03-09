@@ -7,6 +7,7 @@ namespace PLP {
     public:
         virtual ~ResultSetReaderI() {}
         virtual unsigned long long getLineFileOffset() const = 0;
+        virtual bool getResult(unsigned long long number, unsigned long long& lineNumber) = 0;
         virtual bool nextResult(unsigned long long& lineNumber) = 0;
         virtual unsigned long long getLineNumber() const = 0;
         virtual unsigned long long getNumResults() const = 0;

@@ -28,36 +28,25 @@ namespace PLP {
         if (!_pageData || _pageSize == 0) {
             return false;
         }
-        
-        unsigned long long headerSize =
-            sizeof(RESULT_SET_VERSION) +
-            sizeof(unsigned int) + //length of data file path
-            _dataFilePath.length() +
-            sizeof(_resultCount);
-
-        if (_pageSize < headerSize) {
-            return false;
-        }
-
-        _currFileOffset = 0;
+        _currPageOffset = 0;
 
         unsigned int version = 0;
-        std::memcpy(&version, _pageData + _currFileOffset, sizeof(RESULT_SET_VERSION));
+        std::memcpy(&version, _pageData + _currPageOffset, sizeof(RESULT_SET_VERSION));
         if (version != RESULT_SET_VERSION) {
             return false; //TODO can we handle legacy versions
         }
 
-        _currFileOffset += sizeof(RESULT_SET_VERSION);
+        _currPageOffset += sizeof(RESULT_SET_VERSION);
         unsigned int dataFilePathLength = 0;
-        std::memcpy(&dataFilePathLength, _pageData + _currFileOffset, sizeof(dataFilePathLength));
+        std::memcpy(&dataFilePathLength, _pageData + _currPageOffset, sizeof(dataFilePathLength));
 
-        _currFileOffset += sizeof(dataFilePathLength);
-        _dataFilePath = std::string(_pageData + sizeof(RESULT_SET_VERSION) + sizeof(dataFilePathLength), dataFilePathLength);
+        _currPageOffset += sizeof(dataFilePathLength);
+        _dataFilePath = std::string(_pageData + _currPageOffset, dataFilePathLength);
 
-        _currFileOffset += dataFilePathLength;
-        std::memcpy(&_numResults, _pageData + _currFileOffset, sizeof(unsigned long long));
+        _currPageOffset += dataFilePathLength;
+        std::memcpy(&_numResults, _pageData + _currPageOffset, sizeof(unsigned long long));
 
-        _currFileOffset += sizeof(unsigned long long);
+        _currPageOffset += sizeof(unsigned long long);
         return true;
     }
 
@@ -67,11 +56,37 @@ namespace PLP {
         _dataFilePath;
         _numResults = 0;
         _resultCount = 0;
-        _currFileOffset = 0;
+        _currPageOffset = 0;
         _currLineNum = 0;
         _currLineFileOffset = 0;
         _pageData = nullptr;
         _pageSize = 0;
+    }
+
+    bool ResultSetReader::getResult(unsigned long long number, unsigned long long& lineNumber) {
+        if (number >= _numResults) {
+            return false;
+        }
+
+        unsigned long long headerSize =
+            sizeof(RESULT_SET_VERSION) +
+            sizeof(unsigned int) + //length of data file path variable size
+            _dataFilePath.length() +
+            sizeof(_resultCount);
+
+        _pageData = nullptr;
+        _pageSize = 0;
+        _currPageOffset = headerSize + (sizeof(unsigned long long) * 2) * number;
+
+        return nextResult(lineNumber);
+    }
+
+    std::tuple<bool, unsigned long long> ResultSetReader::getResult(unsigned long long number) {
+        unsigned long long lineNum = 0;
+        if (!getResult(number, lineNum)) {
+            return { false, 0 };
+        }
+        return { true, lineNum };
     }
 
     bool ResultSetReader::nextResult(unsigned long long& lineNumber) {
@@ -79,17 +94,19 @@ namespace PLP {
             return false;
         }
 
-        if (_pageSize - _currFileOffset < sizeof(unsigned long long) * 2) {
-            _pageData = const_cast<char*>(_reader->read(0, _pageSize));
+        if (_pageData == nullptr || _pageSize == 0 || _pageSize - _currPageOffset < sizeof(unsigned long long) * 2) {
+            _pageData = const_cast<char*>(_reader->read(_currPageOffset, _pageSize));
             if (!_pageData || _pageSize == 0) {
                 return false;
             }
+            _currPageOffset = 0;
         }
-        std::memcpy(&_currLineNum, _pageData + _currFileOffset, sizeof(_currLineNum));
-        _currFileOffset += sizeof(_currLineNum);
+        char* data = _pageData + _currPageOffset;
+        std::memcpy(&_currLineNum, _pageData + _currPageOffset, sizeof(_currLineNum));
+        _currPageOffset += sizeof(_currLineNum);
 
-        std::memcpy(&_currLineFileOffset, _pageData + _currFileOffset, sizeof(_currLineFileOffset));
-        _currFileOffset += sizeof(_currLineFileOffset);
+        std::memcpy(&_currLineFileOffset, _pageData + _currPageOffset, sizeof(_currLineFileOffset));
+        _currPageOffset += sizeof(_currLineFileOffset);
 
         _resultCount++;
 
@@ -118,7 +135,7 @@ namespace PLP {
     }
 
     void ResultSetReader::restart() {
-        _currFileOffset = 0;
+        _currPageOffset = 0;
         _resultCount = 0;
         _pageData = nullptr;
         _pageSize = 0;
