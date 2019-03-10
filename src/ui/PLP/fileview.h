@@ -31,7 +31,6 @@ private slots:
 private:
     static const unsigned long long MAX_NUM_RESULTS = 100000;
     PagedFileViewWidget* _dataView;
-    QLabel* _fileInfo;
     FileNavControls* _fileNavControls;
     QTabWidget* _indexViewer;
 

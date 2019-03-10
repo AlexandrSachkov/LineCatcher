@@ -110,6 +110,7 @@ void MainWindow::openFile() {
     FileView* fileView = new FileView(std::move(fileReader), this);
     QString fileName = path.split('/').last();
     _fileViewer->addTab(fileView, fileName);
+    _fileViewer->setTabToolTip(_fileViewer->count() - 1, path);
     _fileViewer->setCurrentIndex(_fileViewer->count() - 1);
     fileView->show();
 }

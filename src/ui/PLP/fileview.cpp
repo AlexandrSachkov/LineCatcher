@@ -15,8 +15,6 @@ FileView::FileView(std::unique_ptr<PLP::FileReaderI> fileReader, QWidget *parent
     std::wstring path;
     fileReader->getFilePath(path);
     _filePath = QString::fromStdWString(path);
-    _fileInfo = new QLabel(_filePath, this);
-    mainLayout->addWidget(_fileInfo);
 
     _fileNavControls = new FileNavControls(this);
     mainLayout->addWidget(_fileNavControls);
@@ -75,5 +73,6 @@ void FileView::openIndex(std::unique_ptr<PLP::ResultSetReaderI> indexReader){
 
     IndexViewWidget* indexView = new IndexViewWidget(std::move(indexReader), _dataView, this);
     _indexViewer->addTab(indexView, fileName);
+    _indexViewer->setTabToolTip(_indexViewer->count() - 1, qPath);
     _indexViewer->setCurrentIndex(_indexViewer->count() - 1);
 }
