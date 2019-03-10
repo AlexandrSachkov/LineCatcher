@@ -226,27 +226,16 @@ void PagedFileViewWidget::readBlockIfRequired() {
     }
 }
 
-bool PagedFileViewWidget::getLinesFromIndex(
+bool PagedFileViewWidget::getLineFromIndex(
         std::unique_ptr<PLP::ResultSetReaderI>& indexReader,
-        std::vector<unsigned long long>& lineNumbers,
-        std::vector<QString>& data
+        QString& data
 ) {
-    lineNumbers.clear();
-    data.clear();
-
-    unsigned long long currLine = _fileReader->getLineNumber();
-
     char* lineStart = nullptr;
     unsigned int length;
-    unsigned long long lineNum;
-    while(indexReader->nextResult(lineNum)){
-        if(!_fileReader->getLineFromResult(indexReader.get(), lineStart, length)){
-            return false;
-        }
-        lineNumbers.push_back(lineNum);
-        data.push_back(QString::fromUtf8(lineStart, length));
+    if(!_fileReader->getLineFromResult(indexReader.get(), lineStart, length)){
+        return false;
     }
 
-    //set to previous position
-    return _fileReader->getLine(currLine, lineStart, length);
+    data = QString::fromUtf8(lineStart, length);
+    return true;
 }

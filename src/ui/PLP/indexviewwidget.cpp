@@ -131,19 +131,26 @@ void IndexViewWidget::readNextBlock() {
     const unsigned long long currStartLineNum = _startLineNum;
 
     unsigned long long lineNum;
+    QString line;
 
     QTextCursor cursor = this->textCursor();
     if(_indexReader->getResult(_endLineNum, lineNum)){
+        if(!_fileViewer->getLineFromIndex(_indexReader, line)){
+            return;
+        }
         cursor.movePosition(QTextCursor::End);
-        cursor.insertText(QString::number(lineNum) + "\n");
+        cursor.insertText(QString::number(lineNum) + ":   " + line);
         _endLineNum++;
 
         for(unsigned int i = 0; i < NUM_LINES_PER_READ; i++){
             if(!_indexReader->nextResult(lineNum)){
                 break;
             }
+            if(!_fileViewer->getLineFromIndex(_indexReader, line)){
+                break;
+            }
             cursor.movePosition(QTextCursor::End);
-            cursor.insertText(QString::number(lineNum) + "\n");
+            cursor.insertText(QString::number(lineNum) + ":   " + line);
             _endLineNum++;
         }
     }
@@ -186,15 +193,22 @@ void IndexViewWidget::readPreviousBlock() {
     }
 
     //insert new lines
+    QString line;
     cursor.movePosition(QTextCursor::Start);
     if(_indexReader->getResult(_startLineNum, lineNum)){
-        cursor.insertText(QString::number(lineNum) + "\n");
+        if(!_fileViewer->getLineFromIndex(_indexReader, line)){
+            return;
+        }
+        cursor.insertText(QString::number(lineNum) + ":   " + line);
 
         for(unsigned int i = 0; i < numLinesToRead - 1; i++){
             if(!_indexReader->nextResult(lineNum)){
                 break;
             }
-            cursor.insertText(QString::number(lineNum) + "\n");
+            if(!_fileViewer->getLineFromIndex(_indexReader, line)){
+                return;
+            }
+            cursor.insertText(QString::number(lineNum) + ":   " + line);
         }
     }
 
@@ -214,14 +228,5 @@ void IndexViewWidget::readBlockIfRequired() {
         readNextBlock();
     } else if(currScrollbarValue < (NUM_LINES_PER_READ / 2)){
         readPreviousBlock();
-    }
-}
-
-void IndexViewWidget::loadData(std::unique_ptr<PLP::ResultSetReaderI>& indexReader) {
-    _indices.reserve(indexReader->getNumResults());
-    _data.reserve(indexReader->getNumResults());
-
-    if(!_fileViewer->getLinesFromIndex(indexReader, _indices, _data)){
-        bool zz = true;
     }
 }
