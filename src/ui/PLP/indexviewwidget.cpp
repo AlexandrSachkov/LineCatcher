@@ -13,6 +13,7 @@ IndexViewWidget::IndexViewWidget(
         QWidget* parent)
     : QPlainTextEdit (parent) {
 
+    _indexReader = std::move(indexReader);
     _fileViewer = fileViewer;
     _lineNumberArea = new LineNumberArea(this);
     connect(_lineNumberArea, SIGNAL(paintEventOccurred(QPaintEvent*)), this, SLOT(lineNumberAreaPaintEvent(QPaintEvent*)));
@@ -24,7 +25,7 @@ IndexViewWidget::IndexViewWidget(
 
     this->setLineWrapMode(LineWrapMode::NoWrap);
     this->setWordWrapMode(QTextOption::WrapMode::NoWrap);
-    this->setMaximumBlockCount(MAX_NUM_BLOCKS);
+    this->setMaximumBlockCount(MAX_NUM_BLOCKS + 1);
 
     SignalingScrollBar* scrollBar = new SignalingScrollBar();
     connect(scrollBar, SIGNAL(mouseReleased(void)), this, SLOT(readBlockIfRequired(void)));
@@ -36,9 +37,8 @@ IndexViewWidget::IndexViewWidget(
     this->setFont(f);
 
     calcNumVisibleLines();
-    loadData(indexReader);
-    readNextBlock();
 
+    readNextBlock();
     this->moveCursor(QTextCursor::Start);
     this->ensureCursorVisible();
 
@@ -67,11 +67,7 @@ void IndexViewWidget::calcNumVisibleLines() {
 
 int IndexViewWidget::lineNumberAreaWidth() const
 {
-    unsigned long long max = 1;
-    if(_indices.size() > 0){
-        unsigned long long index = _endLineNum == 0 ? 0 : _endLineNum - 1;
-        max = _indices[index] > 1 ? _indices[index] : 1;
-    }
+    unsigned long long max = _endLineNum > 1 ? _endLineNum : 1;
 
     int digits = 1;
     while (max >= 10) {
@@ -118,10 +114,7 @@ void IndexViewWidget::lineNumberAreaPaintEvent(QPaintEvent *event)
 
     while (block.isValid() && top <= event->rect().bottom()) {
         if (block.isVisible() && bottom >= event->rect().top()) {
-            if(blockNumber >= _indices.size()){
-                break;
-            }
-            QString number = QString::number(_indices[blockNumber] + 1);
+            QString number = QString::number(_startLineNum + blockNumber + 1);
             painter.setPen(Qt::black);
             painter.drawText(0, top, _lineNumberArea->width(), fontMetrics().height(), Qt::AlignLeft, number);
         }
@@ -137,23 +130,25 @@ void IndexViewWidget::readNextBlock() {
     const int currScrollbarValue = this->verticalScrollBar()->value();
     const unsigned long long currStartLineNum = _startLineNum;
 
-    unsigned long long startLocation = _endLineNum;
-    if(startLocation >= _data.size()){
-        return;
-    }
+    unsigned long long lineNum;
 
-    for(unsigned long long i = startLocation; i < startLocation + NUM_LINES_PER_READ; i++){
-        this->moveCursor(QTextCursor::End);
-        if(i >= _data.size()){
-            break;
-        }
-
-        this->insertPlainText(_data[i]);
-
+    QTextCursor cursor = this->textCursor();
+    if(_indexReader->getResult(_endLineNum, lineNum)){
+        cursor.movePosition(QTextCursor::End);
+        cursor.insertText(QString::number(lineNum) + "\n");
         _endLineNum++;
-        _startLineNum = _endLineNum >= MAX_NUM_BLOCKS ? _endLineNum - MAX_NUM_BLOCKS : 0;
+
+        for(unsigned int i = 0; i < NUM_LINES_PER_READ; i++){
+            if(!_indexReader->nextResult(lineNum)){
+                break;
+            }
+            cursor.movePosition(QTextCursor::End);
+            cursor.insertText(QString::number(lineNum) + "\n");
+            _endLineNum++;
+        }
     }
 
+    _startLineNum = _endLineNum >= MAX_NUM_BLOCKS ? _endLineNum - MAX_NUM_BLOCKS : 0;
     const int newScrollbarValue = currScrollbarValue - (_startLineNum - currStartLineNum);
     this->verticalScrollBar()->setValue(newScrollbarValue);
 }
@@ -172,25 +167,40 @@ void IndexViewWidget::readPreviousBlock() {
         return;
     }
 
-    char* lineStart = nullptr;
-    unsigned int length;
+    unsigned long long lineNum;
 
     //delete lines from end of document
     QTextCursor cursor = this->textCursor();
     cursor.movePosition(QTextCursor::End);
+
+    //delete last empty block
+    cursor.movePosition(QTextCursor::StartOfLine, QTextCursor::KeepAnchor);
+    cursor.removeSelectedText();
+    cursor.deletePreviousChar();
+
     for(int i = 0; i < numLinesToRead; i++){
         cursor.movePosition(QTextCursor::StartOfLine, QTextCursor::KeepAnchor);
         cursor.removeSelectedText();
         cursor.deletePreviousChar();
-        _indices.pop_back();
         _endLineNum--;
     }
 
     //insert new lines
     cursor.movePosition(QTextCursor::Start);
-    for(unsigned long long i = _startLineNum; i < _startLineNum + numLinesToRead; i++){
-        cursor.insertText(_data[i]);
+    if(_indexReader->getResult(_startLineNum, lineNum)){
+        cursor.insertText(QString::number(lineNum) + "\n");
+
+        for(unsigned int i = 0; i < numLinesToRead - 1; i++){
+            if(!_indexReader->nextResult(lineNum)){
+                break;
+            }
+            cursor.insertText(QString::number(lineNum) + "\n");
+        }
     }
+
+    //insert last empty block
+    cursor.movePosition(QTextCursor::End);
+    cursor.insertBlock();
 
     int newScrollbarValue = currScrollbarValue + (currStartLineNum - _startLineNum);
     this->verticalScrollBar()->setValue(newScrollbarValue);

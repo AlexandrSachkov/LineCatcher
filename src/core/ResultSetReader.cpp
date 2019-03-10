@@ -76,6 +76,7 @@ namespace PLP {
 
         _pageData = nullptr;
         _pageSize = 0;
+        _resultCount = number;
         _currPageOffset = headerSize + (sizeof(unsigned long long) * 2) * number;
 
         return nextResult(lineNumber);

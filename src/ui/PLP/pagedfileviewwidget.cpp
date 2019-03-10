@@ -22,7 +22,7 @@ PagedFileViewWidget::PagedFileViewWidget(std::unique_ptr<PLP::FileReaderI> fileR
     this->setLineWrapMode(LineWrapMode::NoWrap);
     this->setWordWrapMode(QTextOption::WrapMode::NoWrap);
     this->setMouseTracking(true);
-    this->setMaximumBlockCount(MAX_NUM_BLOCKS);
+    this->setMaximumBlockCount(MAX_NUM_BLOCKS + 1);
 
     SignalingScrollBar* scrollBar = new SignalingScrollBar();
     connect(scrollBar, SIGNAL(mouseReleased(void)), this, SLOT(readBlockIfRequired(void)));
@@ -137,19 +137,26 @@ void PagedFileViewWidget::readNextBlock() {
     const int currScrollbarValue = this->verticalScrollBar()->value();
     const unsigned long long currStartLineNum = _startLineNum;
 
-    for(unsigned int i = 0; i < NUM_LINES_PER_READ; i++){
-        char* lineStart = nullptr;
-        unsigned int length;
-        if(!_fileReader->nextLine(lineStart, length)){
-            break;
-        }
-        this->moveCursor(QTextCursor::End);
-        this->insertPlainText(QString::fromUtf8(lineStart, static_cast<int>(length)));
+    char* lineStart = nullptr;
+    unsigned int length;
 
+    QTextCursor cursor = this->textCursor();
+    if(_fileReader->getLine(_endLineNum, lineStart, length)){
+        cursor.movePosition(QTextCursor::End);
+        cursor.insertText(QString::fromUtf8(lineStart, static_cast<int>(length)));
         _endLineNum++;
-        _startLineNum = _endLineNum >= MAX_NUM_BLOCKS ? _endLineNum - MAX_NUM_BLOCKS : 0;
+
+        for(unsigned int i = 0; i < NUM_LINES_PER_READ - 1; i++){
+            if(!_fileReader->nextLine(lineStart, length)){
+                break;
+            }
+            cursor.movePosition(QTextCursor::End);
+            cursor.insertText(QString::fromUtf8(lineStart, static_cast<int>(length)));
+            _endLineNum++;
+        }
     }
 
+    _startLineNum = _endLineNum >= MAX_NUM_BLOCKS ? _endLineNum - MAX_NUM_BLOCKS : 0;
     const int newScrollbarValue = currScrollbarValue - (_startLineNum - currStartLineNum);
     this->verticalScrollBar()->setValue(newScrollbarValue);
 }
@@ -174,6 +181,12 @@ void PagedFileViewWidget::readPreviousBlock() {
     //delete lines from end of document
     QTextCursor cursor = this->textCursor();
     cursor.movePosition(QTextCursor::End);
+
+    //delete last empty block
+    cursor.movePosition(QTextCursor::StartOfLine, QTextCursor::KeepAnchor);
+    cursor.removeSelectedText();
+    cursor.deletePreviousChar();
+
     for(int i = 0; i < numLinesToRead; i++){
         cursor.movePosition(QTextCursor::StartOfLine, QTextCursor::KeepAnchor);
         cursor.removeSelectedText();
@@ -193,6 +206,10 @@ void PagedFileViewWidget::readPreviousBlock() {
             cursor.insertText(QString::fromUtf8(lineStart, length));
         }
     }
+
+    //insert last empty block
+    cursor.movePosition(QTextCursor::End);
+    cursor.insertBlock();
 
     int newScrollbarValue = currScrollbarValue + (currStartLineNum - _startLineNum);
     this->verticalScrollBar()->setValue(newScrollbarValue);

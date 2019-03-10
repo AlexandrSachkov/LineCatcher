@@ -33,9 +33,10 @@ private:
     void readPreviousBlock();
     void loadData(std::unique_ptr<PLP::ResultSetReaderI>& indexReader);
 
-    static const unsigned int MAX_NUM_BLOCKS = 100;
-    static const unsigned int NUM_LINES_PER_READ = 25;
+    static const unsigned int MAX_NUM_BLOCKS = 1000;
+    static const unsigned int NUM_LINES_PER_READ = 250;
 
+    std::unique_ptr<PLP::ResultSetReaderI> _indexReader;
     PagedFileViewWidget* _fileViewer;
     QWidget* _lineNumberArea;
     std::vector<unsigned long long> _indices;
