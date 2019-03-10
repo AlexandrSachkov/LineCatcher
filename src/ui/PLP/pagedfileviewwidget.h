@@ -1,9 +1,12 @@
 #ifndef PAGEDFILEVIEW_H
 #define PAGEDFILEVIEW_H
 
+#include "ullspinbox.h"
+
 #include <QPlainTextEdit>
 #include <QScrollBar>
 #include <QPaintEvent>
+#include <QSpinBox>
 
 #include "FileReaderI.h"
 #include "ResultSetReaderI.h"
@@ -14,11 +17,12 @@ class PagedFileViewWidget : public QPlainTextEdit
 {
     Q_OBJECT
 public:
-    PagedFileViewWidget(std::unique_ptr<PLP::FileReaderI> fileReader, QWidget *parent = nullptr);
+    PagedFileViewWidget(std::unique_ptr<PLP::FileReaderI> fileReader, ULLSpinBox* lineNavBox, QWidget *parent = nullptr);
     bool getLineFromIndex(
         std::unique_ptr<PLP::ResultSetReaderI>& indexReader,
         QString& data
     );
+    void gotoLine(unsigned long long lineNum);
 signals:
 
 private slots:
@@ -48,6 +52,7 @@ private:
     unsigned int _numVisibleLines;
 
     QWidget* _lineNumberArea;
+    ULLSpinBox* _lineNavBox;
 };
 
 #endif // PAGEDFILEVIEW_H

@@ -115,4 +115,8 @@ namespace PLP {
 
         return true;
     }
+
+    unsigned long long IndexedLineReader::getNumberOfLines() {
+        return _indexHeader.numLines;
+    }
 }

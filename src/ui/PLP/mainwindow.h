@@ -29,7 +29,6 @@ public slots:
 private:
     QWidget* _centralWidget;
     QVBoxLayout* _mainLayout;
-    QMenuBar* _menuBar;
     QAction* _openFile;
     QAction* _exit;
 

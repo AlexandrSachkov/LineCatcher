@@ -28,20 +28,20 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     fileview.cpp \
-    filenavcontrols.cpp \
     scriptview.cpp \
     pagedfileviewwidget.cpp \
-    indexviewwidget.cpp
+    indexviewwidget.cpp \
+    ullspinbox.cpp
 
 HEADERS += \
         mainwindow.h \
     fileview.h \
-    filenavcontrols.h \
     scriptview.h \
     pagedfileviewwidget.h \
     indexviewwidget.h \
     signalingscrollbar.h \
-    linenumberarea.h
+    linenumberarea.h \
+    ullspinbox.h
 
 FORMS += \
         mainwindow.ui \

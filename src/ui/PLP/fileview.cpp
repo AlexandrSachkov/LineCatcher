@@ -11,22 +11,39 @@ FileView::FileView(std::unique_ptr<PLP::FileReaderI> fileReader, QWidget *parent
 {
     QVBoxLayout* mainLayout = new QVBoxLayout();
     this->setLayout(mainLayout);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
 
     std::wstring path;
     fileReader->getFilePath(path);
     _filePath = QString::fromStdWString(path);
 
-    _fileNavControls = new FileNavControls(this);
-    mainLayout->addWidget(_fileNavControls);
+    QHBoxLayout* lineSelectionLayout = new QHBoxLayout();
+    mainLayout->addLayout(lineSelectionLayout);
+
+    QFont lineNavFont("Courier New", 16);
+    lineNavFont.setStyleHint(QFont::Monospace);
+
+    //lineSelectionLayout->addWidget(new QLabel("Line", this), 1, Qt::AlignRight);
+    _currLineNumBox = new ULLSpinBox(this);
+    _currLineNumBox->setFont(lineNavFont);
+    _currLineNumBox->setRange(0, fileReader->getNumberOfLines() - 1);
+    _currLineNumBox->setValue(0);
+    lineSelectionLayout->addWidget(_currLineNumBox, 1, Qt::AlignRight);
+
+    QLabel* numLinesLabel = new QLabel("/" + QString::number(fileReader->getNumberOfLines() - 1), this);
+    numLinesLabel->setFont(lineNavFont);
+    numLinesLabel->setContentsMargins(0, 0, 5, 0);
+    lineSelectionLayout->addWidget(numLinesLabel, 0);
 
     QSplitter* splitter = new QSplitter(this);
     mainLayout->addWidget(splitter);
+    splitter->setContentsMargins(0,0,0,0);
     splitter->setOrientation(Qt::Orientation::Vertical);
     splitter->setHandleWidth(5);
     splitter->setChildrenCollapsible(false);
     mainLayout->addWidget(splitter);
 
-    _dataView = new PagedFileViewWidget(std::move(fileReader), splitter);
+    _dataView = new PagedFileViewWidget(std::move(fileReader), _currLineNumBox, splitter);
     _dataView->setReadOnly(true);
     splitter->addWidget(_dataView);
 

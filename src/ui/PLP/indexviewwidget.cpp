@@ -114,7 +114,7 @@ void IndexViewWidget::lineNumberAreaPaintEvent(QPaintEvent *event)
 
     while (block.isValid() && top <= event->rect().bottom()) {
         if (block.isVisible() && bottom >= event->rect().top()) {
-            QString number = QString::number(_startLineNum + blockNumber + 1);
+            QString number = QString::number(_startLineNum + blockNumber);
             painter.setPen(Qt::black);
             painter.drawText(0, top, _lineNumberArea->width(), fontMetrics().height(), Qt::AlignLeft, number);
         }

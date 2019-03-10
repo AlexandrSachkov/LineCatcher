@@ -34,6 +34,7 @@ namespace PLP {
 
         //Shared interface
         unsigned long long getLineNumber() const override;
+        unsigned long long getNumberOfLines() const override;
         void restart() override;
         void release() override;
 

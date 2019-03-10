@@ -110,4 +110,11 @@ namespace PLP {
     void FileReader::restart() {
         _lineReader->restart();
     }
+
+    unsigned long long FileReader::getNumberOfLines() const {
+        if (!_enableRandomAccess) {
+            return 0;
+        }
+        return static_cast<IndexedLineReader*>(_lineReader.get())->getNumberOfLines();
+    }
 }

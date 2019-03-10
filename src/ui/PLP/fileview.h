@@ -1,8 +1,8 @@
 #ifndef FILEVIEW_H
 #define FILEVIEW_H
 
-#include "filenavcontrols.h"
 #include "pagedfileviewwidget.h"
+#include "ullspinbox.h"
 
 #include <QWidget>
 #include <QPlainTextEdit>
@@ -30,8 +30,8 @@ private slots:
 
 private:
     PagedFileViewWidget* _dataView;
-    FileNavControls* _fileNavControls;
     QTabWidget* _indexViewer;
+    ULLSpinBox* _currLineNumBox;
 
     QString _filePath;
 };

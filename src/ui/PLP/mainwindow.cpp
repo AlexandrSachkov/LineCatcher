@@ -23,15 +23,12 @@ MainWindow::MainWindow(QWidget *parent) :
     _mainLayout = new QVBoxLayout(_centralWidget);
     _centralWidget->setLayout(_mainLayout);
     _mainLayout->setSpacing(6);
-    _mainLayout->setContentsMargins(2, 25, 2, 2);
+    _mainLayout->setContentsMargins(2, 2, 2, 2);
 
-    _menuBar = new QMenuBar(this);
-    _menuBar->setGeometry(QRect(0, 0, 1043, 21));
+    QMenu* fileMenu = new QMenu("File");
+    menuBar()->addMenu(fileMenu);
 
-    QMenu* fileMenu = new QMenu("File", _menuBar);
-    _menuBar->addMenu(fileMenu);
-
-    QMenu* openMenu = new QMenu("Open", _menuBar);
+    QMenu* openMenu = new QMenu("Open");
     fileMenu->addMenu(openMenu);
 
     _openFile = new QAction("Data", openMenu);
@@ -42,18 +39,18 @@ MainWindow::MainWindow(QWidget *parent) :
     openMenu->addAction(openIndex);
     connect(openIndex, SIGNAL(triggered(void)), this, SLOT(openIndex(void)));
 
-    QMenu* runMenu = new QMenu("Run", _menuBar);
-    _menuBar->addMenu(runMenu);
+    QMenu* runMenu = new QMenu("Run");
+    menuBar()->addMenu(runMenu);
 
-    QAction* runScript = new QAction("Script", _menuBar);
+    QAction* runScript = new QAction("Script");
     runMenu->addAction(runScript);
     connect(runScript, SIGNAL(triggered(void)), this, SLOT(showScriptView(void)));
 
-    QMenu* configMenu = new QMenu("Config", _menuBar);
-    _menuBar->addMenu(configMenu);
+    QMenu* configMenu = new QMenu("Config");
+    menuBar()->addMenu(configMenu);
 
-    QMenu* helpMenu = new QMenu("Help", _menuBar);
-    _menuBar->addMenu(helpMenu);
+    QMenu* helpMenu = new QMenu("Help");
+    menuBar()->addMenu(helpMenu);
 
     _fileViewer = new QTabWidget(_centralWidget);
     _mainLayout->addWidget(_fileViewer);

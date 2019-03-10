@@ -12,6 +12,7 @@ namespace PLP {
 
         bool initialize(PagedReader& pagedReader);
         bool getLine(unsigned long long lineNumber, char*& data, unsigned int& size);
+        unsigned long long getNumberOfLines();
     private:
         std::wstring getIndexFilePath(const std::wstring& dataFilePath);
         bool loadIndex(const std::wstring& indexPath);

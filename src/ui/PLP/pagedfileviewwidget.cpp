@@ -7,9 +7,13 @@
 #include <QtMath>
 #include <QScrollBar>
 
-PagedFileViewWidget::PagedFileViewWidget(std::unique_ptr<PLP::FileReaderI> fileReader, QWidget *parent) : QPlainTextEdit (parent)
-{
+PagedFileViewWidget::PagedFileViewWidget(
+        std::unique_ptr<PLP::FileReaderI> fileReader,
+        ULLSpinBox* lineNavBox,
+        QWidget *parent) : QPlainTextEdit (parent) {
+
     _fileReader = std::move(fileReader);
+    _lineNavBox = lineNavBox;
 
     _lineNumberArea = new LineNumberArea(this);
     connect(_lineNumberArea, SIGNAL(paintEventOccurred(QPaintEvent*)), this, SLOT(lineNumberAreaPaintEvent(QPaintEvent*)));
@@ -121,7 +125,7 @@ void PagedFileViewWidget::lineNumberAreaPaintEvent(QPaintEvent *event)
 
     while (block.isValid() && top <= event->rect().bottom()) {
         if (block.isVisible() && bottom >= event->rect().top()) {
-            QString number = QString::number(_startLineNum + blockNumber + 1);
+            QString number = QString::number(_startLineNum + blockNumber);
             painter.setPen(Qt::black);
             painter.drawText(0, top, _lineNumberArea->width(), fontMetrics().height(), Qt::AlignLeft, number);
         }
@@ -238,4 +242,47 @@ bool PagedFileViewWidget::getLineFromIndex(
 
     data = QString::fromUtf8(lineStart, length);
     return true;
+}
+
+void PagedFileViewWidget::gotoLine(unsigned long long lineNum){
+    if(lineNum >= _startLineNum && lineNum < _endLineNum){
+        this->verticalScrollBar()->setValue(lineNum - _startLineNum);
+        return;
+    }
+
+    const unsigned int halfLinesPerRead = NUM_LINES_PER_READ / 2;
+    unsigned long long startLine;
+    if(lineNum - halfLinesPerRead < 0){
+        startLine = 0;
+    }else if(lineNum >= _fileReader->getNumberOfLines()) {
+        startLine = _fileReader->getNumberOfLines() - 1 - halfLinesPerRead;
+    }else{
+        startLine = lineNum - halfLinesPerRead;
+    }
+    _startLineNum = startLine;
+    _endLineNum = startLine;
+
+    this->clear();
+
+    char* lineStart = nullptr;
+    unsigned int length;
+
+    QTextCursor cursor = this->textCursor();
+    if(_fileReader->getLine(_endLineNum, lineStart, length)){
+        cursor.movePosition(QTextCursor::End);
+        cursor.insertText(QString::fromUtf8(lineStart, static_cast<int>(length)));
+        _endLineNum++;
+
+        for(unsigned int i = 0; i < NUM_LINES_PER_READ - 1; i++){
+            if(!_fileReader->nextLine(lineStart, length)){
+                break;
+            }
+            cursor.movePosition(QTextCursor::End);
+            cursor.insertText(QString::fromUtf8(lineStart, static_cast<int>(length)));
+            _endLineNum++;
+        }
+    }
+
+    _startLineNum = _endLineNum >= MAX_NUM_BLOCKS ? _endLineNum - MAX_NUM_BLOCKS : 0;
+    this->verticalScrollBar()->setValue(lineNum - _startLineNum);
 }
