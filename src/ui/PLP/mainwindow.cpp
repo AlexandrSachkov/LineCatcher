@@ -12,10 +12,7 @@
 #include "ResultSetReaderI.h"
 #include <memory>
 
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent)//,
-    //_ui(new Ui::MainWindow)
-{
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     setWindowTitle("Programmable Log Parser");
     _centralWidget = new QWidget();
     setCentralWidget(_centralWidget);

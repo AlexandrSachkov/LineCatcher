@@ -9,12 +9,14 @@ class ULLSpinBox : public QAbstractSpinBox
     Q_OBJECT
 public:
     ULLSpinBox(QWidget* parent = nullptr);
-    void stepBy(int step) override;
     QAbstractSpinBox::StepEnabled stepEnabled() const override;
 
     void setRange(unsigned long long min, unsigned long long max);
     unsigned long long value();
     QSize sizeHint() const override;
+
+signals:
+    void valueUpdated(unsigned long long);
 
 public slots:
     void setValue(unsigned long long val);

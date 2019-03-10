@@ -15,6 +15,9 @@ PagedFileViewWidget::PagedFileViewWidget(
     _fileReader = std::move(fileReader);
     _lineNavBox = lineNavBox;
 
+    _lineNavBox->setValue(0);
+    connect(_lineNavBox, SIGNAL(valueUpdated(unsigned long long)), this, SLOT(gotoLine(unsigned long long)));
+
     _lineNumberArea = new LineNumberArea(this);
     connect(_lineNumberArea, SIGNAL(paintEventOccurred(QPaintEvent*)), this, SLOT(lineNumberAreaPaintEvent(QPaintEvent*)));
     connect(_lineNumberArea, SIGNAL(sizeHintRequested(void)), this, SLOT(lineNumberAreaWidth(void)));
@@ -31,6 +34,7 @@ PagedFileViewWidget::PagedFileViewWidget(
     SignalingScrollBar* scrollBar = new SignalingScrollBar();
     connect(scrollBar, SIGNAL(mouseReleased(void)), this, SLOT(readBlockIfRequired(void)));
     connect(scrollBar, SIGNAL(wheelMoved(void)), this, SLOT(readBlockIfRequired(void)));
+    connect(scrollBar, SIGNAL(valueChanged(int)), this, SLOT(scrollBarMoved(int)));
     this->setVerticalScrollBar(scrollBar);
 
     QFont f("Courier New", 16);
@@ -160,7 +164,10 @@ void PagedFileViewWidget::readNextBlock() {
         }
     }
 
-    _startLineNum = _endLineNum >= MAX_NUM_BLOCKS ? _endLineNum - MAX_NUM_BLOCKS : 0;
+    if(_endLineNum - _startLineNum > MAX_NUM_BLOCKS){
+        _startLineNum = _endLineNum - MAX_NUM_BLOCKS;
+    }
+    //_startLineNum = _endLineNum >= MAX_NUM_BLOCKS ? _endLineNum - MAX_NUM_BLOCKS : 0;
     const int newScrollbarValue = currScrollbarValue - (_startLineNum - currStartLineNum);
     this->verticalScrollBar()->setValue(newScrollbarValue);
 }
@@ -179,6 +186,12 @@ void PagedFileViewWidget::readPreviousBlock() {
         return;
     }
 
+    unsigned long long numLinesToDelete = 0;
+    const unsigned long long totalFutureNumLines = _endLineNum - _startLineNum + numLinesToRead;
+    if(totalFutureNumLines > MAX_NUM_BLOCKS){
+        numLinesToDelete = totalFutureNumLines - MAX_NUM_BLOCKS;
+    }
+
     char* lineStart = nullptr;
     unsigned int length;
 
@@ -191,7 +204,7 @@ void PagedFileViewWidget::readPreviousBlock() {
     cursor.removeSelectedText();
     cursor.deletePreviousChar();
 
-    for(int i = 0; i < numLinesToRead; i++){
+    for(int i = 0; i < numLinesToDelete; i++){
         cursor.movePosition(QTextCursor::StartOfLine, QTextCursor::KeepAnchor);
         cursor.removeSelectedText();
         cursor.deletePreviousChar();
@@ -252,10 +265,12 @@ void PagedFileViewWidget::gotoLine(unsigned long long lineNum){
 
     const unsigned int halfLinesPerRead = NUM_LINES_PER_READ / 2;
     unsigned long long startLine;
-    if(lineNum - halfLinesPerRead < 0){
+    if(lineNum < halfLinesPerRead){
         startLine = 0;
     }else if(lineNum >= _fileReader->getNumberOfLines()) {
-        startLine = _fileReader->getNumberOfLines() - 1 - halfLinesPerRead;
+        startLine = _fileReader->getNumberOfLines() - 1 - NUM_LINES_PER_READ;
+    }else if(_fileReader->getNumberOfLines() - lineNum < halfLinesPerRead){
+        startLine = _fileReader->getNumberOfLines() - 1 - NUM_LINES_PER_READ;
     }else{
         startLine = lineNum - halfLinesPerRead;
     }
@@ -283,6 +298,12 @@ void PagedFileViewWidget::gotoLine(unsigned long long lineNum){
         }
     }
 
-    _startLineNum = _endLineNum >= MAX_NUM_BLOCKS ? _endLineNum - MAX_NUM_BLOCKS : 0;
+    if(_endLineNum - _startLineNum > MAX_NUM_BLOCKS){
+        _startLineNum = _endLineNum - MAX_NUM_BLOCKS;
+    }
     this->verticalScrollBar()->setValue(lineNum - _startLineNum);
+}
+
+void PagedFileViewWidget::scrollBarMoved(int val) {
+    _lineNavBox->setValue(_startLineNum + val);
 }

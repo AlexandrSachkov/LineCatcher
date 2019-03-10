@@ -5,10 +5,7 @@
 ULLSpinBox::ULLSpinBox(QWidget* parent) : QAbstractSpinBox (parent){
     connect(lineEdit(), SIGNAL(editingFinished()), this, SLOT(onEditFinished()));
     setButtonSymbols(QAbstractSpinBox::ButtonSymbols::NoButtons);
-}
-
-void ULLSpinBox::stepBy(int step){
-    //no implementation
+    lineEdit()->setText(QString::number(_min));
 }
 
 QSize ULLSpinBox::sizeHint() const {
@@ -34,6 +31,8 @@ void ULLSpinBox::setRange(unsigned long long min, unsigned long long max){
         temp /= 10;
         ++_numDigits;
     }
+
+    lineEdit()->setText(QString::number(_min));
 }
 
 unsigned long long ULLSpinBox::value(){
@@ -41,6 +40,10 @@ unsigned long long ULLSpinBox::value(){
 }
 
 void ULLSpinBox::setValue(unsigned long long val){
+    if(val == _val){
+        return;
+    }
+
     if (val < _min || val > _max) {
         return;
     }
@@ -56,7 +59,12 @@ void ULLSpinBox::onEditFinished(){
     } else if (val > _max){
         val = _max;
     }
+
+    const unsigned long long currVal = _val;
     setValue(val);
+    if(val != currVal){
+        emit valueUpdated(val);
+    }
 }
 
 QValidator::State ULLSpinBox::validate(QString &input, int &pos) const {

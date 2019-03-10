@@ -22,7 +22,7 @@ public:
         std::unique_ptr<PLP::ResultSetReaderI>& indexReader,
         QString& data
     );
-    void gotoLine(unsigned long long lineNum);
+
 signals:
 
 private slots:
@@ -32,6 +32,8 @@ private slots:
     void readBlockIfRequired();
     void lineNumberAreaPaintEvent(QPaintEvent *event);
     int lineNumberAreaWidth() const;
+    void scrollBarMoved(int val);
+    void gotoLine(unsigned long long lineNum);
 
 protected:
     void resizeEvent(QResizeEvent *e) override;

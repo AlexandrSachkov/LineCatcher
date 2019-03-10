@@ -20,14 +20,12 @@ FileView::FileView(std::unique_ptr<PLP::FileReaderI> fileReader, QWidget *parent
     QHBoxLayout* lineSelectionLayout = new QHBoxLayout();
     mainLayout->addLayout(lineSelectionLayout);
 
-    QFont lineNavFont("Courier New", 16);
+    QFont lineNavFont("Courier New", 14);
     lineNavFont.setStyleHint(QFont::Monospace);
 
-    //lineSelectionLayout->addWidget(new QLabel("Line", this), 1, Qt::AlignRight);
     _currLineNumBox = new ULLSpinBox(this);
     _currLineNumBox->setFont(lineNavFont);
     _currLineNumBox->setRange(0, fileReader->getNumberOfLines() - 1);
-    _currLineNumBox->setValue(0);
     lineSelectionLayout->addWidget(_currLineNumBox, 1, Qt::AlignRight);
 
     QLabel* numLinesLabel = new QLabel("/" + QString::number(fileReader->getNumberOfLines() - 1), this);
