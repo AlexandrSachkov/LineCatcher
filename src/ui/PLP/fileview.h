@@ -29,7 +29,6 @@ private slots:
     void closeTab(int index);
 
 private:
-    static const unsigned long long MAX_NUM_RESULTS = 100000;
     PagedFileViewWidget* _dataView;
     FileNavControls* _fileNavControls;
     QTabWidget* _indexViewer;

@@ -61,16 +61,6 @@ void FileView::openIndex(std::unique_ptr<PLP::ResultSetReaderI> indexReader){
     QString qPath = QString::fromStdWString(path);
     QString fileName = qPath.split('/').last();
 
-    unsigned long long numResults = indexReader->getNumResults();
-    if(numResults > MAX_NUM_RESULTS){
-        int ret = QMessageBox::warning(this,
-           "Unable to open index: " + fileName,
-           "Number of results (" + QString::number(numResults) + ") exceeds maximum " + QString::number(MAX_NUM_RESULTS),
-           QMessageBox::Ok,
-           QMessageBox::Ok);
-        return;
-    }
-
     IndexViewWidget* indexView = new IndexViewWidget(std::move(indexReader), _dataView, this);
     _indexViewer->addTab(indexView, fileName);
     _indexViewer->setTabToolTip(_indexViewer->count() - 1, qPath);
