@@ -32,7 +32,7 @@ private:
     void calcNumVisibleLines();
     void readNextBlock();
     void readPreviousBlock();
-    void mousePressEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
 
     static const unsigned int MAX_NUM_BLOCKS = 1000;
     static const unsigned int NUM_LINES_PER_READ = 250;

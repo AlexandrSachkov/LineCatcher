@@ -231,9 +231,10 @@ void IndexViewWidget::readBlockIfRequired() {
     }
 }
 
-void IndexViewWidget::mousePressEvent(QMouseEvent* event) {
-    QTextCursor cursor = this->cursorForPosition(event->pos());
+void IndexViewWidget::mouseReleaseEvent(QMouseEvent* event) {
+    QPlainTextEdit::mouseReleaseEvent(event);
 
+    QTextCursor cursor = this->cursorForPosition(event->pos());
     QTextEdit::ExtraSelection selection;
     QColor lineColor = QColor(Qt::yellow).lighter(160);
     selection.format.setBackground(lineColor);

@@ -66,6 +66,8 @@ void PagedFileViewWidget::textChangedImpl() {
 }
 
 void PagedFileViewWidget::mouseMoveEvent(QMouseEvent *e) {
+    QPlainTextEdit::mouseMoveEvent(e);
+
     QTextEdit::ExtraSelection selection;
     QColor lineColor = QColor(Qt::yellow).lighter(160);
     selection.format.setBackground(lineColor);
