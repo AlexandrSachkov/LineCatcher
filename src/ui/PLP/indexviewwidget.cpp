@@ -10,11 +10,18 @@
 IndexViewWidget::IndexViewWidget(
         std::unique_ptr<PLP::ResultSetReaderI> indexReader,
         PagedFileViewWidget* fileViewer,
+        ULLSpinBox* lineNavBox,
         QWidget* parent)
     : QPlainTextEdit (parent) {
 
     _indexReader = std::move(indexReader);
     _fileViewer = fileViewer;
+    _lineNavBox = lineNavBox;
+
+    _lineNavBox->setValue(0);
+    connect(_lineNavBox, SIGNAL(valueUpdated(unsigned long long)), this, SLOT(gotoLine(unsigned long long)));
+
+
     _lineNumberArea = new LineNumberArea(this);
     connect(_lineNumberArea, SIGNAL(paintEventOccurred(QPaintEvent*)), this, SLOT(lineNumberAreaPaintEvent(QPaintEvent*)));
     connect(_lineNumberArea, SIGNAL(sizeHintRequested(void)), this, SLOT(lineNumberAreaWidth(void)));
@@ -30,6 +37,7 @@ IndexViewWidget::IndexViewWidget(
     SignalingScrollBar* scrollBar = new SignalingScrollBar();
     connect(scrollBar, SIGNAL(mouseReleased(void)), this, SLOT(readBlockIfRequired(void)));
     connect(scrollBar, SIGNAL(wheelMoved(void)), this, SLOT(readBlockIfRequired(void)));
+    connect(scrollBar, SIGNAL(valueChanged(int)), this, SLOT(scrollBarMoved(int)));
     this->setVerticalScrollBar(scrollBar);
 
     QFont f("Courier New", 16);
@@ -155,7 +163,9 @@ void IndexViewWidget::readNextBlock() {
         }
     }
 
-    _startLineNum = _endLineNum >= MAX_NUM_BLOCKS ? _endLineNum - MAX_NUM_BLOCKS : 0;
+    if(_endLineNum - _startLineNum > MAX_NUM_BLOCKS){
+        _startLineNum = _endLineNum - MAX_NUM_BLOCKS;
+    }
     const int newScrollbarValue = currScrollbarValue - (_startLineNum - currStartLineNum);
     this->verticalScrollBar()->setValue(newScrollbarValue);
 }
@@ -174,6 +184,12 @@ void IndexViewWidget::readPreviousBlock() {
         return;
     }
 
+    unsigned long long numLinesToDelete = 0;
+    const unsigned long long totalFutureNumLines = _endLineNum - _startLineNum + numLinesToRead;
+    if(totalFutureNumLines > MAX_NUM_BLOCKS){
+        numLinesToDelete = totalFutureNumLines - MAX_NUM_BLOCKS;
+    }
+
     unsigned long long lineNum;
 
     //delete lines from end of document
@@ -185,7 +201,7 @@ void IndexViewWidget::readPreviousBlock() {
     cursor.removeSelectedText();
     cursor.deletePreviousChar();
 
-    for(int i = 0; i < numLinesToRead; i++){
+    for(int i = 0; i < numLinesToDelete; i++){
         cursor.movePosition(QTextCursor::StartOfLine, QTextCursor::KeepAnchor);
         cursor.removeSelectedText();
         cursor.deletePreviousChar();
@@ -247,4 +263,61 @@ void IndexViewWidget::mouseReleaseEvent(QMouseEvent* event) {
     if(_indexReader->getResult(_startLineNum + cursor.blockNumber(), lineNum)){
         _fileViewer->gotoLine(lineNum);
     }
+}
+
+void IndexViewWidget::gotoLine(unsigned long long lineNum){
+    if(lineNum >= _startLineNum && lineNum < _endLineNum){
+        this->verticalScrollBar()->setValue(lineNum - _startLineNum);
+        return;
+    }
+
+    const unsigned int halfLinesPerRead = NUM_LINES_PER_READ / 2;
+    unsigned long long startLine;
+    if(lineNum < halfLinesPerRead){
+        startLine = 0;
+    }else if(lineNum >= _indexReader->getNumResults()) {
+        startLine = _indexReader->getNumResults() - 1 - NUM_LINES_PER_READ;
+    }else if(_indexReader->getNumResults() - lineNum < halfLinesPerRead){
+        startLine = _indexReader->getNumResults() - 1 - NUM_LINES_PER_READ;
+    }else{
+        startLine = lineNum - halfLinesPerRead;
+    }
+    _startLineNum = startLine;
+    _endLineNum = startLine;
+
+    this->clear();
+
+    unsigned long long resLineNum;
+    QString line;
+    QTextCursor cursor = this->textCursor();
+    if(_indexReader->getResult(_startLineNum, resLineNum)){
+        if(!_fileViewer->getLineFromIndex(_indexReader, line)){
+            return;
+        }
+        cursor.movePosition(QTextCursor::End);
+        cursor.insertText(QString::number(resLineNum) + ":   " + line);
+        _endLineNum++;
+
+        for(unsigned int i = 0; i < NUM_LINES_PER_READ - 1; i++){
+            if(!_indexReader->nextResult(resLineNum)){
+                break;
+            }
+            if(!_fileViewer->getLineFromIndex(_indexReader, line)){
+                return;
+            }
+
+            cursor.movePosition(QTextCursor::End);
+            cursor.insertText(QString::number(resLineNum) + ":   " + line);
+            _endLineNum++;
+        }
+    }
+
+    if(_endLineNum - _startLineNum > MAX_NUM_BLOCKS){
+        _startLineNum = _endLineNum - MAX_NUM_BLOCKS;
+    }
+    this->verticalScrollBar()->setValue(lineNum - _startLineNum);
+}
+
+void IndexViewWidget::scrollBarMoved(int val) {
+    _lineNavBox->setValue(_startLineNum + val);
 }

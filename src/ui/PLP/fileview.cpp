@@ -1,5 +1,7 @@
 #include "fileview.h"
+#include "indexview.h"
 #include "indexviewwidget.h"
+#include "ullspinbox.h"
 #include <QtWidgets/QVBoxLayout>
 #include <QSplitter>
 #include <QFile>
@@ -76,7 +78,7 @@ void FileView::openIndex(std::unique_ptr<PLP::ResultSetReaderI> indexReader){
     QString qPath = QString::fromStdWString(path);
     QString fileName = qPath.split('/').last();
 
-    IndexViewWidget* indexView = new IndexViewWidget(std::move(indexReader), _dataView, this);
+    IndexView* indexView = new IndexView(std::move(indexReader), _dataView, this);
     _indexViewer->addTab(indexView, fileName);
     _indexViewer->setTabToolTip(_indexViewer->count() - 1, qPath);
     _indexViewer->setCurrentIndex(_indexViewer->count() - 1);

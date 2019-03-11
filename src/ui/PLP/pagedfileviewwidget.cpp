@@ -169,7 +169,6 @@ void PagedFileViewWidget::readNextBlock() {
     if(_endLineNum - _startLineNum > MAX_NUM_BLOCKS){
         _startLineNum = _endLineNum - MAX_NUM_BLOCKS;
     }
-    //_startLineNum = _endLineNum >= MAX_NUM_BLOCKS ? _endLineNum - MAX_NUM_BLOCKS : 0;
     const int newScrollbarValue = currScrollbarValue - (_startLineNum - currStartLineNum);
     this->verticalScrollBar()->setValue(newScrollbarValue);
 }

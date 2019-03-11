@@ -7,6 +7,7 @@
 #include <QMouseEvent>
 
 #include "pagedfileviewwidget.h"
+#include "ullspinbox.h"
 #include "ResultSetReaderI.h"
 #include "FileReaderI.h"
 #include <memory>
@@ -15,11 +16,17 @@ class IndexViewWidget : public QPlainTextEdit
 {
     Q_OBJECT
 public:
-    IndexViewWidget(std::unique_ptr<PLP::ResultSetReaderI> indexReader, PagedFileViewWidget* fileViewer, QWidget* parent = nullptr);
+    IndexViewWidget(
+        std::unique_ptr<PLP::ResultSetReaderI> indexReader,
+        PagedFileViewWidget* fileViewer,
+        ULLSpinBox* lineNavBox,
+        QWidget* parent = nullptr
+    );
 
 protected:
     void resizeEvent(QResizeEvent *e) override;
-
+public slots:
+    void gotoLine(unsigned long long lineNum);
 private slots:
     void textChangedImpl();
     void updateLineNumberAreaWidth(int newBlockCount);
@@ -27,6 +34,7 @@ private slots:
     void readBlockIfRequired();
     void lineNumberAreaPaintEvent(QPaintEvent *event);
     int lineNumberAreaWidth() const;
+    void scrollBarMoved(int val);
 
 private:
     void calcNumVisibleLines();
@@ -40,6 +48,7 @@ private:
     std::unique_ptr<PLP::ResultSetReaderI> _indexReader;
     PagedFileViewWidget* _fileViewer;
     QWidget* _lineNumberArea;
+    ULLSpinBox* _lineNavBox;
     std::vector<unsigned long long> _indices;
     std::vector<QString> _data;
 
