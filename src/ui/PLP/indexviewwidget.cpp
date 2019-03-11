@@ -230,3 +230,20 @@ void IndexViewWidget::readBlockIfRequired() {
         readPreviousBlock();
     }
 }
+
+void IndexViewWidget::mousePressEvent(QMouseEvent* event) {
+    QTextCursor cursor = this->cursorForPosition(event->pos());
+
+    QTextEdit::ExtraSelection selection;
+    QColor lineColor = QColor(Qt::yellow).lighter(160);
+    selection.format.setBackground(lineColor);
+    selection.format.setProperty(QTextFormat::FullWidthSelection, true);
+    selection.cursor = cursor;
+    selection.cursor.clearSelection();
+    this->setExtraSelections({selection});
+
+    unsigned long long lineNum;
+    if(_indexReader->getResult(_startLineNum + cursor.blockNumber(), lineNum)){
+        _fileViewer->gotoLine(lineNum);
+    }
+}

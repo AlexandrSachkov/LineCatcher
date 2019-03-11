@@ -25,6 +25,9 @@ public:
 
 signals:
 
+public slots:
+    void gotoLine(unsigned long long lineNum);
+
 private slots:
     void textChangedImpl();
     void updateLineNumberAreaWidth(int newBlockCount);
@@ -33,7 +36,6 @@ private slots:
     void lineNumberAreaPaintEvent(QPaintEvent *event);
     int lineNumberAreaWidth() const;
     void scrollBarMoved(int val);
-    void gotoLine(unsigned long long lineNum);
 
 protected:
     void resizeEvent(QResizeEvent *e) override;
