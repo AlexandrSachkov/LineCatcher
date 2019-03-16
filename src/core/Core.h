@@ -86,7 +86,8 @@ namespace PLP {
             bool overwriteIfExists
         );
 
-        void printConsole(const std::string& msg);
+        void printConsoleL(const std::string& msg);
+        void printConsoleExL(const std::string& msg, int level);
 
     private:
         static void attachLuaBindings(lua_State* state);

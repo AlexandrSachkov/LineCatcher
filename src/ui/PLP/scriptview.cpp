@@ -56,7 +56,26 @@ ScriptView::ScriptView(PLP::CoreI* plpCore, QWidget *parent) : QWidget(parent)
     splitter->addWidget(_console);
 
     _printConsole = [&](int level, const char* msg){
-        _console->insertPlainText(QString::fromStdString(msg) + "\n");
+        QString levelName;
+        QColor textColor;
+
+        if(level == 1){
+            levelName = "Warning: ";
+            textColor = QColor(255,150,0);
+        } else if(level >= 2){
+            levelName = "Error: ";
+            textColor = QColor(255,0,0);
+        }else{
+            levelName = ""; //Info is not displayed
+            textColor = QColor(0,0,0);
+        }
+
+        QTextCharFormat tf = _console->currentCharFormat();
+        tf = _console->currentCharFormat();
+        tf.setForeground(QBrush(textColor));
+        _console->setCurrentCharFormat(tf);
+
+        _console->insertPlainText(levelName + QString::fromStdString(msg) + "\n");
     };
 
     plpCore->attachLogOutput("console", &_printConsole);

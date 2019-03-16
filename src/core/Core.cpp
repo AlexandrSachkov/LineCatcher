@@ -13,12 +13,8 @@
 #include "Logger.h"
 
 #include "lua.hpp"
-#include "LuaIntf/LuaCompat.h"
 #include "LuaIntf/LuaIntf.h"
-#include "LuaIntf/LuaRef.h"
 
-#include "LuaIntf/LuaContext.h"
-#include "LuaIntf/LuaState.h"
 #include <fstream>
 #include <cstring>
 
@@ -286,8 +282,12 @@ namespace PLP {
         );
     }
 
-    void Core::printConsole(const std::string& msg) {
-        Logger::send(INFO, msg);
+    void Core::printConsoleL(const std::string& msg) {
+        printConsoleExL(msg, 0);
+    }
+
+    void Core::printConsoleExL(const std::string& msg, int level) {
+        Logger::send((LOG_LEVEL)level, msg);
     }
 
     void Core::attachLuaBindings(lua_State* state) {
@@ -298,7 +298,8 @@ namespace PLP {
         plpClass.addFunction("createFileWriter", &Core::createFileWriterL);
         plpClass.addFunction("createResultSetReader", &Core::createResultSetReaderL);
         plpClass.addFunction("createResultSetWriter", &Core::createResultSetWriterL);
-        plpClass.addFunction("printConsole", &Core::printConsole);
+        plpClass.addFunction("printConsole", &Core::printConsoleL);
+        plpClass.addFunction("printConsoleEx", &Core::printConsoleExL);
         plpClass.endClass();
 
         auto fileReaderClass = module.beginClass<FileReader>("FileReader");
