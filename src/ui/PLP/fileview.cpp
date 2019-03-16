@@ -14,6 +14,7 @@ FileView::FileView(std::unique_ptr<PLP::FileReaderI> fileReader, QWidget *parent
     QVBoxLayout* mainLayout = new QVBoxLayout();
     this->setLayout(mainLayout);
     mainLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->setSpacing(0);
 
     std::wstring path;
     fileReader->getFilePath(path);
@@ -37,7 +38,6 @@ FileView::FileView(std::unique_ptr<PLP::FileReaderI> fileReader, QWidget *parent
 
     QSplitter* splitter = new QSplitter(this);
     mainLayout->addWidget(splitter);
-    splitter->setContentsMargins(0,0,0,0);
     splitter->setOrientation(Qt::Orientation::Vertical);
     splitter->setHandleWidth(5);
     splitter->setChildrenCollapsible(false);

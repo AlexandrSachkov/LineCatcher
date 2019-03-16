@@ -12,6 +12,7 @@ IndexView::IndexView(
     QVBoxLayout* mainLayout = new QVBoxLayout();
     this->setLayout(mainLayout);
     mainLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->setSpacing(0);
 
     QFont lineNavFont("Courier New", 14);
     lineNavFont.setStyleHint(QFont::Monospace);

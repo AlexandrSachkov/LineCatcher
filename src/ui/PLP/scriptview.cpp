@@ -6,6 +6,7 @@
 #include <QFileDialog>
 #include <QLibrary>
 #include <QTextStream>
+#include <QScrollBar>
 
 ScriptView::ScriptView(PLP::CoreI* plpCore, QWidget *parent) : QWidget(parent)
 {
@@ -17,11 +18,14 @@ ScriptView::ScriptView(PLP::CoreI* plpCore, QWidget *parent) : QWidget(parent)
     QVBoxLayout* mainLayout = new QVBoxLayout();
     this->setLayout(mainLayout);
     mainLayout->setContentsMargins(2, 2, 2, 2);
+    mainLayout->setSpacing(0);
 
     setWindowFlags(Qt::Window);
 
     QHBoxLayout* scriptLoadControlLayout = new QHBoxLayout();
     mainLayout->addLayout(scriptLoadControlLayout);
+    scriptLoadControlLayout->setContentsMargins(0, 0, 0, 0);
+
 
     _scriptPath = new QLineEdit(this);
     scriptLoadControlLayout->addWidget(_scriptPath);
@@ -39,23 +43,36 @@ ScriptView::ScriptView(PLP::CoreI* plpCore, QWidget *parent) : QWidget(parent)
     connect(_save, SIGNAL(clicked(void)), this, SLOT(saveScript(void)));
 
     _run = new QPushButton("Run", this);
-    mainLayout->addWidget(_run);
+    scriptLoadControlLayout->addWidget(_run);
     connect(_run, SIGNAL(clicked(void)), this, SLOT(runScript(void)));
+
 
     QSplitter* splitter = new QSplitter(this);
     mainLayout->addWidget(splitter);
     splitter->setOrientation(Qt::Orientation::Vertical);
-    splitter->setHandleWidth(3);
+    splitter->setHandleWidth(0);
     splitter->setChildrenCollapsible(false);
 
     _scriptEditor = new QPlainTextEdit(this);
     _scriptEditor->setReadOnly(false);
-    splitter->addWidget(_scriptEditor);
 
-    _console = new QPlainTextEdit(this);
+    QWidget* consoleWidget = new QWidget(splitter);
+    QVBoxLayout* consoleLayout = new QVBoxLayout();
+    consoleWidget->setLayout(consoleLayout);
+    consoleLayout->setContentsMargins(0, 0, 0, 0);
+    consoleLayout->setSpacing(0);
+
+    _clearConsole = new QPushButton("Clear", consoleWidget);
+    _clearConsole->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    consoleLayout->addWidget(_clearConsole);
+
+    _console = new QPlainTextEdit(consoleWidget);
     _console->setReadOnly(true);
     _console->setMaximumBlockCount(1000);
-    splitter->addWidget(_console);
+    consoleLayout->addWidget(_console);
+
+    splitter->addWidget(_scriptEditor);
+    splitter->addWidget(consoleWidget);
 
     _printConsole = [&](int level, const char* msg){
         QString levelName;
@@ -75,9 +92,14 @@ ScriptView::ScriptView(PLP::CoreI* plpCore, QWidget *parent) : QWidget(parent)
         QTextCharFormat tf = _console->currentCharFormat();
         tf = _console->currentCharFormat();
         tf.setForeground(QBrush(textColor));
-        _console->setCurrentCharFormat(tf);
 
-        _console->insertPlainText(levelName + QString::fromStdString(msg) + "\n");
+        QTextCursor cursor = _console->textCursor();
+        cursor.movePosition(QTextCursor::End);
+        cursor.setCharFormat(tf);
+        cursor.insertText(levelName + QString::fromStdString(msg) + "\n");
+
+        QScrollBar* scrollBar = _console->verticalScrollBar();
+        scrollBar->setValue(scrollBar->maximum());
     };
 
     plpCore->attachLogOutput("console", &_printConsole);

@@ -34,6 +34,7 @@ private:
     QPushButton* _load;
     QPushButton* _save;
     QPushButton* _run;
+    QPushButton* _clearConsole;
     QLineEdit* _scriptPath;
     QPlainTextEdit* _scriptEditor;
     QPlainTextEdit* _console;
