@@ -33,6 +33,7 @@ namespace PLP {
 
         bool initialize();
         bool runScript(const std::wstring& scriptLua, std::wstring& errMsg) override;
+        bool attachLogOutput(const char* name, const std::function<void(int, const char*)>* func);
 
         //C++ interface
         FileReaderI* createFileReader(
@@ -84,6 +85,8 @@ namespace PLP {
             const FileReaderI* fReader,
             bool overwriteIfExists
         );
+
+        void printConsole(const std::string& msg);
 
     private:
         static void attachLuaBindings(lua_State* state);

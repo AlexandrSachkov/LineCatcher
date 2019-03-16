@@ -10,6 +10,7 @@
 #include "PagedReader.h"
 #include "MemMappedPagedReader.h"
 #include "LineReader.h"
+#include "Logger.h"
 
 #include "lua.hpp"
 #include "LuaIntf/LuaCompat.h"
@@ -75,6 +76,11 @@ namespace PLP {
             errMsg = string_to_wstring(lua_tostring(_state, -1));
             return false;
         }
+        return true;
+    }
+
+    bool Core::attachLogOutput(const char* name, const std::function<void(int, const char*)>* func) {
+        Logger::subscribe(name, *func);
         return true;
     }
 
@@ -170,6 +176,7 @@ namespace PLP {
     ) {
         FileReader* fReader = new FileReader();
         if (!fReader->initialize(string_to_wstring(path), preferredBuffSizeBytes, requireRandomAccess)) {
+            Logger::send(ERR, "Failed to create file reader");
             return nullptr;
         }
         return fReader;
@@ -182,6 +189,7 @@ namespace PLP {
     ) {
         FileWriter* fileWriter = new FileWriter();
         if (!fileWriter->initialize(string_to_wstring(path), preferredBuffSizeBytes, overwriteIfExists, *_fileOpThread)) {
+            Logger::send(ERR, "Failed to create file writer");
             return nullptr;
         }
         return fileWriter;
@@ -193,6 +201,7 @@ namespace PLP {
     ) {
         ResultSetReader* resSet = new ResultSetReader();
         if (!resSet->initialize(string_to_wstring(path), preferredBuffSizeBytes)) {
+            Logger::send(ERR, "Failed to create index reader");
             return nullptr;
         }
         return resSet;
@@ -216,6 +225,7 @@ namespace PLP {
             string_to_wstring(path), 
             dataPath,
             preferredBuffSizeBytes, overwriteIfExists, *_fileOpThread)) {
+            Logger::send(ERR, "Failed to create index writer");
             return nullptr;
         }
         return resSet;
@@ -261,6 +271,10 @@ namespace PLP {
         );
     }
 
+    void Core::printConsole(const std::string& msg) {
+        Logger::send(INFO, msg);
+    }
+
     void Core::attachLuaBindings(lua_State* state) {
         auto module = LuaIntf::LuaBinding(state).beginModule("PLP");
 
@@ -269,6 +283,7 @@ namespace PLP {
         plpClass.addFunction("createFileWriter", &Core::createFileWriterL);
         plpClass.addFunction("createResultSetReader", &Core::createResultSetReaderL);
         plpClass.addFunction("createResultSetWriter", &Core::createResultSetWriterL);
+        plpClass.addFunction("printConsole", &Core::printConsole);
         plpClass.endClass();
 
         auto fileReaderClass = module.beginClass<FileReader>("FileReader");
@@ -297,6 +312,7 @@ namespace PLP {
         resultReaderClass.addFunction("nextResult", nextResult);
         resultReaderClass.addFunction("getLineNumber", &ResultSetReader::getLineNumber);
         resultReaderClass.addFunction("getNumResults", &ResultSetReader::getNumResults);
+        resultReaderClass.addFunction("getFilePath", &ResultSetReader::getFilePath);
         resultReaderClass.addFunction("getDataFilePath", &ResultSetReader::getDataFilePath);
         resultReaderClass.addFunction("restart", &ResultSetReader::restart);
         resultReaderClass.addFunction("release", &ResultSetReader::release);

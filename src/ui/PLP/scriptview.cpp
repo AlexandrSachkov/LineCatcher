@@ -54,6 +54,16 @@ ScriptView::ScriptView(PLP::CoreI* plpCore, QWidget *parent) : QWidget(parent)
     _console->setReadOnly(true);
     _console->setMaximumBlockCount(1000);
     splitter->addWidget(_console);
+
+    _printConsole = [&](int level, const char* msg){
+        _console->insertPlainText(QString::fromStdString(msg) + "\n");
+    };
+
+    plpCore->attachLogOutput("console", &_printConsole);
+
+    QFont f("Courier New", 14);
+    f.setStyleHint(QFont::Monospace);
+    this->setFont(f);
 }
 
 ScriptView::~ScriptView() {

@@ -12,6 +12,10 @@ int main() {
         return 1;
     }
 
+    core->attachLogOutput("console", [](int level, const char* msg) {
+        printf("%s\n", msg);
+    });
+
     std::wstring err;
     std::wstring script1 =
         L"file = io.open(\"test.txt\", \"a\");"

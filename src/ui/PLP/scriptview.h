@@ -11,6 +11,8 @@
 
 #include "Core.h"
 
+#include <functional>
+
 class ScriptView : public QWidget
 {
     Q_OBJECT
@@ -26,6 +28,8 @@ public slots:
     void runScript();
 
 private:
+    std::function<void(int, const char*)> _printConsole;
+
     QPushButton* _open;
     QPushButton* _load;
     QPushButton* _save;
