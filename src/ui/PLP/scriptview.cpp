@@ -97,6 +97,11 @@ void ScriptView::openScript(){
 
     QString fileName = path.split('/').last();
     _scriptPath->setText(path);
+
+    QFile file(path);
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        _scriptEditor->setPlainText(file.readAll());
+    }
 }
 
 void ScriptView::loadScript() {
