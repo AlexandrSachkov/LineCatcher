@@ -76,6 +76,10 @@ namespace PLP {
             errMsg = string_to_wstring(lua_tostring(_state, -1));
             return false;
         }
+
+        lua_settop(_state, 0);
+        lua_gc(_state, LUA_GCCOLLECT, 0);
+
         return true;
     }
 

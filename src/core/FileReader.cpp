@@ -5,10 +5,12 @@
 #include "IndexedLineReader.h"
 #include "Utils.h"
 #include "ResultSetReader.h"
+#include "Logger.h"
 
 namespace PLP {
     FileReader::FileReader() {}
     FileReader::~FileReader() {
+        Logger::send(INFO, "Releasing file reader");
         release();
     }
 
