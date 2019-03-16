@@ -16,6 +16,8 @@ ScriptView::ScriptView(PLP::CoreI* plpCore, QWidget *parent) : QWidget(parent)
 
     QVBoxLayout* mainLayout = new QVBoxLayout();
     this->setLayout(mainLayout);
+    mainLayout->setContentsMargins(2, 2, 2, 2);
+
     setWindowFlags(Qt::Window);
 
     QHBoxLayout* scriptLoadControlLayout = new QHBoxLayout();
