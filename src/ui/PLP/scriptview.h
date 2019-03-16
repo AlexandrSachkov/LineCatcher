@@ -21,11 +21,12 @@ public:
     ~ScriptView();
 signals:
 
-public slots:
+private slots:
     void openScript();
     void loadScript();
     void saveScript();
     void runScript();
+    void clearConsole();
 
 private:
     std::function<void(int, const char*)> _printConsole;

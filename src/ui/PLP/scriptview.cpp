@@ -65,6 +65,7 @@ ScriptView::ScriptView(PLP::CoreI* plpCore, QWidget *parent) : QWidget(parent)
     _clearConsole = new QPushButton("Clear", consoleWidget);
     _clearConsole->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     consoleLayout->addWidget(_clearConsole);
+    connect(_clearConsole, SIGNAL(clicked(void)), this, SLOT(clearConsole(void)));
 
     _console = new QPlainTextEdit(consoleWidget);
     _console->setReadOnly(true);
@@ -160,4 +161,8 @@ void ScriptView::saveScript() {
         QTextStream out(&file);
         out << script;
     }
+}
+
+void ScriptView::clearConsole() {
+    _console->clear();
 }
