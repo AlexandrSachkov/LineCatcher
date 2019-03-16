@@ -42,6 +42,7 @@ namespace PLP {
     bool Core::initialize() {
         _state = luaL_newstate();
         if (!_state) {
+            Logger::send(ERR, "Failed to start thread pool");
             return false;
         }
 
@@ -50,14 +51,17 @@ namespace PLP {
 
         _fileOpThread.reset(new Thread(1000000)); //1 ms sleep
         if (!_fileOpThread->start()) {
+            Logger::send(ERR, "Failed to start thread pool");
             return false;
         }
 
+        Logger::send(INFO, "Successfully initialized PLP core");
         return true;
     }
 
     bool Core::runScript(const std::wstring& scriptLua, std::wstring& errMsg) {
         if (scriptLua.empty()) {
+            Logger::send(WARN, "No script provided");
             return true;
         }
 
@@ -70,10 +74,12 @@ namespace PLP {
         lua_settop(_state, 0);
         if (luaL_loadstring(_state, wstring_to_string(scriptLua).c_str())) {
             errMsg = string_to_wstring(lua_tostring(_state, -1));
+            Logger::send(ERR, "Failed to compile lua script");
             return false;
         }
         if (lua_pcall(_state, 0, LUA_MULTRET, 0)) {
             errMsg = string_to_wstring(lua_tostring(_state, -1));
+            Logger::send(ERR, "Failed to run lua script");
             return false;
         }
 
@@ -183,6 +189,7 @@ namespace PLP {
             Logger::send(ERR, "Failed to create file reader");
             return nullptr;
         }
+        Logger::send(INFO, "Successfully created file reader");
         return fReader;
     }
 
@@ -196,6 +203,7 @@ namespace PLP {
             Logger::send(ERR, "Failed to create file writer");
             return nullptr;
         }
+        Logger::send(INFO, "Successfully created file writer");
         return fileWriter;
     }
 
@@ -208,6 +216,7 @@ namespace PLP {
             Logger::send(ERR, "Failed to create index reader");
             return nullptr;
         }
+        Logger::send(INFO, "Successfully created index reader");
         return resSet;
     }
 
@@ -218,6 +227,7 @@ namespace PLP {
         bool overwriteIfExists
     ) {
         if (!fReader) {
+            Logger::send(ERR, "File reader is null");
             return false;
         }
 
@@ -232,6 +242,7 @@ namespace PLP {
             Logger::send(ERR, "Failed to create index writer");
             return nullptr;
         }
+        Logger::send(INFO, "Successfully created index writer");
         return resSet;
     }
 
