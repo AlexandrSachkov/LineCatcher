@@ -76,6 +76,9 @@ namespace PLP {
         if (lua_pcall(_state, 0, LUA_MULTRET, 0)) {
             std::string err = lua_tostring(_state, -1);
             Logger::send(ERR, "Failed to run lua script:\n" + err);
+            lua_settop(_state, 0);
+            lua_gc(_state, LUA_GCCOLLECT, 0);
+
             return false;
         }
 
