@@ -8,6 +8,8 @@
 #include <QFileInfo>
 #include <QDateTime>
 #include <QMessageBox>
+#include <QApplication>
+#include <QDesktopWidget>
 
 FileView::FileView(std::unique_ptr<PLP::FileReaderI> fileReader, QWidget *parent) : QWidget(parent)
 {
@@ -41,7 +43,6 @@ FileView::FileView(std::unique_ptr<PLP::FileReaderI> fileReader, QWidget *parent
     splitter->setOrientation(Qt::Orientation::Vertical);
     splitter->setHandleWidth(5);
     splitter->setChildrenCollapsible(false);
-    mainLayout->addWidget(splitter);
 
     _dataView = new PagedFileViewWidget(std::move(fileReader), _currLineNumBox, splitter);
     _dataView->setReadOnly(true);
@@ -50,6 +51,10 @@ FileView::FileView(std::unique_ptr<PLP::FileReaderI> fileReader, QWidget *parent
     _indexViewer = new QTabWidget(splitter);
     _indexViewer->setTabsClosable(true);
     splitter->addWidget(_indexViewer);
+
+    QRect screenGeometry = QApplication::desktop()->screenGeometry();
+    splitter->setSizes(QList<int>({screenGeometry.height() / 4 * 3, screenGeometry.height() / 4}));
+
     connect(_indexViewer, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
 }
 

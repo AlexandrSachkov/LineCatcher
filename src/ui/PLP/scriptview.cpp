@@ -80,6 +80,9 @@ ScriptView::ScriptView(PLP::CoreI* plpCore, QWidget *parent) : QWidget(parent)
     splitter->addWidget(_scriptEditor);
     splitter->addWidget(consoleWidget);
 
+    QRect screenGeometry = QApplication::desktop()->screenGeometry();
+    splitter->setSizes(QList<int>({(int)(screenGeometry.height() / 4 * 2.5), (int)(screenGeometry.height() / 4 * 1.5)}));
+
     _printConsole = [&](int level, const char* msg){
         QString levelName;
         QColor textColor;
