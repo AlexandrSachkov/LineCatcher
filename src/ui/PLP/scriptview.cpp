@@ -8,6 +8,8 @@
 #include <QTextStream>
 #include <QScrollBar>
 
+const char* ScriptView::LOG_SUBSCRIBER_NAME = "console";
+
 ScriptView::ScriptView(PLP::CoreI* plpCore, QWidget *parent) : QWidget(parent)
 {
     if(!_plpCore){
@@ -103,8 +105,6 @@ ScriptView::ScriptView(PLP::CoreI* plpCore, QWidget *parent) : QWidget(parent)
         scrollBar->setValue(scrollBar->maximum());
     };
 
-    plpCore->attachLogOutput("console", &_printConsole);
-
     QFont f("Courier New", 14);
     f.setStyleHint(QFont::Monospace);
     this->setFont(f);
@@ -142,10 +142,14 @@ void ScriptView::loadScript() {
 }
 
 void ScriptView::runScript() {
+    _plpCore->attachLogOutput(LOG_SUBSCRIBER_NAME, &_printConsole);
+
     std::wstring errMsg;
     if(!_plpCore->runScript(_scriptEditor->toPlainText().toStdWString(), errMsg)){
         _console->appendPlainText(QString::fromStdWString(errMsg));
     }
+
+    _plpCore->detachLogOutput(LOG_SUBSCRIBER_NAME);
 }
 
 void ScriptView::saveScript() {

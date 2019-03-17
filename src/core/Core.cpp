@@ -90,6 +90,10 @@ namespace PLP {
         return true;
     }
 
+    void Core::detachLogOutput(const char* name) {
+        Logger::unsubscribe(name);
+    }
+
     /*bool PLPCore::searchLineContains(const std::wstring path, const std::wstring& substr, unsigned int& numMatches) {
         std::ifstream fs(wstring_to_string(path), std::ifstream::in | std::ifstream::binary);
         if (!fs.good()) {

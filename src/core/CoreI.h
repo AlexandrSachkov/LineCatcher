@@ -16,6 +16,7 @@ namespace PLP {
         virtual bool initialize() = 0;
         virtual bool runScript(const std::wstring& scriptLua, std::wstring& errMsg) = 0;
         virtual bool attachLogOutput(const char* name, const std::function<void(int, const char*)>* func) = 0;
+        virtual void detachLogOutput(const char* name) = 0;
 
         virtual FileReaderI* createFileReader(
             const std::string& path,

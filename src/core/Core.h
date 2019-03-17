@@ -34,6 +34,7 @@ namespace PLP {
         bool initialize();
         bool runScript(const std::wstring& scriptLua, std::wstring& errMsg) override;
         bool attachLogOutput(const char* name, const std::function<void(int, const char*)>* func);
+        void detachLogOutput(const char* name);
 
         //C++ interface
         FileReaderI* createFileReader(

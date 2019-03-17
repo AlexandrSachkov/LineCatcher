@@ -29,6 +29,7 @@ private slots:
     void clearConsole();
 
 private:
+    static const char* LOG_SUBSCRIBER_NAME;
     std::function<void(int, const char*)> _printConsole;
 
     QPushButton* _open;
