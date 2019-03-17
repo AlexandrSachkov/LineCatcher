@@ -281,11 +281,11 @@ namespace PLP {
     std::shared_ptr<ResultSetWriter> Core::createResultSetWriterL(
         const std::string& path,
         unsigned long long preferredBuffSizeBytes,
-        const FileReaderI* fReader,
+        std::shared_ptr<FileReader> fReader,
         bool overwriteIfExists
     ) {
         return std::shared_ptr<ResultSetWriter>(
-            static_cast<ResultSetWriter*>(createResultSetWriter(path, preferredBuffSizeBytes, fReader, overwriteIfExists))
+            static_cast<ResultSetWriter*>(createResultSetWriter(path, preferredBuffSizeBytes, fReader.get(), overwriteIfExists))
         );
     }
 
