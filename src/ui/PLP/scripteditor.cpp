@@ -3,6 +3,7 @@
 
 #include <QTextBlock>
 #include <QPainter>
+#include <QFontMetricsF>
 
 ScriptEditor::ScriptEditor(QWidget* parent) : QPlainTextEdit (parent)
 {
@@ -17,6 +18,14 @@ ScriptEditor::ScriptEditor(QWidget* parent) : QPlainTextEdit (parent)
     this->setWordWrapMode(QTextOption::WrapMode::NoWrap);
 
     _highlighter = new LuaSyntaxHighlighter(this->document());
+
+    QFont f("Courier New", 14);
+    f.setStyleHint(QFont::Monospace);
+    this->setFont(f);
+
+    const int tabStop = 4;  // 4 characters
+    QFontMetricsF metrics(this->font());
+    this->setTabStopDistance(metrics.width(' ') * tabStop);
 }
 
 void ScriptEditor::resizeEvent(QResizeEvent *e){
