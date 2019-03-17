@@ -28,6 +28,10 @@ private slots:
     void runScript();
     void clearConsole();
 
+protected:
+    void hideEvent(QHideEvent* event);
+    void showEvent(QShowEvent* event);
+
 private:
     static const char* LOG_SUBSCRIBER_NAME;
     std::function<void(int, const char*)> _printConsole;

@@ -7,6 +7,9 @@
 #include <QLibrary>
 #include <QTextStream>
 #include <QScrollBar>
+#include <QSettings>
+#include <QApplication>
+#include <QDesktopWidget>
 
 const char* ScriptView::LOG_SUBSCRIBER_NAME = "console";
 
@@ -111,7 +114,6 @@ ScriptView::ScriptView(PLP::CoreI* plpCore, QWidget *parent) : QWidget(parent)
 }
 
 ScriptView::~ScriptView() {
-
 }
 
 void ScriptView::openScript(){
@@ -169,4 +171,33 @@ void ScriptView::saveScript() {
 
 void ScriptView::clearConsole() {
     _console->clear();
+}
+
+void ScriptView::hideEvent(QHideEvent* event) {
+    QSettings settings("AlexandrSachkov", "PLP");
+    settings.beginGroup("ScriptView");
+    settings.setValue("size", size());
+    settings.setValue("pos", pos());
+    settings.setValue("maximized", isMaximized());
+    settings.endGroup();
+}
+
+void ScriptView::showEvent(QShowEvent* event) {
+    QSize defaultSize = parentWidget()->size() * 0.75;
+
+    QRect screenGeometry = QApplication::desktop()->screenGeometry();
+    int defaultPosX = (screenGeometry.width() - defaultSize.width()) / 2;
+    int defaultPosY = (screenGeometry.height() - defaultSize.height()) / 2;
+
+    QSettings settings("AlexandrSachkov", "PLP");
+    settings.beginGroup("ScriptView");
+    resize(settings.value("size", defaultSize).toSize());
+    move(settings.value("pos", QPoint(defaultPosX, defaultPosY)).toPoint());
+
+    bool maximized = settings.value("maximized", false).toBool();
+    if(maximized){
+        showMaximized();
+    }
+
+    settings.endGroup();
 }
