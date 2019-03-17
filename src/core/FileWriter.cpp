@@ -3,10 +3,12 @@
 #include "Utils.h"
 #include "TaskRunner.h"
 #include "PagedWriter.h"
+#include "Logger.h"
 
 namespace PLP {
     FileWriter::FileWriter() {}
     FileWriter::~FileWriter() {
+        Logger::send(INFO, "Releasing file writer");
         release();
     }
 

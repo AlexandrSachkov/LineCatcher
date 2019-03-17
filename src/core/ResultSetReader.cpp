@@ -1,6 +1,7 @@
 #include "ResultSetReader.h"
 #include "MemMappedPagedReader.h"
 #include "Utils.h"
+#include "Logger.h"
 
 #include <fstream>
 
@@ -8,6 +9,7 @@ namespace PLP {
     ResultSetReader::ResultSetReader() {}
 
     ResultSetReader::~ResultSetReader() {
+        Logger::send(INFO, "Releasing index reader");
         release();
     }
 

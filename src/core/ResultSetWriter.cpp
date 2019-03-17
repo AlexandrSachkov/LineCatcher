@@ -3,10 +3,12 @@
 #include "Utils.h"
 #include "FileReader.h"
 #include "TaskRunner.h"
+#include "Logger.h"
 
 namespace PLP {
     ResultSetWriter::ResultSetWriter() {}
     ResultSetWriter::~ResultSetWriter() {
+        Logger::send(INFO, "Releasing index writer");
         release();
     }
 
