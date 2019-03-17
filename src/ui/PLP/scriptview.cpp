@@ -151,10 +151,8 @@ void ScriptView::loadScript() {
 void ScriptView::runScript() {
     _plpCore->attachLogOutput(LOG_SUBSCRIBER_NAME, &_printConsole);
 
-    std::wstring errMsg;
-    if(!_plpCore->runScript(_scriptEditor->toPlainText().toStdWString(), errMsg)){
-        _console->appendPlainText(QString::fromStdWString(errMsg));
-    }
+    std::wstring script = _scriptEditor->toPlainText().toStdWString();
+    _plpCore->runScript(&script);
 
     _plpCore->detachLogOutput(LOG_SUBSCRIBER_NAME);
 }

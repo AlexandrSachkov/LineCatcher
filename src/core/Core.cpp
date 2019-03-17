@@ -55,8 +55,8 @@ namespace PLP {
         return true;
     }
 
-    bool Core::runScript(const std::wstring& scriptLua, std::wstring& errMsg) {
-        if (scriptLua.empty()) {
+    bool Core::runScript(const std::wstring* scriptLua) {
+        if (nullptr == scriptLua || scriptLua->empty()) {
             Logger::send(WARN, "No script provided");
             return true;
         }
@@ -68,14 +68,14 @@ namespace PLP {
         module.endModule();
 
         lua_settop(_state, 0);
-        if (luaL_loadstring(_state, wstring_to_string(scriptLua).c_str())) {
-            errMsg = string_to_wstring(lua_tostring(_state, -1));
-            Logger::send(ERR, "Failed to compile lua script");
+        if (luaL_loadstring(_state, wstring_to_string(*scriptLua).c_str())) {
+            std::string err = lua_tostring(_state, -1);
+            Logger::send(ERR, "Failed to compile lua script:\n" + err);
             return false;
         }
         if (lua_pcall(_state, 0, LUA_MULTRET, 0)) {
-            errMsg = string_to_wstring(lua_tostring(_state, -1));
-            Logger::send(ERR, "Failed to run lua script");
+            std::string err = lua_tostring(_state, -1);
+            Logger::send(ERR, "Failed to run lua script:\n" + err);
             return false;
         }
 
