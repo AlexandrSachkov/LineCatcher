@@ -1,4 +1,6 @@
 #include "scriptview.h"
+#include "scripteditor.h"
+
 #include <QtWidgets/QVBoxLayout>
 #include <QHBoxLayout>
 #include <QSplitter>
@@ -58,7 +60,7 @@ ScriptView::ScriptView(PLP::CoreI* plpCore, QWidget *parent) : QWidget(parent)
     splitter->setHandleWidth(0);
     splitter->setChildrenCollapsible(false);
 
-    _scriptEditor = new QPlainTextEdit(this);
+    _scriptEditor = new ScriptEditor(this);
     _scriptEditor->setReadOnly(false);
 
     QWidget* consoleWidget = new QWidget(splitter);

@@ -32,7 +32,8 @@ SOURCES += \
     pagedfileviewwidget.cpp \
     indexviewwidget.cpp \
     ullspinbox.cpp \
-    indexview.cpp
+    indexview.cpp \
+    scripteditor.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -43,7 +44,8 @@ HEADERS += \
     signalingscrollbar.h \
     linenumberarea.h \
     ullspinbox.h \
-    indexview.h
+    indexview.h \
+    scripteditor.h
 
 FORMS += \
         mainwindow.ui \

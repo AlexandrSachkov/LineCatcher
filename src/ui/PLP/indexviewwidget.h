@@ -31,9 +31,9 @@ private slots:
     void textChangedImpl();
     void updateLineNumberAreaWidth(int newBlockCount);
     void updateLineNumberArea(const QRect&, int);
-    void readBlockIfRequired();
     void lineNumberAreaPaintEvent(QPaintEvent *event);
     int lineNumberAreaWidth() const;
+    void readBlockIfRequired();
     void scrollBarMoved(int val);
 
 private:

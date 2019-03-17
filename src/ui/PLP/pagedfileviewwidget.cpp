@@ -29,7 +29,7 @@ PagedFileViewWidget::PagedFileViewWidget(
     this->setLineWrapMode(LineWrapMode::NoWrap);
     this->setWordWrapMode(QTextOption::WrapMode::NoWrap);
     this->setMouseTracking(true);
-    this->setMaximumBlockCount(MAX_NUM_BLOCKS + 1);
+    this->setMaximumBlockCount(MAX_NUM_BLOCKS + 1); //there is always going to be a last empty block
 
     SignalingScrollBar* scrollBar = new SignalingScrollBar();
     connect(scrollBar, SIGNAL(mouseReleased(void)), this, SLOT(readBlockIfRequired(void)));
