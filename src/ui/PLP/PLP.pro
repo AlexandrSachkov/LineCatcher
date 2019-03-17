@@ -33,7 +33,8 @@ SOURCES += \
     indexviewwidget.cpp \
     ullspinbox.cpp \
     indexview.cpp \
-    scripteditor.cpp
+    scripteditor.cpp \
+    luasyntaxhighlighter.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -45,7 +46,8 @@ HEADERS += \
     linenumberarea.h \
     ullspinbox.h \
     indexview.h \
-    scripteditor.h
+    scripteditor.h \
+    luasyntaxhighlighter.h
 
 FORMS += \
         mainwindow.ui \

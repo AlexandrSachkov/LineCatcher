@@ -1,5 +1,7 @@
 #ifndef SCRIPTEDITOR_H
 #define SCRIPTEDITOR_H
+
+#include "luasyntaxhighlighter.h"
 #include <QPlainTextEdit>
 
 class ScriptEditor : public QPlainTextEdit
@@ -19,6 +21,7 @@ private slots:
 
 private:
     QWidget* _lineNumberArea;
+    LuaSyntaxHighlighter* _highlighter;
 };
 
 #endif // SCRIPTEDITOR_H

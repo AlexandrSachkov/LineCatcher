@@ -15,6 +15,8 @@ ScriptEditor::ScriptEditor(QWidget* parent) : QPlainTextEdit (parent)
 
     this->setLineWrapMode(LineWrapMode::NoWrap);
     this->setWordWrapMode(QTextOption::WrapMode::NoWrap);
+
+    _highlighter = new LuaSyntaxHighlighter(this->document());
 }
 
 void ScriptEditor::resizeEvent(QResizeEvent *e){
