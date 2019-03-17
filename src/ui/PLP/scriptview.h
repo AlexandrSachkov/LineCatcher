@@ -27,14 +27,18 @@ private slots:
     void saveScript();
     void runScript();
     void clearConsole();
+    void onScriptModified();
 
 protected:
     void hideEvent(QHideEvent* event);
     void showEvent(QShowEvent* event);
 
 private:
+    void setScriptModified(bool modified);
+
     static const char* LOG_SUBSCRIBER_NAME;
     std::function<void(int, const char*)> _printConsole;
+    bool _saved = false;
 
     QPushButton* _open;
     QPushButton* _load;

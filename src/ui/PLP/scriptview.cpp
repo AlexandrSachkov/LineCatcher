@@ -62,6 +62,7 @@ ScriptView::ScriptView(PLP::CoreI* plpCore, QWidget *parent) : QWidget(parent)
 
     _scriptEditor = new ScriptEditor(this);
     _scriptEditor->setReadOnly(false);
+    connect(_scriptEditor, SIGNAL(textChanged(void)), this, SLOT(onScriptModified(void)));
 
     QWidget* consoleWidget = new QWidget(splitter);
     QVBoxLayout* consoleLayout = new QVBoxLayout();
@@ -116,6 +117,8 @@ ScriptView::ScriptView(PLP::CoreI* plpCore, QWidget *parent) : QWidget(parent)
     QFont f("Courier New", 14);
     f.setStyleHint(QFont::Monospace);
     this->setFont(f);
+
+    setScriptModified(false);
 }
 
 ScriptView::~ScriptView() {
@@ -130,10 +133,7 @@ void ScriptView::openScript(){
     QString fileName = path.split('/').last();
     _scriptPath->setText(path);
 
-    QFile file(path);
-    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        _scriptEditor->setPlainText(file.readAll());
-    }
+    loadScript();
 }
 
 void ScriptView::loadScript() {
@@ -145,6 +145,7 @@ void ScriptView::loadScript() {
     QFile file(path);
     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         _scriptEditor->setPlainText(file.readAll());
+        setScriptModified(false);
     }
 }
 
@@ -169,6 +170,8 @@ void ScriptView::saveScript() {
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out(&file);
         out << script;
+
+        setScriptModified(false);
     }
 }
 
@@ -203,4 +206,24 @@ void ScriptView::showEvent(QShowEvent* event) {
     }
 
     settings.endGroup();
+}
+
+void ScriptView::onScriptModified(){
+    setScriptModified(true);
+}
+
+void ScriptView::setScriptModified(bool modified) {
+    _saved = !modified;
+
+    QPalette p = _save->palette();
+    if(modified){
+        p.setColor(QPalette::Button, QColor(255,0,0));
+        p.setColor(QPalette::ButtonText, QColor(255,0,0));
+    }else{
+        p.setColor(QPalette::Button, QColor(0,255,0));
+        p.setColor(QPalette::ButtonText, QColor(0,0,0));
+    }
+    _save->setAutoFillBackground(true);
+    _save->setPalette(p);
+    _save->update();
 }
