@@ -281,7 +281,7 @@ namespace PLP {
     std::shared_ptr<ResultSetWriter> Core::createResultSetWriterL(
         const std::string& path,
         unsigned long long preferredBuffSizeBytes,
-        std::shared_ptr<FileReader> fReader,
+        const std::shared_ptr<FileReader> fReader,
         bool overwriteIfExists
     ) {
         return std::shared_ptr<ResultSetWriter>(
@@ -343,7 +343,7 @@ namespace PLP {
         resultReaderClass.endClass();
 
         auto resultWriterClass = module.beginClass<ResultSetWriter>("ResultSetWriter");
-        bool(ResultSetWriter::*appendCurrLine)(std::shared_ptr<FileReaderI>) = &ResultSetWriter::appendCurrLine;
+        bool(ResultSetWriter::*appendCurrLine)(std::shared_ptr<FileReader>) = &ResultSetWriter::appendCurrLine;
         resultWriterClass.addFunction("appendCurrLine", appendCurrLine);
         resultWriterClass.addFunction("getNumResults", &ResultSetWriter::getNumResults);
         resultWriterClass.addFunction("release", &ResultSetWriter::release);

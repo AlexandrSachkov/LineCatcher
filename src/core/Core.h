@@ -83,7 +83,7 @@ namespace PLP {
         std::shared_ptr<ResultSetWriter> createResultSetWriterL(
             const std::string& path,
             unsigned long long preferredBuffSizeBytes,
-            std::shared_ptr<FileReader> fReader,
+            const std::shared_ptr<FileReader> fReader,
             bool overwriteIfExists
         );
 

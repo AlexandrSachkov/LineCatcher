@@ -78,7 +78,7 @@ namespace PLP {
         return true;
     }
 
-    bool ResultSetWriter::appendCurrLine(std::shared_ptr<FileReaderI> fReader) {
+    bool ResultSetWriter::appendCurrLine(const std::shared_ptr<FileReader> fReader) {
         return appendCurrLine(fReader.get());
     }
 

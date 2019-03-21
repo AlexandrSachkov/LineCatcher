@@ -9,6 +9,7 @@
 namespace PLP {
     class PagedWriter;
     class TaskRunner;
+    class FileReader;
 
     class ResultSetWriter : public ResultSetWriterI {
     public:
@@ -27,7 +28,7 @@ namespace PLP {
         bool appendCurrLine(const FileReaderI* fReader) override;
 
         //Lua interface
-        bool appendCurrLine(std::shared_ptr<FileReaderI> fReader);
+        bool appendCurrLine(const std::shared_ptr<FileReader> fReader);
 
         //Shared interface
         unsigned long long getNumResults() const override;
