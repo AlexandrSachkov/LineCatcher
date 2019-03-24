@@ -280,9 +280,9 @@ void IndexViewWidget::gotoLine(unsigned long long lineNum){
     if(lineNum < halfLinesPerRead){
         startLine = 0;
     }else if(lineNum >= _indexReader->getNumResults()) {
-        startLine = _indexReader->getNumResults() - 1 - NUM_LINES_PER_READ;
+        startLine = _indexReader->getNumResults() - NUM_LINES_PER_READ;
     }else if(_indexReader->getNumResults() - lineNum < halfLinesPerRead){
-        startLine = _indexReader->getNumResults() - 1 - NUM_LINES_PER_READ;
+        startLine = _indexReader->getNumResults() - NUM_LINES_PER_READ;
     }else{
         startLine = lineNum - halfLinesPerRead;
     }
