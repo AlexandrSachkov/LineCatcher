@@ -61,6 +61,8 @@ namespace PLP {
             return true;
         }
 
+        _cancelled = false;
+
         auto module = LuaIntf::LuaBinding(_state).beginModule("PLP");
         module.addFunction("core", [this] {
             return this;
@@ -88,6 +90,10 @@ namespace PLP {
         return true;
     }
 
+    void Core::cancelOperation() {
+        _cancelled = true;
+    }
+
     bool Core::attachLogOutput(const char* name, const std::function<void(int, const char*)>* func) {
         Logger::subscribe(name, *func);
         return true;
@@ -97,98 +103,15 @@ namespace PLP {
         Logger::unsubscribe(name);
     }
 
-    /*bool PLPCore::searchLineContains(const std::wstring path, const std::wstring& substr, unsigned int& numMatches) {
-        std::ifstream fs(wstring_to_string(path), std::ifstream::in | std::ifstream::binary);
-        if (!fs.good()) {
-            return false;
-        }
-
-        std::string substring = wstring_to_string(substr);
-        numMatches = 0;
-
-        Timer timer;
-
-        int lineNum = 1;
-        std::string line;
-        while (std::getline(fs, line, '\n')) {
-            if (line.find(substring) != std::string::npos) {
-                numMatches++;
-            }
-            lineNum++;
-            if (lineNum % 1000000 == 0) {
-                printf("%i\n", lineNum);
-            }
-        }
-        double numSeconds = timer.deltaT() / 1000000000;
-        printf("Completed in: %f seconds\n", numSeconds);
-
-        return true;
-    }
-
-    bool PLPCore::searchLineContainsMM(const std::wstring path, const std::wstring& substr, unsigned int& numMatches) {
-        std::string substring = wstring_to_string(substr);
-        const char* cSubstr = substring.c_str();
-        numMatches = 0;
-
-        MemMappedPagedReader pager;
-        if (!pager.initialize(path)) {
-            return false;
-        }
-
-        LineReader lineReader;
-        if (!lineReader.initialize(pager)) {
-            return false;
-        }
-
-        unsigned long long lineNum = 0;
-
-        char* lineStart;
-        unsigned int lineSize;
-        while (lineReader.nextLine(lineStart, lineSize)) {
-            lineNum++;
-            if (lineNum % 10000000 == 0) {
-                printf("%llu\n", lineNum);
-            }
-        }
-        printf("TOTAL LINES: %llu\n", lineNum);
-
-        return true;
-    }
-
-    bool PLPCore::searchLineContainsMMIndexed(const std::wstring path, const std::wstring& substr, unsigned int& numMatches) {
-        std::string substring = wstring_to_string(substr);
-        const char* cSubstr = substring.c_str();
-        numMatches = 0;
-
-        std::shared_ptr<FileReader> fileReader = createFileReader(wstring_to_string(path), 0, true);
-
-        char* lineStart;
-        unsigned int lineSize;
-        while (fileReader->nextLine(lineStart, lineSize)) {
-            if (fileReader->getLineNumber() % 10000000 == 0) {
-                printf("%llu\n", fileReader->getLineNumber());
-            }
-        }
-        printf("TOTAL LINES: %llu\n", fileReader->getLineNumber() + 1);
-
-        return true;
-    }
-
-    bool PLPCore::search(const std::wstring path, const std::wstring& frameFilterScriptLua, std::wstring& errMsg) {
-        auto module = LuaIntf::LuaBinding(_state).beginModule("PLP");
-        module.addConstant("Core", this);
-        module.endModule();
-
-        return true;
-    }*/
-
     FileReaderI* Core::createFileReader(
         const std::string& path,
         unsigned long long preferredBuffSizeBytes,
         bool requireRandomAccess
     ) {
+        _cancelled = false;
+
         FileReader* fReader = new FileReader();
-        if (!fReader->initialize(string_to_wstring(path), preferredBuffSizeBytes, requireRandomAccess)) {
+        if (!fReader->initialize(string_to_wstring(path), preferredBuffSizeBytes, requireRandomAccess, _cancelled)) {
             Logger::send(ERR, "Failed to create file reader");
             return nullptr;
         }
@@ -297,6 +220,10 @@ namespace PLP {
         Logger::send((LOG_LEVEL)level, msg);
     }
 
+    bool Core::isCancelled() {
+        return _cancelled;
+    }
+
     void Core::attachLuaBindings(lua_State* state) {
         auto module = LuaIntf::LuaBinding(state).beginModule("PLP");
 
@@ -307,6 +234,7 @@ namespace PLP {
         plpClass.addFunction("createResultSetWriter", &Core::createResultSetWriterL);
         plpClass.addFunction("printConsole", &Core::printConsoleL);
         plpClass.addFunction("printConsoleEx", &Core::printConsoleExL);
+        plpClass.addFunction("isCancelled", &Core::isCancelled);
         plpClass.endClass();
 
         auto fileReaderClass = module.beginClass<FileReader>("FileReader");

@@ -17,7 +17,8 @@ namespace PLP {
     bool FileReader::initialize(
         const std::wstring& path, 
         unsigned long long preferredBuffSizeBytes, 
-        bool requireRandomAccess
+        bool requireRandomAccess,
+        const std::atomic<bool>& cancelled
     ) {
         release();
         _enableRandomAccess = requireRandomAccess;
@@ -30,7 +31,7 @@ namespace PLP {
 
         if (requireRandomAccess) {
             IndexedLineReader* idxLineReader = new IndexedLineReader();
-            if (!idxLineReader->initialize(*_pager)) {
+            if (!idxLineReader->initialize(*_pager, cancelled)) {
                 return false;
             }
             _lineReader.reset(idxLineReader);

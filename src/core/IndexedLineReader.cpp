@@ -1,5 +1,6 @@
 #include "IndexedLineReader.h"
 #include "Utils.h"
+#include "Core.h"
 
 #include "cereal/types/unordered_map.hpp"
 #include "cereal/types/string.hpp"
@@ -11,14 +12,14 @@ namespace PLP {
     IndexedLineReader::IndexedLineReader() {}
     IndexedLineReader::~IndexedLineReader() {}
 
-    bool IndexedLineReader::initialize(PagedReader& pagedReader) {
+    bool IndexedLineReader::initialize(PagedReader& pagedReader, const std::atomic<bool>& cancelled) {
         if (!LineReader::initialize(pagedReader)) {
             return false;
         }
 
         std::wstring indexPath = getIndexFilePath(pagedReader.getFilePath());
         if (!loadIndex(indexPath)) {
-            if (!generateIndex(pagedReader.getFilePath(), indexPath)) {
+            if (!generateIndex(pagedReader.getFilePath(), indexPath, cancelled)) {
                 return false;
             }
         }
@@ -51,12 +52,20 @@ namespace PLP {
         return true;
     }
 
-    bool IndexedLineReader::generateIndex(const std::wstring& dataFilePath, const std::wstring& indexPath) {
+    bool IndexedLineReader::generateIndex(
+        const std::wstring& dataFilePath, 
+        const std::wstring& indexPath, 
+        const std::atomic<bool>& cancelled
+    ) {
         char* lineStart;
         unsigned int length;
         unsigned long long lineStartFileOffset = 0;
         unsigned long long numLines = 0;
         while (nextLine(lineStart, length)) {
+            if (getLineNumber() % 1000000 == 0 && cancelled) {
+                return false;
+            }
+
             if (getLineNumber() > 0 && getLineNumber() % LINE_INDEX_FREQUENCY == 0) {
                 _fileIndex.insert({ getLineNumber(), lineStartFileOffset });
             }

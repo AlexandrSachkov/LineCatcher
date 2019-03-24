@@ -3,6 +3,7 @@
 #include "PagedReader.h"
 
 #include <unordered_map>
+#include <atomic>
 
 namespace PLP {
     class IndexedLineReader : public LineReader {
@@ -10,13 +11,17 @@ namespace PLP {
         IndexedLineReader();
         ~IndexedLineReader();
 
-        bool initialize(PagedReader& pagedReader);
+        bool initialize(PagedReader& pagedReader, const std::atomic<bool>& cancelled);
         bool getLine(unsigned long long lineNumber, char*& data, unsigned int& size);
         unsigned long long getNumberOfLines();
     private:
         std::wstring getIndexFilePath(const std::wstring& dataFilePath);
         bool loadIndex(const std::wstring& indexPath);
-        bool generateIndex(const std::wstring& dataFilePath, const std::wstring& indexPath);
+        bool generateIndex(
+            const std::wstring& dataFilePath, 
+            const std::wstring& indexPath,
+            const std::atomic<bool>& cancelled
+        );
 
         struct IndexHeader {
             std::string filePath;

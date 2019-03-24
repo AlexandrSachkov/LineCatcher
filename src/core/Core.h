@@ -7,6 +7,7 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <atomic>
 
 #define PLP_LIB_EXPORT __declspec(dllexport)
 #define PLP_LIB_IMPORT __declspec(dllimport)
@@ -33,6 +34,9 @@ namespace PLP {
 
         bool initialize();
         bool runScript(const std::wstring* scriptLua) override;
+        void cancelOperation() override;
+        bool isCancelled();
+        
         bool attachLogOutput(const char* name, const std::function<void(int, const char*)>* func);
         void detachLogOutput(const char* name);
 
@@ -89,12 +93,12 @@ namespace PLP {
 
         void printConsoleL(const std::string& msg);
         void printConsoleExL(const std::string& msg, int level);
-
     private:
         static void attachLuaBindings(lua_State* state);
 
         lua_State* _state;
         std::unique_ptr<Thread> _fileOpThread;
+        std::atomic<bool> _cancelled = false;
     };
 
     PLP_LIB_API PLP::CoreI* createCore();

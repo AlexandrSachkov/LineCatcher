@@ -4,6 +4,7 @@
 
 #include <string>
 #include <tuple>
+#include <atomic>
 
 namespace PLP {
     class PagedReader;
@@ -17,7 +18,8 @@ namespace PLP {
         bool initialize(
             const std::wstring& path, 
             unsigned long long preferredBuffSizeBytes,
-            bool requireRandomAccess
+            bool requireRandomAccess,
+            const std::atomic<bool>& cancelled
         );
         
         //C++ interface
