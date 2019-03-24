@@ -283,9 +283,9 @@ void PagedFileViewWidget::gotoLine(unsigned long long lineNum){
     if(lineNum < halfLinesPerRead){
         startLine = 0;
     }else if(lineNum >= _fileReader->getNumberOfLines()) {
-        startLine = _fileReader->getNumberOfLines() - 1 - NUM_LINES_PER_READ;
+        startLine = _fileReader->getNumberOfLines() - NUM_LINES_PER_READ;
     }else if(_fileReader->getNumberOfLines() - lineNum < halfLinesPerRead){
-        startLine = _fileReader->getNumberOfLines() - 1 - NUM_LINES_PER_READ;
+        startLine = _fileReader->getNumberOfLines() - NUM_LINES_PER_READ;
     }else{
         startLine = lineNum - halfLinesPerRead;
     }
