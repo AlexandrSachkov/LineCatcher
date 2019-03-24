@@ -3,6 +3,11 @@
 #include <string>
 #include <functional>
 #include <map>
+#include <memory>
+
+namespace tbb {
+    class spin_mutex;
+}
 
 namespace PLP {
     enum LOG_LEVEL {
@@ -19,5 +24,6 @@ namespace PLP {
         static void send(LOG_LEVEL level, const std::string& msg);
     private:
         static std::map <std::string, std::function<void(LOG_LEVEL, const char*)>> _subscribers;
+        static std::unique_ptr<tbb::spin_mutex> _interfaceLock;
     };
 }
