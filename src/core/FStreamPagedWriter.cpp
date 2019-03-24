@@ -67,7 +67,7 @@ namespace PLP {
 
             if (bytesToWrite > 0) {
                 char* writeLocation = _frontBuff + _frontBuffContentSize;
-                memcpy(writeLocation, data, bytesToWrite);
+                memcpy(writeLocation, data + (size - bytesLeftToWrite), bytesToWrite);
                 _frontBuffContentSize += bytesToWrite;
             }
 
