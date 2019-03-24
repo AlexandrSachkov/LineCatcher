@@ -10,6 +10,7 @@
 #include <QLineEdit>
 #include <QTimer>
 #include <QtConcurrent/QtConcurrentRun>
+#include <QProgressBar>
 
 #include "Core.h"
 
@@ -57,6 +58,7 @@ private:
     QLineEdit* _scriptPath;
     QPlainTextEdit* _scriptEditor;
     QPlainTextEdit* _console;
+    QProgressBar* _progressBar;
 
     PLP::CoreI* _plpCore;
     QFuture<bool> _scriptResult;

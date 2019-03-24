@@ -86,6 +86,14 @@ ScriptView::ScriptView(PLP::CoreI* plpCore, QWidget *parent) : QWidget(parent)
     QRect screenGeometry = QApplication::desktop()->screenGeometry();
     splitter->setSizes(QList<int>({(int)(screenGeometry.height() / 4 * 2.5), (int)(screenGeometry.height() / 4 * 1.5)}));
 
+    _progressBar = new QProgressBar(this);
+    _progressBar->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    _progressBar->setTextVisible(false);
+    _progressBar->setRange(0,0);
+    _progressBar->setMaximumHeight(10);
+    _progressBar->setHidden(true);
+    mainLayout->addWidget(_progressBar);
+
     _scriptRunTimer = new QTimer(this);
     connect(_scriptRunTimer, SIGNAL(timeout()), this, SLOT(checkScriptCompleted()));
 
@@ -138,6 +146,7 @@ void ScriptView::runScript() {
             return _plpCore->runScript(&script);
         });
         _run->setText("Stop"); //TODO refactor to keep state in button
+        _progressBar->setHidden(false);
         _appendLogData(0, "======== Script started ========");
         _scriptRunTimer->start(250);
     }else{
@@ -220,6 +229,7 @@ void ScriptView::checkScriptCompleted() {
         _scriptRunTimer->stop();
         _plpCore->detachLogOutput(LOG_SUBSCRIBER_NAME);
         _appendLogData(0, "======== Script finished ========");
+        _progressBar->setHidden(true);
         _run->setText("Run"); //TODO refactor to keep state in button
     }
     printLogDataToConsole();
