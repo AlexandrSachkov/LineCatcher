@@ -265,8 +265,9 @@ void ScriptView::printLogDataToConsole() {
         cursor.insertText(levelName + msg + "\n");
     }
 
+    if(_logData.size() > 0){
+        QScrollBar* scrollBar = _console->verticalScrollBar();
+        scrollBar->setValue(scrollBar->maximum());
+    }
     _logData.clear();
-
-    QScrollBar* scrollBar = _console->verticalScrollBar();
-    scrollBar->setValue(scrollBar->maximum());
 }
