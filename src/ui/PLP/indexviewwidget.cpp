@@ -44,6 +44,10 @@ IndexViewWidget::IndexViewWidget(
     f.setStyleHint(QFont::Monospace);
     this->setFont(f);
 
+    QCursor cursor = this->viewport()->cursor();
+    cursor.setShape(Qt::CursorShape::PointingHandCursor);
+    this->viewport()->setCursor(cursor);
+
     calcNumVisibleLines();
 
     readNextBlock();
