@@ -86,32 +86,12 @@ ScriptView::ScriptView(PLP::CoreI* plpCore, QWidget *parent) : QWidget(parent)
     QRect screenGeometry = QApplication::desktop()->screenGeometry();
     splitter->setSizes(QList<int>({(int)(screenGeometry.height() / 4 * 2.5), (int)(screenGeometry.height() / 4 * 1.5)}));
 
-    _printConsole = [&](int level, const char* msg){
-        QString levelName;
-        QColor textColor;
+    _scriptRunTimer = new QTimer(this);
+    connect(_scriptRunTimer, SIGNAL(timeout()), this, SLOT(checkScriptCompleted()));
 
-        if(level == 1){
-            levelName = "Warning: ";
-            textColor = QColor(255,150,0);
-        } else if(level >= 2){
-            levelName = "Error: ";
-            textColor = QColor(255,0,0);
-        }else{
-            levelName = ""; //Info is not displayed
-            textColor = QColor(0,0,0);
-        }
-
-        QTextCharFormat tf = _console->currentCharFormat();
-        tf = _console->currentCharFormat();
-        tf.setForeground(QBrush(textColor));
-
-        QTextCursor cursor = _console->textCursor();
-        cursor.movePosition(QTextCursor::End);
-        cursor.setCharFormat(tf);
-        cursor.insertText(levelName + QString::fromStdString(msg) + "\n");
-
-        QScrollBar* scrollBar = _console->verticalScrollBar();
-        scrollBar->setValue(scrollBar->maximum());
+    _appendLogData = [&](int level, const char* msg){
+        std::lock_guard<std::mutex> guard(_logDataLock);
+        _logData.push_back({level, QString::fromStdString(msg)});
     };
 
     QFont f("Courier New", 14);
@@ -150,12 +130,19 @@ void ScriptView::loadScript() {
 }
 
 void ScriptView::runScript() {
-    _plpCore->attachLogOutput(LOG_SUBSCRIBER_NAME, &_printConsole);
+    if(_run->text().compare("Run") == 0){ //TODO refactor to keep state in button
+        _plpCore->attachLogOutput(LOG_SUBSCRIBER_NAME, &_appendLogData);
+        std::wstring script = _scriptEditor->toPlainText().toStdWString();
 
-    std::wstring script = _scriptEditor->toPlainText().toStdWString();
-    _plpCore->runScript(&script);
-
-    _plpCore->detachLogOutput(LOG_SUBSCRIBER_NAME);
+        _scriptResult = QtConcurrent::run([&, script](){
+            return _plpCore->runScript(&script);
+        });
+        _run->setText("Stop"); //TODO refactor to keep state in button
+        _appendLogData(0, "======== Script started ========");
+        _scriptRunTimer->start(250);
+    }else{
+        _plpCore->cancelOperation();
+    }
 }
 
 void ScriptView::saveScript() {
@@ -226,4 +213,50 @@ void ScriptView::setScriptModified(bool modified) {
     _save->setAutoFillBackground(true);
     _save->setPalette(p);
     _save->update();
+}
+
+void ScriptView::checkScriptCompleted() {
+    if(_scriptResult.isFinished()){
+        _scriptRunTimer->stop();
+        _plpCore->detachLogOutput(LOG_SUBSCRIBER_NAME);
+        _appendLogData(0, "======== Script finished ========");
+        _run->setText("Run"); //TODO refactor to keep state in button
+    }
+    printLogDataToConsole();
+}
+
+void ScriptView::printLogDataToConsole() {
+    std::lock_guard<std::mutex> guard(_logDataLock);
+    for(auto& pair : _logData){
+        int level = pair.first;
+        QString& msg = pair.second;
+
+        QString levelName;
+        QColor textColor;
+
+        if(level == 1){
+            levelName = "Warning: ";
+            textColor = QColor(255,150,0);
+        } else if(level >= 2){
+            levelName = "Error: ";
+            textColor = QColor(255,0,0);
+        }else{
+            levelName = ""; //Info is not displayed
+            textColor = QColor(0,0,0);
+        }
+
+        QTextCharFormat tf = _console->currentCharFormat();
+        tf = _console->currentCharFormat();
+        tf.setForeground(QBrush(textColor));
+
+        QTextCursor cursor = _console->textCursor();
+        cursor.movePosition(QTextCursor::End);
+        cursor.setCharFormat(tf);
+        cursor.insertText(levelName + msg + "\n");
+    }
+
+    _logData.clear();
+
+    QScrollBar* scrollBar = _console->verticalScrollBar();
+    scrollBar->setValue(scrollBar->maximum());
 }

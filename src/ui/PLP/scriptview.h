@@ -8,10 +8,14 @@
 #include <QPushButton>
 #include <QString>
 #include <QLineEdit>
+#include <QTimer>
+#include <QtConcurrent/QtConcurrentRun>
 
 #include "Core.h"
 
 #include <functional>
+#include <mutex>
+#include <vector>
 
 class ScriptView : public QWidget
 {
@@ -28,6 +32,7 @@ private slots:
     void runScript();
     void clearConsole();
     void onScriptModified();
+    void checkScriptCompleted();
 
 protected:
     void hideEvent(QHideEvent* event);
@@ -35,9 +40,13 @@ protected:
 
 private:
     void setScriptModified(bool modified);
+    void printLogDataToConsole();
 
     static const char* LOG_SUBSCRIBER_NAME;
-    std::function<void(int, const char*)> _printConsole;
+    std::function<void(int, const char*)> _appendLogData;
+    std::mutex _logDataLock;
+    std::vector<std::pair<int, QString>> _logData;
+
     bool _saved = false;
 
     QPushButton* _open;
@@ -50,6 +59,8 @@ private:
     QPlainTextEdit* _console;
 
     PLP::CoreI* _plpCore;
+    QFuture<bool> _scriptResult;
+    QTimer* _scriptRunTimer;
 };
 
 #endif // SCRIPTVIEW_H
