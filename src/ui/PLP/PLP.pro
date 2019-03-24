@@ -49,9 +49,7 @@ HEADERS += \
     scripteditor.h \
     luasyntaxhighlighter.h
 
-FORMS += \
-        mainwindow.ui \
-    fileview.ui
+FORMS +=
 
 
 # Default rules for deployment.
