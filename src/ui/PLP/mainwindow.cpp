@@ -98,6 +98,7 @@ void MainWindow::openFile() {
     std::unique_ptr<PLP::FileReaderI> fileReader =
             std::unique_ptr<PLP::FileReaderI>(_plpCore->createFileReader(path.toStdString(), PLP::OPTIMAL_BLOCK_SIZE_BYTES * 2, true));
     if(!fileReader){
+        //TODO add error message
         return;
     }
 

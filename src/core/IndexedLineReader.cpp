@@ -1,6 +1,7 @@
 #include "IndexedLineReader.h"
 #include "Utils.h"
 #include "Core.h"
+#include "Logger.h"
 
 #include "cereal/types/unordered_map.hpp"
 #include "cereal/types/string.hpp"
@@ -12,8 +13,8 @@ namespace PLP {
     IndexedLineReader::IndexedLineReader() {}
     IndexedLineReader::~IndexedLineReader() {}
 
-    bool IndexedLineReader::initialize(PagedReader& pagedReader, const std::atomic<bool>& cancelled) {
-        if (!LineReader::initialize(pagedReader)) {
+    bool IndexedLineReader::initialize(PagedReader& pagedReader, unsigned int maxLineSize, const std::atomic<bool>& cancelled) {
+        if (!LineReader::initialize(pagedReader, maxLineSize)) {
             return false;
         }
 
@@ -61,7 +62,9 @@ namespace PLP {
         unsigned int length;
         unsigned long long lineStartFileOffset = 0;
         unsigned long long numLines = 0;
-        while (nextLine(lineStart, length)) {
+
+        LineReaderResult result;
+        while ((result = nextLine(lineStart, length)) == LineReaderResult::SUCCESS) {
             if (getLineNumber() % 1000000 == 0 && cancelled) {
                 return false;
             }
@@ -72,6 +75,10 @@ namespace PLP {
             lineStartFileOffset = getCurrentFileOffset();
             numLines++;
         }
+        if (result == LineReaderResult::ERROR) {
+            return false;
+        }
+
         restart();
 
         std::ofstream fs;
@@ -91,9 +98,9 @@ namespace PLP {
         return true;
     }
 
-    bool IndexedLineReader::getLine(unsigned long long lineNumber, char*& data, unsigned int& size) {
+    LineReaderResult IndexedLineReader::getLine(unsigned long long lineNumber, char*& data, unsigned int& size) {
         if (lineNumber < 0 || lineNumber > _indexHeader.numLines - 1) {
-            return false;
+            return LineReaderResult::ERROR;
         }
 
         unsigned long long prevIndexedLineNum = lineNumber / _indexHeader.lineIndexFreq * _indexHeader.lineIndexFreq;
@@ -103,26 +110,29 @@ namespace PLP {
         } else {
             auto it = _fileIndex.find(prevIndexedLineNum);
             if (it == _fileIndex.end()) {
-                return false; //broken indexer
+                Logger::send(ERR, "Failed to find nearest known file location");
+                return LineReaderResult::ERROR;
             }
             prevIndexedLineFileOffset = it->second;
         }
         
         char* lineData = nullptr;
         unsigned int length = 0;
-        if (!getLineUnverified(prevIndexedLineNum, prevIndexedLineFileOffset, lineData, length)) {
-            return false;
+        LineReaderResult result = getLineUnverified(prevIndexedLineNum, prevIndexedLineFileOffset, lineData, length);
+        if (result != LineReaderResult::SUCCESS) {
+            return result;
         }
+
         while (getLineNumber() < lineNumber) {
-            if (!nextLine(lineData, length)) {
-                return false;
+            if (LineReaderResult::SUCCESS != nextLine(lineData, length)) {
+                return LineReaderResult::ERROR;
             }
         }
 
         data = lineData;
         size = length;
 
-        return true;
+        return LineReaderResult::SUCCESS;
     }
 
     unsigned long long IndexedLineReader::getNumberOfLines() {

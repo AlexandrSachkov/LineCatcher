@@ -59,20 +59,35 @@ namespace PLP {
         return pos;
     }
 
-    const char* findNextLineEnding(const char* buff, unsigned long long buffSize, unsigned long long startOffsetBytes) {
+    LineReaderResult findNextLineEnding(
+        const char* buff, 
+        unsigned long long buffSize, 
+        unsigned long long startOffsetBytes, 
+        unsigned int maxLineSize,
+        char*& lineEnding
+    ) {
+        lineEnding = nullptr;
         if (startOffsetBytes >= buffSize) {
-            return nullptr;
+            return LineReaderResult::ERROR;
         }
 
         char* pos = const_cast<char*>(buff) + startOffsetBytes;
-        while (pos < buff + buffSize && *pos != '\n') {
+        while ((buff - pos  + 1) < maxLineSize 
+            && pos < buff + buffSize 
+            && *pos != '\n'
+            ) {
             pos++;
         }
 
-        if (pos == buff + buffSize) {
-            return nullptr;
+        if (buff - pos + 1 >= maxLineSize) {
+            return LineReaderResult::ERROR;
         }
 
-        return pos;
+        if (pos == buff + buffSize) {
+            return LineReaderResult::NOT_FOUND;
+        }
+
+        lineEnding = pos;
+        return LineReaderResult::SUCCESS;
     }
 }

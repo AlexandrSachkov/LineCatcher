@@ -1,5 +1,9 @@
 #pragma once
+#include "LineBuffer.h"
+#include "ReturnType.h"
+
 #include <vector>
+#include <memory>
 
 namespace PLP {
     class PagedReader;
@@ -7,9 +11,9 @@ namespace PLP {
     public:
         virtual ~LineReader();
 
-        bool initialize(PagedReader& pager);
-        bool nextLine(char*& data, unsigned int& size);
-        bool getLineUnverified( //only use if you know what you are doing. Incorrect lineNum/fileOffset can cause undefined behavior
+        bool initialize(PagedReader& pager, unsigned int maxLineSize);
+        LineReaderResult nextLine(char*& data, unsigned int& size);
+        LineReaderResult getLineUnverified( //only use if you know what you are doing. Incorrect lineNum/fileOffset can cause undefined behavior
             unsigned long long lineNum, 
             unsigned long long fileOffset, 
             char*& data, 
@@ -19,10 +23,8 @@ namespace PLP {
         unsigned long long getCurrentFileOffset();
         unsigned long long getCurrentLineFileOffset();
         void restart();
-    protected:
-        bool appendPageBoundaryLineBuff(const char* data, unsigned int size);
-        void resetPageBoundaryLineBuff();
 
+    protected:
         PagedReader* _pager = nullptr;
         char* _pageData = nullptr;
         unsigned long long _pageSize = 0;
@@ -31,6 +33,7 @@ namespace PLP {
         unsigned long long _lineCount = 0;
         unsigned int _currentLineLength = 0;
 
-        std::vector<char> _pageBoundaryLineBuff;
+        std::unique_ptr<LineBuffer> _pageBoundaryLineBuff;
+        unsigned int _maxLineSize = 0;
     };
 }

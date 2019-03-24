@@ -7,6 +7,8 @@
 #include <QtMath>
 #include <QScrollBar>
 
+#include "ReturnType.h"
+
 PagedFileViewWidget::PagedFileViewWidget(
         std::unique_ptr<PLP::FileReaderI> fileReader,
         ULLSpinBox* lineNavBox,
@@ -151,19 +153,25 @@ void PagedFileViewWidget::readNextBlock() {
     unsigned int length;
 
     QTextCursor cursor = this->textCursor();
-    if(_fileReader->getLine(_endLineNum, lineStart, length)){
+    PLP::LineReaderResult result = _fileReader->getLine(_endLineNum, lineStart, length);
+    if(result == PLP::LineReaderResult::SUCCESS){
         cursor.movePosition(QTextCursor::End);
         cursor.insertText(QString::fromUtf8(lineStart, static_cast<int>(length)));
         _endLineNum++;
 
         for(unsigned int i = 0; i < NUM_LINES_PER_READ - 1; i++){
-            if(!_fileReader->nextLine(lineStart, length)){
+            result = _fileReader->nextLine(lineStart, length);
+            if(result != PLP::LineReaderResult::SUCCESS){
                 break;
             }
             cursor.movePosition(QTextCursor::End);
             cursor.insertText(QString::fromUtf8(lineStart, static_cast<int>(length)));
             _endLineNum++;
         }
+    }
+
+    if(result == PLP::LineReaderResult::ERROR){
+        //TODO error message
     }
 
     if(_endLineNum - _startLineNum > MAX_NUM_BLOCKS){
@@ -214,15 +222,21 @@ void PagedFileViewWidget::readPreviousBlock() {
 
     //insert new lines
     cursor.movePosition(QTextCursor::Start);
-    if(_fileReader->getLine(_startLineNum, lineStart, length)){
+    PLP::LineReaderResult result = _fileReader->getLine(_startLineNum, lineStart, length);
+    if(result == PLP::LineReaderResult::SUCCESS){
         cursor.insertText(QString::fromUtf8(lineStart, length));
 
         for(unsigned int i = 0; i < numLinesToRead - 1; i++){
-            if(!_fileReader->nextLine(lineStart, length)){
+            result = _fileReader->nextLine(lineStart, length);
+            if(result != PLP::LineReaderResult::SUCCESS){
                 break;
             }
             cursor.insertText(QString::fromUtf8(lineStart, length));
         }
+    }
+
+    if(result == PLP::LineReaderResult::ERROR){
+        //TODO error message
     }
 
     //insert last empty block
@@ -250,7 +264,7 @@ bool PagedFileViewWidget::getLineFromIndex(
 ) {
     char* lineStart = nullptr;
     unsigned int length;
-    if(!_fileReader->getLineFromResult(indexReader.get(), lineStart, length)){
+    if(PLP::LineReaderResult::SUCCESS != _fileReader->getLineFromResult(indexReader.get(), lineStart, length)){
         return false;
     }
 
@@ -284,19 +298,25 @@ void PagedFileViewWidget::gotoLine(unsigned long long lineNum){
     unsigned int length;
 
     QTextCursor cursor = this->textCursor();
-    if(_fileReader->getLine(_endLineNum, lineStart, length)){
+    PLP::LineReaderResult result = _fileReader->getLine(_endLineNum, lineStart, length);
+    if(result == PLP::LineReaderResult::SUCCESS){
         cursor.movePosition(QTextCursor::End);
         cursor.insertText(QString::fromUtf8(lineStart, static_cast<int>(length)));
         _endLineNum++;
 
         for(unsigned int i = 0; i < NUM_LINES_PER_READ - 1; i++){
-            if(!_fileReader->nextLine(lineStart, length)){
+            result = _fileReader->nextLine(lineStart, length);
+            if(result != PLP::LineReaderResult::SUCCESS){
                 break;
             }
             cursor.movePosition(QTextCursor::End);
             cursor.insertText(QString::fromUtf8(lineStart, static_cast<int>(length)));
             _endLineNum++;
         }
+    }
+
+    if(result == PLP::LineReaderResult::ERROR){
+        //TODO show error message
     }
 
     if(_endLineNum - _startLineNum > MAX_NUM_BLOCKS){

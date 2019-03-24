@@ -1,78 +1,118 @@
 #include "LineReader.h"
 #include "PagedReader.h"
 #include "Utils.h"
-
-#include <Windows.h>
+#include "Logger.h"
 
 namespace PLP {
-    LineReader::~LineReader() {}
+    LineReader::~LineReader() {
+        _pageBoundaryLineBuff.reset();
+    }
 
-    bool LineReader::initialize(PagedReader& pager) {
+    bool LineReader::initialize(PagedReader& pager, unsigned int maxLineSize) {
         _pager = &pager;
+
+        if (maxLineSize == 0) {
+            Logger::send(ERR, "Maximum line size cannot be 0");
+            return false;
+        }
+        _maxLineSize = maxLineSize;
+
         try {
-            _pageBoundaryLineBuff.reserve(200);
+            _pageBoundaryLineBuff.reset(new LineBuffer(maxLineSize));
         } catch (std::bad_alloc&) {
+            Logger::send(ERR, "Page boundary line buffer failed to allocate");
             return false;
         }
         
         return true;
     }
 
-    bool LineReader::nextLine(char*& data, unsigned int& size) {
+    LineReaderResult LineReader::nextLine(char*& data, unsigned int& size) {
+        data = nullptr;
+        size = 0;
+
         bool loadNextPage = false;
-        do {
-            //load a new page if required
-            if (!_pageData || _pageSize == 0 || _pageOffset >= _pageSize || loadNextPage) {
-                _pageOffset = 0;
-                _pageData = const_cast<char*>(_pager->read(_fileOffset, _pageSize));
-                if (!_pageData || _pageSize == 0) {
-                    return false;
+        _pageBoundaryLineBuff->clear(); // prep for buffering next line
+
+        char* lineStart = nullptr;
+        char* lineEnd = nullptr;
+
+        //__try {
+            do {
+                //load a new page if required
+                if (!_pageData || _pageSize == 0 || _pageOffset >= _pageSize || loadNextPage) {
+                    _pageOffset = 0;
+                    _pageData = const_cast<char*>(_pager->read(_fileOffset, _pageSize));
+                    if (!_pageData || _pageSize == 0) {
+                        return LineReaderResult::NOT_FOUND;
+                    }
+                    loadNextPage = false;
                 }
-                loadNextPage = false;
+
+                lineStart = _pageData + _pageOffset;
+                lineEnd = nullptr;
+
+                // find line ending
+                LineReaderResult result = findNextLineEnding(_pageData, _pageSize, _pageOffset, _maxLineSize, lineEnd);
+                if (result == LineReaderResult::ERROR) {
+                    return LineReaderResult::ERROR;
+                }
+
+                // if this line continues on the next page
+                if (result == LineReaderResult::NOT_FOUND && (_pager->getFileSize() - _fileOffset) > (_pageSize - _pageOffset)) {
+                    //can be converted to unsigned int because lineSegmentLength is smaller than _maxLineSize, and _maxLineSize is unsigned int
+                    const unsigned int lineSegmentLength = (unsigned int)(_pageSize - _pageOffset);
+                    if (!_pageBoundaryLineBuff->append(lineStart, lineSegmentLength)) {
+                        Logger::send(ERR, "Line size exceeds maximum");
+                        return LineReaderResult::ERROR;
+                    }
+
+                    _fileOffset += lineSegmentLength;
+                    loadNextPage = true;
+                }
+            } while (loadNextPage);
+        /*} __except (GetExceptionCode() == EXCEPTION_IN_PAGE_ERROR) {
+            Logger::send(ERR, "Failed during line processing");
+            return false;
+        }*/
+
+
+        // if this line ends on EOF
+        if (lineEnd == nullptr && (_pager->getFileSize() - _fileOffset) == (_pageSize - _pageOffset)) {
+            lineEnd = _pageData + _pageSize - 1;
+        }
+
+        //can be converted to unsigned int because lineSegmentLength is smaller than _maxLineSize, and _maxLineSize is unsigned int
+        const unsigned int lineSegmentLength = (unsigned int)(lineEnd - lineStart + 1);
+        if (_pageBoundaryLineBuff->getSize() > 0) { // line started on previous page
+            if (!_pageBoundaryLineBuff->append(lineStart, lineSegmentLength)) {
+                Logger::send(ERR, "Line size exceeds maximum");
+                return LineReaderResult::ERROR;
             }
 
-            char* lineStart = _pageData + _pageOffset;
-            char* lineEnd = nullptr;
-
-            // find line ending. If does not exist, the end is on the next page
-            __try {
-                lineEnd = (char*)findNextLineEnding(_pageData, _pageSize, _pageOffset);
-            }
-            __except (GetExceptionCode() == EXCEPTION_IN_PAGE_ERROR) {
-                printf("Failed during line processing");
-                return false;
-            }
-
-            // if this line does not end on EOF
-            if (lineEnd == nullptr && (_pager->getFileSize() - _fileOffset) > (_pageSize - _pageOffset)) {
-                loadNextPage = true;
-                continue;
-            } else if (lineEnd == nullptr && (_pager->getFileSize() - _fileOffset) == (_pageSize - _pageOffset)){ //process last line as usual
-                lineEnd = _pageData + _pageSize - 1;
-            }
-                
-            unsigned int length = (unsigned int)(lineEnd - lineStart + 1);
-            _currentLineLength = length;
-            _pageOffset += length;
-            _fileOffset += length;
-            _lineCount++;
-
+            _currentLineLength = _pageBoundaryLineBuff->getSize();
+            _pageBoundaryLineBuff->get(data, size);
+        } else {
+            _currentLineLength = lineSegmentLength;
             data = lineStart;
-            size = length;
+            size = lineSegmentLength;
+        }
 
-        } while (loadNextPage);
+        _pageOffset += lineSegmentLength;
+        _fileOffset += lineSegmentLength;
+        _lineCount++;
 
-        return true;
+        return LineReaderResult::SUCCESS;
     }
 
-    bool LineReader::getLineUnverified(
+    LineReaderResult LineReader::getLineUnverified(
         unsigned long long lineNum,
         unsigned long long fileOffset,
         char*& data,
         unsigned int& size
     ) {
         if (fileOffset >= _pager->getFileSize()) {
-            return false;
+            return LineReaderResult::ERROR;
         }
 
         _pageData = nullptr;
@@ -81,28 +121,7 @@ namespace PLP {
         _lineCount = lineNum;
         _fileOffset = fileOffset;
 
-        if (!nextLine(data, size)) {
-            return false;
-        }
-        return true;
-    }
-
-    bool LineReader::appendPageBoundaryLineBuff(const char* data, unsigned int size) {
-        unsigned int requiredSize = (unsigned int)_pageBoundaryLineBuff.size() + size;
-        if (requiredSize > _pageBoundaryLineBuff.capacity()) {
-            try {
-                _pageBoundaryLineBuff.reserve(requiredSize * 2);
-            } catch (std::bad_alloc&) {
-                return false;
-            }
-        }
-
-        _pageBoundaryLineBuff.insert(_pageBoundaryLineBuff.end(), data, data + size);
-        return true;
-    }
-
-    void LineReader::resetPageBoundaryLineBuff() {
-        _pageBoundaryLineBuff.clear();
+        return nextLine(data, size);
     }
 
     unsigned long long LineReader::getLineNumber() {

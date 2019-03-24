@@ -1,6 +1,7 @@
 #pragma once
 #include "LineReader.h"
 #include "PagedReader.h"
+#include "ReturnType.h"
 
 #include <unordered_map>
 #include <atomic>
@@ -11,8 +12,8 @@ namespace PLP {
         IndexedLineReader();
         ~IndexedLineReader();
 
-        bool initialize(PagedReader& pagedReader, const std::atomic<bool>& cancelled);
-        bool getLine(unsigned long long lineNumber, char*& data, unsigned int& size);
+        bool initialize(PagedReader& pagedReader, unsigned int maxLineSize, const std::atomic<bool>& cancelled);
+        LineReaderResult getLine(unsigned long long lineNumber, char*& data, unsigned int& size);
         unsigned long long getNumberOfLines();
     private:
         std::wstring getIndexFilePath(const std::wstring& dataFilePath);

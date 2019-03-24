@@ -11,6 +11,7 @@
 #include "MemMappedPagedReader.h"
 #include "LineReader.h"
 #include "Logger.h"
+#include "ReturnType.h"
 
 #include "lua.hpp"
 #include "LuaIntf/LuaIntf.h"
@@ -226,6 +227,9 @@ namespace PLP {
 
     void Core::attachLuaBindings(lua_State* state) {
         auto module = LuaIntf::LuaBinding(state).beginModule("PLP");
+        module.addConstant("ERROR", LineReaderResult::ERROR);
+        module.addConstant("NOT_FOUND", LineReaderResult::NOT_FOUND);
+        module.addConstant("SUCCESS", LineReaderResult::SUCCESS);
 
         auto plpClass = module.beginClass<Core>("Core");
         plpClass.addFunction("createFileReader", &Core::createFileReaderL);
@@ -238,9 +242,9 @@ namespace PLP {
         plpClass.endClass();
 
         auto fileReaderClass = module.beginClass<FileReader>("FileReader");
-        std::tuple<bool, std::string>(FileReader::*nextLine)() = &FileReader::nextLine;
-        std::tuple<bool, std::string>(FileReader::*getLine)(unsigned long long) = &FileReader::getLine;
-        std::tuple<bool, std::string>(FileReader::*getLineFromResult)(std::shared_ptr<ResultSetReaderI>) 
+        std::tuple<int, std::string>(FileReader::*nextLine)() = &FileReader::nextLine;
+        std::tuple<int, std::string>(FileReader::*getLine)(unsigned long long) = &FileReader::getLine;
+        std::tuple<int, std::string>(FileReader::*getLineFromResult)(std::shared_ptr<ResultSetReaderI>) 
             = &FileReader::getLineFromResult;
         fileReaderClass.addFunction("nextLine", nextLine);
         fileReaderClass.addFunction("getLine", getLine);

@@ -31,13 +31,13 @@ namespace PLP {
 
         if (requireRandomAccess) {
             IndexedLineReader* idxLineReader = new IndexedLineReader();
-            if (!idxLineReader->initialize(*_pager, cancelled)) {
+            if (!idxLineReader->initialize(*_pager, 100000, cancelled)) {
                 return false;
             }
             _lineReader.reset(idxLineReader);
         } else {
             _lineReader.reset(new LineReader());
-            if (!_lineReader->initialize(*_pager)) {
+            if (!_lineReader->initialize(*_pager, 100000)) {
                 return false;
             }
         }
@@ -51,51 +51,55 @@ namespace PLP {
         _enableRandomAccess = false;
     }
 
-    bool FileReader::nextLine(char*& lineStart, unsigned int& length) {
+    LineReaderResult FileReader::nextLine(char*& lineStart, unsigned int& length) {
         return _lineReader->nextLine(lineStart, length);
     }
 
-    std::tuple<bool, std::string> FileReader::nextLine() {
+    std::tuple<int, std::string> FileReader::nextLine() {
         char* lineStart = nullptr;
         unsigned int length = 0;
-        if (!_lineReader->nextLine(lineStart, length)) {
-            return { false, std::string() };
-        }
 
-        return { true, std::string(lineStart, length) };
+        LineReaderResult result = _lineReader->nextLine(lineStart, length);
+        if (result != LineReaderResult::SUCCESS) {
+            return { result, std::string() };
+        }
+        return { result, std::string(lineStart, length) };
     }
 
-    bool FileReader::getLine(unsigned long long lineNumber, char*& data, unsigned int& size) {
+    LineReaderResult FileReader::getLine(unsigned long long lineNumber, char*& data, unsigned int& size) {
         if (!_enableRandomAccess) {
-            return false;
+            return LineReaderResult::ERROR;
         }
         return static_cast<IndexedLineReader*>(_lineReader.get())->getLine(lineNumber, data, size);
     }
 
-    bool FileReader::getLineFromResult(const ResultSetReaderI* rsReader, char*& data, unsigned int& size) {
+    LineReaderResult FileReader::getLineFromResult(const ResultSetReaderI* rsReader, char*& data, unsigned int& size) {
         if (!rsReader) {
-            return false;
+            return LineReaderResult::ERROR;
         }
         return _lineReader->getLineUnverified(rsReader->getLineNumber(), rsReader->getLineFileOffset(), data, size);
     }
 
-    std::tuple<bool, std::string> FileReader::getLineFromResult(std::shared_ptr<ResultSetReaderI> rsReader) {
+    std::tuple<int, std::string> FileReader::getLineFromResult(std::shared_ptr<ResultSetReaderI> rsReader) {
         char* lineStart = nullptr;
         unsigned int length = 0;
-        if (!getLineFromResult(rsReader.get(), lineStart, length)) {
-            return { false, std::string() };
+
+        LineReaderResult result = getLineFromResult(rsReader.get(), lineStart, length);
+        if (result != LineReaderResult::SUCCESS) {
+            return { result, std::string() };
         }
-        return { true, std::string(lineStart, length) };
+        return { result, std::string(lineStart, length) };
     }
 
-    std::tuple<bool, std::string> FileReader::getLine(unsigned long long lineNumber) {
+    std::tuple<int, std::string> FileReader::getLine(unsigned long long lineNumber) {
         char* lineStart = nullptr;
         unsigned int length = 0;
-        if (!getLine(lineNumber, lineStart, length)) {
-            return { false, std::string() };
-        }
 
-        return { true, std::string(lineStart, length) };
+        LineReaderResult result = getLine(lineNumber, lineStart, length);
+        if (result != LineReaderResult::SUCCESS) {
+            return { result, std::string() };
+        }
+        return { result, std::string(lineStart, length) };
     }
 
     unsigned long long FileReader::getLineNumber() const {

@@ -23,16 +23,16 @@ namespace PLP {
         );
         
         //C++ interface
-        bool nextLine(char*& lineStart, unsigned int& length) override;
-        bool getLine(unsigned long long lineNumber, char*& data, unsigned int& size) override;
-        bool getLineFromResult(const ResultSetReaderI* rsReader, char*& data, unsigned int& size) override;
+        LineReaderResult nextLine(char*& lineStart, unsigned int& length) override;
+        LineReaderResult getLine(unsigned long long lineNumber, char*& data, unsigned int& size) override;
+        LineReaderResult getLineFromResult(const ResultSetReaderI* rsReader, char*& data, unsigned int& size) override;
         unsigned long long getLineFileOffset() const override;
         void getFilePath(std::wstring& path) const override;
 
         //Lua interface
-        std::tuple<bool, std::string> nextLine();
-        std::tuple<bool, std::string> getLine(unsigned long long lineNumber);
-        std::tuple<bool, std::string> getLineFromResult(std::shared_ptr<ResultSetReaderI> rsReader);
+        std::tuple<int, std::string> nextLine();
+        std::tuple<int, std::string> getLine(unsigned long long lineNumber);
+        std::tuple<int, std::string> getLineFromResult(std::shared_ptr<ResultSetReaderI> rsReader);
 
         //Shared interface
         unsigned long long getLineNumber() const override;
