@@ -31,10 +31,10 @@ namespace PLP {
 
         if (requireRandomAccess) {
             IndexedLineReader* idxLineReader = new IndexedLineReader();
+            _lineReader.reset(idxLineReader);
             if (!idxLineReader->initialize(*_pager, 100000, cancelled)) {
                 return false;
             }
-            _lineReader.reset(idxLineReader);
         } else {
             _lineReader.reset(new LineReader());
             if (!_lineReader->initialize(*_pager, 100000)) {

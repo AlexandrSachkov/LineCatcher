@@ -111,13 +111,13 @@ namespace PLP {
     ) {
         _cancelled = false;
 
-        FileReader* fReader = new FileReader();
+        std::unique_ptr<FileReader> fReader(new FileReader());
         if (!fReader->initialize(string_to_wstring(path), preferredBuffSizeBytes, requireRandomAccess, _cancelled)) {
             Logger::send(ERR, "Failed to create file reader");
             return nullptr;
         }
         Logger::send(INFO, "Successfully created file reader");
-        return fReader;
+        return fReader.release();
     }
 
     FileWriterI* Core::createFileWriter(
@@ -125,26 +125,26 @@ namespace PLP {
         unsigned long long preferredBuffSizeBytes,
         bool overwriteIfExists
     ) {
-        FileWriter* fileWriter = new FileWriter();
+        std::unique_ptr<FileWriter> fileWriter(new FileWriter());
         if (!fileWriter->initialize(string_to_wstring(path), preferredBuffSizeBytes, overwriteIfExists, *_fileOpThread)) {
             Logger::send(ERR, "Failed to create file writer");
             return nullptr;
         }
         Logger::send(INFO, "Successfully created file writer");
-        return fileWriter;
+        return fileWriter.release();
     }
 
     ResultSetReaderI* Core::createResultSetReader(
         const std::string& path,
         unsigned long long preferredBuffSizeBytes
     ) {
-        ResultSetReader* resSet = new ResultSetReader();
+        std::unique_ptr<ResultSetReader> resSet(new ResultSetReader());
         if (!resSet->initialize(string_to_wstring(path), preferredBuffSizeBytes)) {
             Logger::send(ERR, "Failed to create index reader");
             return nullptr;
         }
         Logger::send(INFO, "Successfully created index reader");
-        return resSet;
+        return resSet.release();
     }
 
     ResultSetWriterI* Core::createResultSetWriter(
@@ -158,7 +158,7 @@ namespace PLP {
             return false;
         }
 
-        ResultSetWriter* resSet = new ResultSetWriter();
+        std::unique_ptr<ResultSetWriter> resSet(new ResultSetWriter());
         std::wstring dataPath;
         fReader->getFilePath(dataPath);
 
@@ -170,7 +170,7 @@ namespace PLP {
             return nullptr;
         }
         Logger::send(INFO, "Successfully created index writer");
-        return resSet;
+        return resSet.release();
     }
 
     std::shared_ptr<FileReader> Core::createFileReaderL(
