@@ -244,7 +244,7 @@ namespace PLP {
         auto fileReaderClass = module.beginClass<FileReader>("FileReader");
         std::tuple<int, std::string>(FileReader::*nextLine)() = &FileReader::nextLine;
         std::tuple<int, std::string>(FileReader::*getLine)(unsigned long long) = &FileReader::getLine;
-        std::tuple<int, std::string>(FileReader::*getLineFromResult)(std::shared_ptr<ResultSetReaderI>) 
+        std::tuple<int, std::string>(FileReader::*getLineFromResult)(const std::shared_ptr<ResultSetReader>) 
             = &FileReader::getLineFromResult;
         fileReaderClass.addFunction("nextLine", nextLine);
         fileReaderClass.addFunction("getLine", getLine);

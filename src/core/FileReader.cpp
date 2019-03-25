@@ -80,7 +80,7 @@ namespace PLP {
         return _lineReader->getLineUnverified(rsReader->getLineNumber(), rsReader->getLineFileOffset(), data, size);
     }
 
-    std::tuple<int, std::string> FileReader::getLineFromResult(std::shared_ptr<ResultSetReaderI> rsReader) {
+    std::tuple<int, std::string> FileReader::getLineFromResult(const std::shared_ptr<ResultSetReader> rsReader) {
         char* lineStart = nullptr;
         unsigned int length = 0;
 

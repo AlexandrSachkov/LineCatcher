@@ -9,6 +9,7 @@
 namespace PLP {
     class PagedReader;
     class LineReader;
+    class ResultSetReader;
 
     class FileReader : public FileReaderI{
     public:
@@ -32,7 +33,7 @@ namespace PLP {
         //Lua interface
         std::tuple<int, std::string> nextLine();
         std::tuple<int, std::string> getLine(unsigned long long lineNumber);
-        std::tuple<int, std::string> getLineFromResult(std::shared_ptr<ResultSetReaderI> rsReader);
+        std::tuple<int, std::string> getLineFromResult(const std::shared_ptr<ResultSetReader> rsReader);
 
         //Shared interface
         unsigned long long getLineNumber() const override;
