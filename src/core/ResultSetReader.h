@@ -42,6 +42,7 @@ namespace PLP {
         unsigned long long _currPageOffset = 0;
         unsigned long long _currLineNum = 0;
         unsigned long long _currLineFileOffset = 0;
+        unsigned long long _fileOffset = 0;
 
         char* _pageData = nullptr;
         unsigned long long _pageSize = 0;

@@ -49,6 +49,7 @@ namespace PLP {
         std::memcpy(&_numResults, _pageData + _currPageOffset, sizeof(unsigned long long));
 
         _currPageOffset += sizeof(unsigned long long);
+        _fileOffset = _currPageOffset;
         return true;
     }
 
@@ -63,6 +64,7 @@ namespace PLP {
         _currLineFileOffset = 0;
         _pageData = nullptr;
         _pageSize = 0;
+        _fileOffset = 0;
     }
 
     bool ResultSetReader::getResult(unsigned long long number, unsigned long long& lineNumber) {
@@ -79,7 +81,7 @@ namespace PLP {
         _pageData = nullptr;
         _pageSize = 0;
         _resultCount = number;
-        _currPageOffset = headerSize + (sizeof(unsigned long long) * 2) * number;
+        _fileOffset = headerSize + (sizeof(unsigned long long) * 2) * number;
 
         return nextResult(lineNumber);
     }
@@ -98,7 +100,7 @@ namespace PLP {
         }
 
         if (_pageData == nullptr || _pageSize == 0 || _pageSize - _currPageOffset < sizeof(unsigned long long) * 2) {
-            _pageData = const_cast<char*>(_reader->read(_currPageOffset, _pageSize));
+            _pageData = const_cast<char*>(_reader->read(_fileOffset, _pageSize));
             if (!_pageData || _pageSize == 0) {
                 return false;
             }
@@ -107,9 +109,11 @@ namespace PLP {
         char* data = _pageData + _currPageOffset;
         std::memcpy(&_currLineNum, _pageData + _currPageOffset, sizeof(_currLineNum));
         _currPageOffset += sizeof(_currLineNum);
+        _fileOffset += sizeof(_currLineNum);
 
         std::memcpy(&_currLineFileOffset, _pageData + _currPageOffset, sizeof(_currLineFileOffset));
         _currPageOffset += sizeof(_currLineFileOffset);
+        _fileOffset += sizeof(_currLineFileOffset);;
 
         _resultCount++;
 
@@ -144,6 +148,7 @@ namespace PLP {
         _pageSize = 0;
         _currLineNum = 0;
         _currLineFileOffset = 0;
+        _fileOffset = 0;
     }
 
     unsigned long long ResultSetReader::getLineNumber() const {
