@@ -77,7 +77,7 @@ ScriptView::ScriptView(PLP::CoreI* plpCore, QWidget *parent) : QWidget(parent)
 
     _console = new QPlainTextEdit(consoleWidget);
     _console->setReadOnly(true);
-    _console->setMaximumBlockCount(1000);
+    _console->setMaximumBlockCount(MAX_LINES_CONSOLE);
     consoleLayout->addWidget(_console);
 
     splitter->addWidget(_scriptEditor);
@@ -110,6 +110,7 @@ ScriptView::ScriptView(PLP::CoreI* plpCore, QWidget *parent) : QWidget(parent)
 }
 
 ScriptView::~ScriptView() {
+    _plpCore->detachLogOutput(LOG_SUBSCRIBER_NAME);
 }
 
 void ScriptView::openScript(){
@@ -232,12 +233,19 @@ void ScriptView::checkScriptCompleted() {
         _progressBar->setHidden(true);
         _run->setText("Run"); //TODO refactor to keep state in button
     }
+
     printLogDataToConsole();
 }
 
 void ScriptView::printLogDataToConsole() {
     std::lock_guard<std::mutex> guard(_logDataLock);
-    for(auto& pair : _logData){
+
+    QTextCharFormat tf = _console->currentCharFormat();
+    QTextCursor cursor = _console->textCursor();
+
+    const int start = _logData.size() > MAX_LINES_CONSOLE ? _logData.size() - MAX_LINES_CONSOLE : 0;
+    for(int i = start; i < _logData.size(); i++) {
+        auto& pair = _logData[i];
         int level = pair.first;
         QString& msg = pair.second;
 
@@ -255,13 +263,9 @@ void ScriptView::printLogDataToConsole() {
             textColor = QColor(0,0,0);
         }
 
-        QTextCharFormat tf = _console->currentCharFormat();
-        tf = _console->currentCharFormat();
         tf.setForeground(QBrush(textColor));
-
-        QTextCursor cursor = _console->textCursor();
-        cursor.movePosition(QTextCursor::End);
         cursor.setCharFormat(tf);
+        cursor.movePosition(QTextCursor::End);
         cursor.insertText(levelName + msg + "\n");
     }
 

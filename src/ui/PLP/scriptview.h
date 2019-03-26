@@ -44,6 +44,7 @@ private:
     void printLogDataToConsole();
 
     static const char* LOG_SUBSCRIBER_NAME;
+    const int MAX_LINES_CONSOLE = 1000;
     std::function<void(int, const char*)> _appendLogData;
     std::mutex _logDataLock;
     std::vector<std::pair<int, QString>> _logData;
