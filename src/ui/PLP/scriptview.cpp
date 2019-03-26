@@ -243,6 +243,7 @@ void ScriptView::printLogDataToConsole() {
     QTextCharFormat tf = _console->currentCharFormat();
     QTextCursor cursor = _console->textCursor();
 
+    //print at most number of lines that fit into console and delete the rest
     const int start = _logData.size() > MAX_LINES_CONSOLE ? _logData.size() - MAX_LINES_CONSOLE : 0;
     for(int i = start; i < _logData.size(); i++) {
         auto& pair = _logData[i];
