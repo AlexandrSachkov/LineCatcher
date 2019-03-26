@@ -1,5 +1,6 @@
 #pragma once
 
+#include "PagedReader.h"
 #include "TaskRunner.h"
 #include "Timer.h"
 
@@ -11,19 +12,29 @@
 namespace PLP {
     class TaskRunner;
 
-    class FStreamPagedReader {
+    class FStreamPagedReader : public PagedReader {
     public:
         FStreamPagedReader();
         ~FStreamPagedReader();
 
-        bool initialize(const std::wstring& path, std::vector<char>& buffer, TaskRunner& asyncTaskRunner);
-        const char* getNextPage(unsigned long long& size);
+        bool initialize(const std::wstring& path, unsigned long long preferredBuffSize/*, TaskRunner& asyncTaskRunner*/);
+        const char* read(unsigned long long fileOffset, unsigned long long& size) override;
+        unsigned long long getFileSize() override;
+        std::wstring getFilePath() override;
+        
+        /*const char* getNextPage(unsigned long long& size);
         void resetToBeginning();
-        unsigned long long getFileSize();
-        std::wstring getFilePath();
-        unsigned long long getCurrentPageFileOffset();
+        unsigned long long getCurrentPageFileOffset();*/
     private:
-        struct LoadingData {
+        
+        std::wstring _filePath;
+        std::vector<char> _buffer;
+        TaskRunner* _asyncTaskRunner;
+        
+        std::ifstream _ifs;
+        unsigned long long _fileSize;
+
+        /*struct LoadingData {
             unsigned long long fileOffsetBytes = 0;
             unsigned long long buffStartOffsetBytes = 0;
             unsigned long long buffSizeBytes = 0;
@@ -33,11 +44,10 @@ namespace PLP {
         };
 
         Timer timer;
-        std::wstring _filePath;
-        std::vector<char>* _buffer;
-        TaskRunner* _asyncTaskRunner;
-        std::ifstream _ifs;
-        unsigned long long _fileSize;
+        
+        
+        
+        
 
         unsigned long long _pageSizeBytes;
         char* _frontBuff;
@@ -48,6 +58,6 @@ namespace PLP {
         TaskStatus _currPageLoadStatus;
 
         std::function<void()> _preloadNextPage;
-        std::function<void()> _preloadPreviousPage;
+        std::function<void()> _preloadPreviousPage;*/
     };
 }

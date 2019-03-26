@@ -8,13 +8,34 @@ namespace PLP {
         _ifs.close();
     }
 
-    bool FStreamPagedReader::initialize(const std::wstring& path, std::vector<char>& buffer, TaskRunner& asyncTaskRunner) {
+    bool FStreamPagedReader::initialize(const std::wstring& path, unsigned long long preferredBuffSize/*, TaskRunner& asyncTaskRunner*/) {
         _filePath = path;
-        _buffer = &buffer;
-        _asyncTaskRunner = &asyncTaskRunner;
+        //_asyncTaskRunner = &asyncTaskRunner;
+
+        unsigned long long buffSize;
+        if (preferredBuffSize < OPTIMAL_BLOCK_SIZE_BYTES) {
+            buffSize = OPTIMAL_BLOCK_SIZE_BYTES;
+        } else {
+            buffSize = preferredBuffSize / OPTIMAL_BLOCK_SIZE_BYTES * OPTIMAL_BLOCK_SIZE_BYTES;
+        }
+
+        try {
+            _buffer.resize(buffSize);
+        } catch (std::bad_alloc&) {
+            return false;
+        }
+
+        _ifs.open(path, std::ifstream::in | std::ifstream::binary);
+        if (!_ifs.good()) {
+            return false;
+        }
+
+        _ifs.seekg(0, _ifs.end);
+        _fileSize = _ifs.tellg();
+        _ifs.seekg(0, _ifs.beg);
 
         //buffer size must be a multiple of (OPTIMAL_BLOCK_SIZE_BYTES * 2) for efficiency
-        unsigned long long buffSize = buffer.size();
+        /*unsigned long long buffSize = buffer.size();
         if (buffSize == 0 || (buffSize > 0 && buffSize % (OPTIMAL_BLOCK_SIZE_BYTES * 2) != 0)) {
             return false;
         }
@@ -65,11 +86,33 @@ namespace PLP {
         };
 
         //start preloading next page
-        _asyncTaskRunner->runAsync(_preloadNextPage, _currPageLoadStatus);
+        _asyncTaskRunner->runAsync(_preloadNextPage, _currPageLoadStatus);*/
         return true;
     }
 
-    const char* FStreamPagedReader::getNextPage(unsigned long long& size) {
+    const char* FStreamPagedReader::read(unsigned long long fileOffset, unsigned long long& size) {
+        size = 0;
+        if (fileOffset >= _fileSize) {
+            return nullptr;
+        }
+
+        const unsigned long long bytesTillEnd = _fileSize - fileOffset;
+        const unsigned long long bytesToRead = bytesTillEnd > _buffer.size() ? _buffer.size() : bytesTillEnd;
+        if (bytesToRead == 0) {
+            return nullptr;
+        }
+
+        _ifs.seekg(fileOffset);
+        _ifs.read(_buffer.data(), bytesToRead);
+        if (!_ifs.good()) {
+            return nullptr;
+        }
+
+        size = bytesToRead;
+        return _buffer.data();
+    }
+
+    /*const char* FStreamPagedReader::getNextPage(unsigned long long& size) {
         if (!_lastPageLD.backtracked && (_lastPageLD.endOfFile || _lastPageLD.readErrorOccurred)) {
             size = 0;
             return nullptr;
@@ -107,16 +150,8 @@ namespace PLP {
 
         return nullptr;
     }
-
-    unsigned long long FStreamPagedReader::getFileSize() {
-        return _fileSize;
-    }
-
-    std::wstring FStreamPagedReader::getFilePath() {
-        return _filePath;
-    }
-
-    unsigned long long FStreamPagedReader::getCurrentPageFileOffset() {
+    
+     unsigned long long FStreamPagedReader::getCurrentPageFileOffset() {
         return _currentPageLD.fileOffsetBytes + _currentPageLD.buffStartOffsetBytes;
     }
 
@@ -129,5 +164,14 @@ namespace PLP {
         _currPageLoadStatus = TaskStatus();
 
         _asyncTaskRunner->runAsync(_preloadNextPage, _currPageLoadStatus);
+    }
+    */
+
+    unsigned long long FStreamPagedReader::getFileSize() {
+        return _fileSize;
+    }
+
+    std::wstring FStreamPagedReader::getFilePath() {
+        return _filePath;
     }
 }

@@ -1,5 +1,6 @@
 #include "ResultSetReader.h"
 #include "MemMappedPagedReader.h"
+#include "FStreamPagedReader.h"
 #include "Utils.h"
 #include "Logger.h"
 
@@ -20,7 +21,8 @@ namespace PLP {
         release();
         _path = path;
 
-        MemMappedPagedReader* reader = new MemMappedPagedReader();
+        //MemMappedPagedReader* reader = new MemMappedPagedReader();
+        FStreamPagedReader* reader = new FStreamPagedReader();
         _reader.reset(reader);
         if (!reader->initialize(path, preferredBufferSizeBytes)) {
             return false;

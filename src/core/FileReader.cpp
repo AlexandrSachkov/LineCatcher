@@ -5,6 +5,7 @@
 #include "IndexedLineReader.h"
 #include "Utils.h"
 #include "ResultSetReader.h"
+#include "FStreamPagedReader.h"
 #include "Logger.h"
 
 namespace PLP {
@@ -23,7 +24,13 @@ namespace PLP {
         release();
         _enableRandomAccess = requireRandomAccess;
 
-        MemMappedPagedReader* pagedReader = new MemMappedPagedReader();
+        /*MemMappedPagedReader* pagedReader = new MemMappedPagedReader();
+        _pager.reset(pagedReader);
+        if (!pagedReader->initialize(path, preferredBuffSizeBytes)) {
+            return false;
+        }*/
+
+        FStreamPagedReader* pagedReader = new FStreamPagedReader();
         _pager.reset(pagedReader);
         if (!pagedReader->initialize(path, preferredBuffSizeBytes)) {
             return false;
