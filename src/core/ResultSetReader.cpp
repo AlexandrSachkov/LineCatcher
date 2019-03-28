@@ -160,4 +160,11 @@ namespace PLP {
     unsigned long long ResultSetReader::getLineFileOffset() const {
         return _currLineFileOffset;
     }
+
+    unsigned long long ResultSetReader::getResultNumber() const {
+        if (_resultCount == 0) {
+            return 0;
+        }
+        return _resultCount - 1;
+    }
 }

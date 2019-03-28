@@ -42,5 +42,26 @@ namespace PLP {
             const FileReaderI* fReader,
             bool overwriteIfExists
         ) = 0;
+
+        virtual bool search(
+            FileReaderI* fileReader,
+            ResultSetWriterI* indexWriter,
+            unsigned long long startLine,
+            unsigned long long endLine, //0 for end of file, inclusive
+            const std::wstring& searchText,
+            bool plainTextSearch, //false for regex
+            const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
+        ) = 0;
+
+        virtual bool searchI(
+            FileReaderI* fileReader,
+            ResultSetReaderI* indexReader,
+            ResultSetWriterI* indexWriter,
+            unsigned long long startIndex,
+            unsigned long long endIndex, //0 for end of file, inclusive
+            const std::wstring& searchText,
+            bool plainTextSearch, //false for regex
+            const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
+        ) = 0;
     };
 }

@@ -18,6 +18,9 @@
 
 #include <fstream>
 #include <cstring>
+#include <cmath>
+#include <functional>
+#include <regex>
 
 namespace LuaIntf {
     LUA_USING_SHARED_PTR_TYPE(std::shared_ptr)
@@ -173,6 +176,200 @@ namespace PLP {
         return resSet.release();
     }
 
+    bool Core::search(
+        FileReaderI* fileReader,
+        ResultSetWriterI* indexWriter,
+        unsigned long long startLine,
+        unsigned long long endLine, //0 for end of file
+        const std::wstring& searchText,
+        bool plainTextSearch, //false for regex
+        const std::function<void(int, unsigned long long)>* progressUpdate
+    ) {
+        if (fileReader == nullptr || indexWriter == nullptr) {
+            Logger::send(ERR, "File reader and index writer cannot be null");
+            return false;
+        }
+        if (startLine > endLine) {
+            Logger::send(ERR, "Start line must be smaller or equal to end line");
+            return false;
+        }
+        if (searchText.empty()) {
+            Logger::send(ERR, "Search text cannot be empty");
+            return false;
+        }
+        std::function<void(int, unsigned long long)> defaultProgressUpdate = [](int, unsigned long long) {};
+        if (progressUpdate == nullptr) {
+            progressUpdate = &defaultProgressUpdate;
+        }
+
+        const unsigned long long start = startLine;
+        const unsigned long long end = endLine > 0 ? endLine : fileReader->getNumberOfLines() - 1;
+        const long double dLinesPerPercent = (end - start + 1) / 100.0;
+        const unsigned long long numLinesTillProgressUpdate = dLinesPerPercent > 1.0 ? (unsigned long long)dLinesPerPercent : 1;
+        const int percentPerProgressUpdate = dLinesPerPercent > 1.0 ? 1 : (int)(1.0 / dLinesPerPercent);
+        const std::string text = wstring_to_string(searchText);
+
+        char* line;
+        unsigned int lineSize;
+
+        std::function<bool()> match;
+        if (plainTextSearch) {
+            match = [&]() -> bool {
+                return std::string::npos != std::string(line, lineSize).find(text);
+            };
+        } else {
+            std::regex regex(text);
+            match = [&, regex]() -> bool {
+                return std::regex_match(std::string(line, lineSize), regex);
+            };
+        }
+
+        int progressPercent = 0;
+        unsigned long long numProcessedLines = 0;
+        if (fileReader->getLine(start, line, lineSize) == LineReaderResult::ERROR) {
+            Logger::send(ERR, "Failed to get line");
+            return false;
+        }
+
+        if (match()) {
+            if (!indexWriter->appendCurrLine(fileReader)) {
+                Logger::send(ERR, "Failed to append search result");
+                return false;
+            }
+        }
+
+        numProcessedLines++;
+        if (numProcessedLines % numLinesTillProgressUpdate == 0) {
+            progressPercent += percentPerProgressUpdate;
+            (*progressUpdate)(progressPercent, indexWriter->getNumResults());
+        }
+
+        LineReaderResult result;
+        while (fileReader->getLineNumber() <= end 
+            && (result = fileReader->nextLine(line, lineSize)) == LineReaderResult::SUCCESS) {
+            if (match()) {
+                if (!indexWriter->appendCurrLine(fileReader)) {
+                    Logger::send(ERR, "Failed to append search result");
+                    return false;
+                }
+            }
+
+            numProcessedLines++;
+            if (numProcessedLines % numLinesTillProgressUpdate == 0) {
+                progressPercent += percentPerProgressUpdate;
+                (*progressUpdate)(progressPercent, indexWriter->getNumResults());
+            }
+        }
+        if (result == LineReaderResult::ERROR) {
+            Logger::send(ERR, "Failed to get line");
+            return false;
+        }
+
+        if (progressPercent < 100) {
+            (*progressUpdate)(100, indexWriter->getNumResults());
+        }
+        
+        return true;
+    }
+
+    bool Core::searchI(
+        FileReaderI* fileReader,
+        ResultSetReaderI* indexReader,
+        ResultSetWriterI* indexWriter,
+        unsigned long long startIndex,
+        unsigned long long endIndex,
+        const std::wstring& searchText,
+        bool plainTextSearch,
+        const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
+    ) {
+        if (fileReader == nullptr || indexReader == nullptr || indexWriter == nullptr) {
+            Logger::send(ERR, "File reader, index reader and index writer cannot be null");
+            return false;
+        }
+        if (startIndex > endIndex) {
+            Logger::send(ERR, "Start index must be smaller or equal to end index");
+            return false;
+        }
+        if (searchText.empty()) {
+            Logger::send(ERR, "Search text cannot be empty");
+            return false;
+        }
+        std::function<void(int, unsigned long long)> defaultProgressUpdate = [](int, unsigned long long) {};
+        if (progressUpdate == nullptr) {
+            progressUpdate = &defaultProgressUpdate;
+        }
+
+        const unsigned long long start = startIndex;
+        const unsigned long long end = endIndex > 0 ? endIndex : indexReader->getNumResults() - 1;
+        const long double dLinesPerPercent = (end - start + 1) / 100.0;
+        const unsigned long long numLinesTillProgressUpdate = dLinesPerPercent > 1.0 ? (unsigned long long)dLinesPerPercent : 1;
+        const int percentPerProgressUpdate = dLinesPerPercent > 1.0 ? 1 : (int)(1.0 / dLinesPerPercent);
+        const std::string text = wstring_to_string(searchText);
+
+        char* line;
+        unsigned int lineSize;
+
+        std::function<bool()> match;
+        if (plainTextSearch) {
+            match = [&]() -> bool {
+                return std::string::npos != std::string(line, lineSize).find(text);
+            };
+        } else {
+            std::regex regex(text);
+            match = [&, regex]() -> bool {
+                return std::regex_match(std::string(line, lineSize), regex);
+            };
+        }
+
+        int progressPercent = 0;
+        unsigned long long numProcessedLines = 0;
+        unsigned long long lineNumber = 0;
+        if (!indexReader->getResult(start, lineNumber)) {
+            Logger::send(ERR, "Failed to get index");
+            return false;
+        }
+        if (fileReader->getLineFromResult(indexReader, line, lineSize) == LineReaderResult::ERROR) {
+            Logger::send(ERR, "Failed to get line");
+            return false;
+        }
+        if (match()) {
+            if (!indexWriter->appendCurrLine(fileReader)) {
+                Logger::send(ERR, "Failed to append search result");
+                return false;
+            }
+        }
+
+        numProcessedLines++;
+        if (numProcessedLines % numLinesTillProgressUpdate == 0) {
+            progressPercent += percentPerProgressUpdate;
+            (*progressUpdate)(progressPercent, indexWriter->getNumResults());
+        }
+
+        while (indexReader->getResultNumber() <= end && indexReader->nextResult(lineNumber)) {
+            if (fileReader->getLineFromResult(indexReader, line, lineSize) == LineReaderResult::ERROR) {
+                Logger::send(ERR, "Failed to get line");
+                return false;
+            }
+            if (match()) {
+                if (!indexWriter->appendCurrLine(fileReader)) {
+                    Logger::send(ERR, "Failed to append search result");
+                    return false;
+                }
+            }
+
+            numProcessedLines++;
+            if (numProcessedLines % numLinesTillProgressUpdate == 0) {
+                progressPercent += percentPerProgressUpdate;
+                (*progressUpdate)(progressPercent, indexWriter->getNumResults());
+            }
+        }
+
+        if (progressPercent < 100) {
+            (*progressUpdate)(100, indexWriter->getNumResults());
+        }
+        return true;
+    }
+
     std::shared_ptr<FileReader> Core::createFileReaderL(
         const std::string& path,
         unsigned long long preferredBuffSizeBytes,
@@ -213,6 +410,50 @@ namespace PLP {
         );
     }
 
+    bool Core::searchL(
+        std::shared_ptr<FileReader> fileReader,
+        std::shared_ptr<ResultSetWriter> indexWriter,
+        unsigned long long startLine,
+        unsigned long long endLine, //0 for end of file, inclusive
+        const std::string& searchText,
+        bool plainTextSearch //false for regex
+    ) {
+        std::function<void(int, unsigned long long)> progressUpdate = [&](int percent, unsigned long long numResults) {
+            printConsoleL(std::to_string(percent) + "%, Found results: " + std::to_string(numResults));
+        };
+        return search(
+            fileReader.get(),
+            indexWriter.get(),
+            startLine, endLine,
+            string_to_wstring(searchText),
+            plainTextSearch,
+            &progressUpdate
+        );
+    }
+
+    bool Core::searchIL(
+        std::shared_ptr<FileReader> fileReader,
+        std::shared_ptr<ResultSetReader> indexReader,
+        std::shared_ptr<ResultSetWriter> indexWriter,
+        unsigned long long startIndex,
+        unsigned long long endIndex,
+        const std::string& searchText,
+        bool plainTextSearch
+    ) {
+        std::function<void(int, unsigned long long)> progressUpdate = [&](int percent, unsigned long long numResults) {
+            printConsoleL(std::to_string(percent) + "%, Found results: " + std::to_string(numResults));
+        };
+        return searchI(
+            fileReader.get(),
+            indexReader.get(),
+            indexWriter.get(),
+            startIndex, endIndex,
+            string_to_wstring(searchText),
+            plainTextSearch,
+            &progressUpdate
+        );
+    }
+
     void Core::printConsoleL(const std::string& msg) {
         printConsoleExL(msg, 0);
     }
@@ -236,6 +477,8 @@ namespace PLP {
         plpClass.addFunction("createFileWriter", &Core::createFileWriterL);
         plpClass.addFunction("createResultSetReader", &Core::createResultSetReaderL);
         plpClass.addFunction("createResultSetWriter", &Core::createResultSetWriterL);
+        plpClass.addFunction("search", &Core::searchL);
+        plpClass.addFunction("searchI", &Core::searchIL);
         plpClass.addFunction("printConsole", &Core::printConsoleL);
         plpClass.addFunction("printConsoleEx", &Core::printConsoleExL);
         plpClass.addFunction("isCancelled", &Core::isCancelled);

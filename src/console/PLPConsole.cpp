@@ -12,9 +12,10 @@ int main() {
         return 1;
     }
 
-    core->attachLogOutput("console", [](int level, const char* msg) {
+    std::function<void(int, const char*)> printConsole = [](int level, const char* msg) {
         printf("%s\n", msg);
-    });
+    };
+    core->attachLogOutput("console", &printConsole);
 
     std::wstring err;
     std::wstring script1 =
@@ -117,7 +118,7 @@ int main() {
         return 1;
     }*/
 
-    auto fReader = core->createFileReader(smallFile, 0, true);
+    /*auto fReader = core->createFileReader(smallFile, 0, true);
     auto rWriter = core->createResultSetWriter("results.txt", 0, fReader, true);
     char* line;
     unsigned int lineSize;
@@ -141,7 +142,7 @@ int main() {
 
     if (!rReader->getResult(5, lineNum)) {
         return 1;
-    }
+    }*/
 
     /*auto rReader = core->createResultSetReader("results.txt", 0);
     std::wstring dataPath;
@@ -176,6 +177,24 @@ int main() {
     }
     rWriter->release();
     fReader->release();*/
+
+    auto fReader = core->createFileReader(largeFile, 0, true);
+    //auto rReader = core->createResultSetReader("D:/Repositories/LogParser/resources/resourceIdResults.txt", 0);
+    auto rWriter = core->createResultSetWriter("simpleSearchResults.txt", 0, fReader, true);
+    std::function<void(int, unsigned long long)> updateProgress = [](int percent, unsigned long long numResults) {
+        printf("Progress: %i, %llu\n", percent, numResults);
+    };
+    if (!core->search(
+        fReader,
+        //rReader,
+        rWriter,
+        0, 0,
+        L"0x00000003dcf2a690",
+        true,
+        &updateProgress
+    )) {
+        return 1;
+    }
 
     double numSeconds = timer.deltaT() / 1000000000;
     printf("Completed in: %f seconds\n", numSeconds);

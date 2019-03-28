@@ -11,6 +11,7 @@ namespace PLP {
         virtual bool nextResult(unsigned long long& lineNumber) = 0;
         virtual unsigned long long getLineNumber() const = 0;
         virtual unsigned long long getNumResults() const = 0;
+        virtual unsigned long long getResultNumber() const = 0;
         virtual void getFilePath(std::wstring& path) const = 0;
         virtual void getDataFilePath(std::wstring& path) const = 0;
         virtual void restart() = 0;
