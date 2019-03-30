@@ -70,8 +70,10 @@ namespace PLP {
             ResultSetWriterI* indexWriter,
             unsigned long long startLine,
             unsigned long long endLine, //0 for end of file, inclusive
+            unsigned long long maxNumResults,
             const std::wstring& searchText,
             bool plainTextSearch, //false for regex
+            bool ignoreCase,
             const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
         ) override;
 
@@ -81,8 +83,10 @@ namespace PLP {
             ResultSetWriterI* indexWriter,
             unsigned long long startIndex,
             unsigned long long endIndex, //0 for end of file, inclusive
+            unsigned long long maxNumResults,
             const std::wstring& searchText,
             bool plainTextSearch, //false for regex
+            bool ignoreCase,
             const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
         ) override;
 
@@ -116,8 +120,10 @@ namespace PLP {
             std::shared_ptr<ResultSetWriter> indexWriter,
             unsigned long long startLine,
             unsigned long long endLine, //0 for end of file, inclusive
+            unsigned long long maxNumResults,
             const std::string& searchText,
-            bool plainTextSearch //false for regex
+            bool plainTextSearch, //false for regex
+            bool ignoreCase
         );
 
         bool searchIL(
@@ -126,8 +132,10 @@ namespace PLP {
             std::shared_ptr<ResultSetWriter> indexWriter,
             unsigned long long startIndex,
             unsigned long long endIndex, //0 for end of file, inclusive
+            unsigned long long maxNumResults,
             const std::string& searchText,
-            bool plainTextSearch //false for regex
+            bool plainTextSearch, //false for regex
+            bool ignoreCase
         );
 
         void printConsoleL(const std::string& msg);

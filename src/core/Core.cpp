@@ -21,6 +21,7 @@
 #include <cmath>
 #include <functional>
 #include <regex>
+#include <limits>
 
 namespace LuaIntf {
     LUA_USING_SHARED_PTR_TYPE(std::shared_ptr)
@@ -181,8 +182,10 @@ namespace PLP {
         ResultSetWriterI* indexWriter,
         unsigned long long startLine,
         unsigned long long endLine, //0 for end of file
+        unsigned long long maxNumResults,
         const std::wstring& searchText,
         bool plainTextSearch, //false for regex
+        bool ignoreCase,
         const std::function<void(int, unsigned long long)>* progressUpdate
     ) {
         if (fileReader == nullptr || indexWriter == nullptr) {
@@ -201,6 +204,9 @@ namespace PLP {
         if (progressUpdate == nullptr) {
             progressUpdate = &defaultProgressUpdate;
         }
+        if (maxNumResults == 0) {
+            maxNumResults = ULLONG_MAX;
+        }
 
         const unsigned long long start = startLine;
         const unsigned long long end = endLine > 0 ? endLine : fileReader->getNumberOfLines() - 1;
@@ -212,6 +218,7 @@ namespace PLP {
         char* line;
         unsigned int lineSize;
 
+        // define match()
         std::function<bool()> match;
         if (plainTextSearch) {
             match = [&]() -> bool {
@@ -224,6 +231,7 @@ namespace PLP {
             };
         }
 
+        // find and process first line
         int progressPercent = 0;
         unsigned long long numProcessedLines = 0;
         if (fileReader->getLine(start, line, lineSize) == LineReaderResult::ERROR) {
@@ -236,6 +244,12 @@ namespace PLP {
                 Logger::send(ERR, "Failed to append search result");
                 return false;
             }
+            if (indexWriter->getNumResults() == maxNumResults) {
+                if (progressPercent < 100) {
+                    (*progressUpdate)(100, indexWriter->getNumResults());
+                }
+                return true;
+            }
         }
 
         numProcessedLines++;
@@ -244,6 +258,7 @@ namespace PLP {
             (*progressUpdate)(progressPercent, indexWriter->getNumResults());
         }
 
+        // find and process the rest 
         LineReaderResult result;
         while (fileReader->getLineNumber() <= end 
             && (result = fileReader->nextLine(line, lineSize)) == LineReaderResult::SUCCESS) {
@@ -251,6 +266,9 @@ namespace PLP {
                 if (!indexWriter->appendCurrLine(fileReader)) {
                     Logger::send(ERR, "Failed to append search result");
                     return false;
+                }
+                if (indexWriter->getNumResults() == maxNumResults) {
+                    break;
                 }
             }
 
@@ -278,8 +296,10 @@ namespace PLP {
         ResultSetWriterI* indexWriter,
         unsigned long long startIndex,
         unsigned long long endIndex,
+        unsigned long long maxNumResults,
         const std::wstring& searchText,
         bool plainTextSearch,
+        bool ignoreCase,
         const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
     ) {
         if (fileReader == nullptr || indexReader == nullptr || indexWriter == nullptr) {
@@ -297,6 +317,9 @@ namespace PLP {
         std::function<void(int, unsigned long long)> defaultProgressUpdate = [](int, unsigned long long) {};
         if (progressUpdate == nullptr) {
             progressUpdate = &defaultProgressUpdate;
+        }
+        if (maxNumResults == 0) {
+            maxNumResults = ULLONG_MAX;
         }
 
         const unsigned long long start = startIndex;
@@ -337,6 +360,12 @@ namespace PLP {
                 Logger::send(ERR, "Failed to append search result");
                 return false;
             }
+            if (indexWriter->getNumResults() == maxNumResults) {
+                if (progressPercent < 100) {
+                    (*progressUpdate)(100, indexWriter->getNumResults());
+                }
+                return true;
+            }
         }
 
         numProcessedLines++;
@@ -354,6 +383,9 @@ namespace PLP {
                 if (!indexWriter->appendCurrLine(fileReader)) {
                     Logger::send(ERR, "Failed to append search result");
                     return false;
+                }
+                if (indexWriter->getNumResults() == maxNumResults) {
+                    break;
                 }
             }
 
@@ -415,8 +447,10 @@ namespace PLP {
         std::shared_ptr<ResultSetWriter> indexWriter,
         unsigned long long startLine,
         unsigned long long endLine, //0 for end of file, inclusive
+        unsigned long long maxNumResults,
         const std::string& searchText,
-        bool plainTextSearch //false for regex
+        bool plainTextSearch, //false for regex
+        bool ignoreCase
     ) {
         std::function<void(int, unsigned long long)> progressUpdate = [&](int percent, unsigned long long numResults) {
             printConsoleL(std::to_string(percent) + "%, Found results: " + std::to_string(numResults));
@@ -425,8 +459,10 @@ namespace PLP {
             fileReader.get(),
             indexWriter.get(),
             startLine, endLine,
+            maxNumResults,
             string_to_wstring(searchText),
             plainTextSearch,
+            ignoreCase,
             &progressUpdate
         );
     }
@@ -437,8 +473,10 @@ namespace PLP {
         std::shared_ptr<ResultSetWriter> indexWriter,
         unsigned long long startIndex,
         unsigned long long endIndex,
+        unsigned long long maxNumResults,
         const std::string& searchText,
-        bool plainTextSearch
+        bool plainTextSearch,
+        bool ignoreCase
     ) {
         std::function<void(int, unsigned long long)> progressUpdate = [&](int percent, unsigned long long numResults) {
             printConsoleL(std::to_string(percent) + "%, Found results: " + std::to_string(numResults));
@@ -448,8 +486,10 @@ namespace PLP {
             indexReader.get(),
             indexWriter.get(),
             startIndex, endIndex,
+            maxNumResults,
             string_to_wstring(searchText),
             plainTextSearch,
+            ignoreCase,
             &progressUpdate
         );
     }

@@ -48,8 +48,10 @@ namespace PLP {
             ResultSetWriterI* indexWriter,
             unsigned long long startLine,
             unsigned long long endLine, //0 for end of file, inclusive
+            unsigned long long maxNumResults,
             const std::wstring& searchText,
             bool plainTextSearch, //false for regex
+            bool ignoreCase,
             const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
         ) = 0;
 
@@ -59,8 +61,10 @@ namespace PLP {
             ResultSetWriterI* indexWriter,
             unsigned long long startIndex,
             unsigned long long endIndex, //0 for end of file, inclusive
+            unsigned long long maxNumResults,
             const std::wstring& searchText,
             bool plainTextSearch, //false for regex
+            bool ignoreCase,
             const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
         ) = 0;
     };
