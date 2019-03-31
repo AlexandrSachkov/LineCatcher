@@ -12,6 +12,8 @@
 #include "LineReader.h"
 #include "Logger.h"
 #include "ReturnType.h"
+#include "CircularLineBuffer.h"
+#include "TextComparator.h"
 
 #include "lua.hpp"
 #include "LuaIntf/LuaIntf.h"
@@ -22,9 +24,13 @@
 #include <functional>
 #include <regex>
 #include <limits>
+#include <algorithm>
+#include <unordered_map>
 
 namespace LuaIntf {
-    LUA_USING_SHARED_PTR_TYPE(std::shared_ptr)
+    LUA_USING_SHARED_PTR_TYPE(std::shared_ptr);
+    LUA_USING_LIST_TYPE(std::vector);
+    LUA_USING_MAP_TYPE(std::unordered_map);
 }
 
 namespace PLP {
@@ -212,34 +218,30 @@ namespace PLP {
         const unsigned long long end = endLine > 0 ? endLine : fileReader->getNumberOfLines() - 1;
         const long double dLinesPerPercent = (end - start + 1) / 100.0;
         const unsigned long long numLinesTillProgressUpdate = dLinesPerPercent > 1.0 ? (unsigned long long)dLinesPerPercent : 1;
-        const int percentPerProgressUpdate = dLinesPerPercent > 1.0 ? 1 : (int)(1.0 / dLinesPerPercent);
+        const int percentPerProgressUpdate = dLinesPerPercent > 1.0 ? 1 : (int)(1.0 / dLinesPerPercent); 
+
         const std::string text = wstring_to_string(searchText);
-
-        char* line;
-        unsigned int lineSize;
-
-        // define match()
-        std::function<bool()> match;
+        std::unique_ptr<TextComparator> comparator = nullptr;
         if (plainTextSearch) {
-            match = [&]() -> bool {
-                return std::string::npos != std::string(line, lineSize).find(text);
-            };
+            comparator.reset(new Contains(text));
         } else {
-            std::regex regex(text);
-            match = [&, regex]() -> bool {
-                return std::regex_match(std::string(line, lineSize), regex);
-            };
+            comparator.reset(new RegexMatch(text, false));
+        }
+        if (!comparator->initialize()) {
+            return false;
         }
 
         // find and process first line
         int progressPercent = 0;
+        char* line;
+        unsigned int lineSize;
         unsigned long long numProcessedLines = 0;
         if (fileReader->getLine(start, line, lineSize) == LineReaderResult::ERROR) {
             Logger::send(ERR, "Failed to get line");
             return false;
         }
 
-        if (match()) {
+        if (comparator->match(line, lineSize)) {
             if (!indexWriter->appendCurrLine(fileReader)) {
                 Logger::send(ERR, "Failed to append search result");
                 return false;
@@ -262,7 +264,7 @@ namespace PLP {
         LineReaderResult result;
         while (fileReader->getLineNumber() <= end 
             && (result = fileReader->nextLine(line, lineSize)) == LineReaderResult::SUCCESS) {
-            if (match()) {
+            if (comparator->match(line, lineSize)) {
                 if (!indexWriter->appendCurrLine(fileReader)) {
                     Logger::send(ERR, "Failed to append search result");
                     return false;
@@ -402,6 +404,72 @@ namespace PLP {
         return true;
     }
 
+    bool Core::searchM(
+        FileReaderI* fileReader,
+        ResultSetWriterI* indexWriter,
+        unsigned long long startLine,
+        unsigned long long endLine, //0 for end of file, inclusive
+        unsigned long long maxNumResults, //0 for all
+        const std::vector<MultilineSearchParams>& searchParams,
+        const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
+    ) {
+        /*if (fileReader == nullptr || indexWriter == nullptr) {
+            Logger::send(ERR, "File reader and index writer cannot be null");
+            return false;
+        }
+        if (startLine > endLine) {
+            Logger::send(ERR, "Start line must be smaller or equal to end line");
+            return false;
+        }
+        if (searchParams.size() == 0) {
+            Logger::send(ERR, "No search parameters provided");
+            return false;
+        }
+        std::function<void(int, unsigned long long)> defaultProgressUpdate = [](int, unsigned long long) {};
+        if (progressUpdate == nullptr) {
+            progressUpdate = &defaultProgressUpdate;
+        }
+        if (maxNumResults == 0) {
+            maxNumResults = ULLONG_MAX;
+        }
+
+        std::vector<MultilineSearchParams> params = searchParams;
+        std::sort(params.begin(), params.end(), [](MultilineSearchParams& param1, MultilineSearchParams& param2) {
+            return param1.getLineOffset() > param2.getLineOffset();
+        });
+
+        const int startLineOffset = params[0].getLineOffset();
+
+        int numUniqueLines = 0;
+        for(int i = 0; i < params.size(); i++){
+            if (i == 0 || i != i - 1) {
+                numUniqueLines++;
+            }
+        }
+
+        CircularLineBuffer lineBuffer;
+        if (!lineBuffer.initialize(100000, numUniqueLines)) {
+            Logger::send(ERR, "Failed to initialize line buffer");
+            return false;
+        }*/
+        
+
+        return true;
+    }
+
+    bool Core::searchMI(
+        FileReaderI* fileReader,
+        ResultSetReaderI* indexReader,
+        ResultSetWriterI* indexWriter,
+        unsigned long long startLine,
+        unsigned long long endLine, //0 for end of file, inclusive
+        unsigned long long maxNumResults, //0 for all
+        const std::vector<MultilineSearchParams>& searchParams,
+        const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
+    ) {
+        return true;
+    }
+
     std::shared_ptr<FileReader> Core::createFileReaderL(
         const std::string& path,
         unsigned long long preferredBuffSizeBytes,
@@ -494,6 +562,50 @@ namespace PLP {
         );
     }
 
+    bool Core::searchML(
+        std::shared_ptr<FileReader> fileReader,
+        std::shared_ptr<ResultSetWriter> indexWriter,
+        unsigned long long startLine,
+        unsigned long long endLine, //0 for end of file, inclusive
+        unsigned long long maxNumResults, //0 for all
+        const std::vector<MultilineSearchParams>& searchParams
+    ) {
+        std::function<void(int, unsigned long long)> progressUpdate = [&](int percent, unsigned long long numResults) {
+            printConsoleL(std::to_string(percent) + "%, Found results: " + std::to_string(numResults));
+        };
+        return searchM(
+            fileReader.get(),
+            indexWriter.get(),
+            startLine, endLine,
+            maxNumResults,
+            searchParams,
+            &progressUpdate
+        );
+    }
+
+    bool Core::searchMIL(
+        std::shared_ptr<FileReader> fileReader,
+        std::shared_ptr<ResultSetReader> indexReader,
+        std::shared_ptr<ResultSetWriter> indexWriter,
+        unsigned long long startIndex,
+        unsigned long long endIndex, //0 for end of file, inclusive
+        unsigned long long maxNumResults, //0 for all
+        const std::vector<MultilineSearchParams>& searchParams
+    ) {
+        std::function<void(int, unsigned long long)> progressUpdate = [&](int percent, unsigned long long numResults) {
+            printConsoleL(std::to_string(percent) + "%, Found results: " + std::to_string(numResults));
+        };
+        return searchMI(
+            fileReader.get(),
+            indexReader.get(),
+            indexWriter.get(),
+            startIndex, endIndex,
+            maxNumResults,
+            searchParams,
+            &progressUpdate
+        );
+    }
+
     void Core::printConsoleL(const std::string& msg) {
         printConsoleExL(msg, 0);
     }
@@ -512,6 +624,15 @@ namespace PLP {
         module.addConstant("NOT_FOUND", LineReaderResult::NOT_FOUND);
         module.addConstant("SUCCESS", LineReaderResult::SUCCESS);
 
+        auto mspClass = module.beginClass<MultilineSearchParams>("MSP");
+        mspClass.addConstructor(LUA_ARGS(int, int, bool, const std::string&, bool, bool));
+        mspClass.addFunction("getLineOffset", &MultilineSearchParams::getLineOffset);
+        mspClass.addFunction("getWordIndex", &MultilineSearchParams::getWordIndex);
+        mspClass.addFunction("getSearchText", &MultilineSearchParams::getSearchText);
+        mspClass.addFunction("plainText", &MultilineSearchParams::plainText);
+        mspClass.addFunction("ignoreCase", &MultilineSearchParams::ignoreCase);
+        mspClass.endClass();
+
         auto plpClass = module.beginClass<Core>("Core");
         plpClass.addFunction("createFileReader", &Core::createFileReaderL);
         plpClass.addFunction("createFileWriter", &Core::createFileWriterL);
@@ -519,6 +640,8 @@ namespace PLP {
         plpClass.addFunction("createResultSetWriter", &Core::createResultSetWriterL);
         plpClass.addFunction("search", &Core::searchL);
         plpClass.addFunction("searchI", &Core::searchIL);
+        plpClass.addFunction("searchM", &Core::searchML);
+        plpClass.addFunction("searchMI", &Core::searchMIL);
         plpClass.addFunction("printConsole", &Core::printConsoleL);
         plpClass.addFunction("printConsoleEx", &Core::printConsoleExL);
         plpClass.addFunction("isCancelled", &Core::isCancelled);
@@ -564,6 +687,37 @@ namespace PLP {
         resultWriterClass.addFunction("release", &ResultSetWriter::release);
         resultWriterClass.endClass();
 
+        //Text compare
+        auto tcModule = module.beginModule("TC");
+
+        auto tcTextComparator = tcModule.beginClass<TextComparator>("TextComparator");
+        tcTextComparator.endClass();
+
+        auto tcContains = tcModule.beginClass<Contains>("Contains");
+        tcContains.addFactory([](const std::string& text) {
+            return std::shared_ptr<TextComparator>(new Contains(text));
+        });
+        tcContains.endClass();
+
+        auto tcMatchMultiple = tcModule.beginClass<MatchMultiple>("MatchMultiple");
+        tcMatchMultiple.addFactory([](const std::vector<std::shared_ptr<TextComparator>>& comparators) {
+            return std::shared_ptr<TextComparator>(new MatchMultiple(comparators));
+        });
+        tcMatchMultiple.endClass();
+
+        auto tcRegexMatch = tcModule.beginClass<RegexMatch>("RegexMatch");
+        tcRegexMatch.addFactory([](const std::string& regexPattern, bool ignoreCase) {
+            return std::shared_ptr<TextComparator>(new RegexMatch(regexPattern, ignoreCase));
+        });
+        tcRegexMatch.endClass();
+
+        auto tcSplit = tcModule.beginClass<Split>("Split");
+        tcSplit.addFactory([](const std::string& splitText, const std::unordered_map<int, std::shared_ptr<TextComparator>>& sliceComparators) {
+            return std::shared_ptr<TextComparator>(new Split(splitText, sliceComparators));
+        });
+        tcSplit.endClass();
+
+        tcModule.endModule();
         module.endModule();
     }
 }

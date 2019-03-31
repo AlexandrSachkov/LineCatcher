@@ -1,7 +1,10 @@
 #pragma once
 
+#include "MultilineSearchParams.h"
+
 #include <string>
 #include <functional>
+#include <vector>
 
 namespace PLP {
     class FileReaderI;
@@ -48,7 +51,7 @@ namespace PLP {
             ResultSetWriterI* indexWriter,
             unsigned long long startLine,
             unsigned long long endLine, //0 for end of file, inclusive
-            unsigned long long maxNumResults,
+            unsigned long long maxNumResults, //0 for all
             const std::wstring& searchText,
             bool plainTextSearch, //false for regex
             bool ignoreCase,
@@ -61,10 +64,31 @@ namespace PLP {
             ResultSetWriterI* indexWriter,
             unsigned long long startIndex,
             unsigned long long endIndex, //0 for end of file, inclusive
-            unsigned long long maxNumResults,
+            unsigned long long maxNumResults, //0 for all
             const std::wstring& searchText,
             bool plainTextSearch, //false for regex
             bool ignoreCase,
+            const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
+        ) = 0;
+
+        virtual bool searchM(
+            FileReaderI* fileReader,
+            ResultSetWriterI* indexWriter,
+            unsigned long long startLine,
+            unsigned long long endLine, //0 for end of file, inclusive
+            unsigned long long maxNumResults, //0 for all
+            const std::vector<MultilineSearchParams>& searchParams,
+            const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
+        ) = 0;
+
+        virtual bool searchMI(
+            FileReaderI* fileReader,
+            ResultSetReaderI* indexReader,
+            ResultSetWriterI* indexWriter,
+            unsigned long long startIndex,
+            unsigned long long endIndex, //0 for end of file, inclusive
+            unsigned long long maxNumResults, //0 for all
+            const std::vector<MultilineSearchParams>& searchParams,
             const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
         ) = 0;
     };

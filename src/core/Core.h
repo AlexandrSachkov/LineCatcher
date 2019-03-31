@@ -90,6 +90,27 @@ namespace PLP {
             const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
         ) override;
 
+        bool searchM(
+            FileReaderI* fileReader,
+            ResultSetWriterI* indexWriter,
+            unsigned long long startLine,
+            unsigned long long endLine, //0 for end of file, inclusive
+            unsigned long long maxNumResults, //0 for all
+            const std::vector<MultilineSearchParams>& searchParams,
+            const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
+        ) override;
+
+        bool searchMI(
+            FileReaderI* fileReader,
+            ResultSetReaderI* indexReader,
+            ResultSetWriterI* indexWriter,
+            unsigned long long startLine,
+            unsigned long long endLine, //0 for end of file, inclusive
+            unsigned long long maxNumResults, //0 for all
+            const std::vector<MultilineSearchParams>& searchParams,
+            const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
+        ) override;
+
         //Lua interface
         std::shared_ptr<FileReader> createFileReaderL(
             const std::string& path,
@@ -136,6 +157,25 @@ namespace PLP {
             const std::string& searchText,
             bool plainTextSearch, //false for regex
             bool ignoreCase
+        );
+
+        bool searchML(
+            std::shared_ptr<FileReader> fileReader,
+            std::shared_ptr<ResultSetWriter> indexWriter,
+            unsigned long long startLine,
+            unsigned long long endLine, //0 for end of file, inclusive
+            unsigned long long maxNumResults, //0 for all
+            const std::vector<MultilineSearchParams>& searchParams
+        );
+
+        bool searchMIL(
+            std::shared_ptr<FileReader> fileReader,
+            std::shared_ptr<ResultSetReader> indexReader,
+            std::shared_ptr<ResultSetWriter> indexWriter,
+            unsigned long long startIndex,
+            unsigned long long endIndex, //0 for end of file, inclusive
+            unsigned long long maxNumResults, //0 for all
+            const std::vector<MultilineSearchParams>& searchParams
         );
 
         void printConsoleL(const std::string& msg);

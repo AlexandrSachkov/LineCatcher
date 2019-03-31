@@ -5,22 +5,23 @@
 #include <vector>
 #include <unordered_map>
 #include <algorithm>
+#include <memory>
 
 namespace PLP {
     class TextComparator {
     public:
         virtual bool initialize() = 0;
-        virtual bool match(const char* data, unsigned int size) const = 0;
+        virtual bool match(const char* data, unsigned int size) = 0;
     };
 
     class MatchMultiple : public TextComparator {
     public:
-        MatchMultiple(const std::vector<TextComparator*>& comparators) {
+        MatchMultiple(const std::vector<std::shared_ptr<TextComparator>>& comparators) {
             _comparators = comparators;
         }
 
         bool initialize() override {
-            for (auto comparator : _comparators) {
+            for (auto& comparator : _comparators) {
                 if (!comparator->initialize()) {
                     return false;
                 }
@@ -28,8 +29,8 @@ namespace PLP {
             return true;
         }
 
-        bool match(const char* data, unsigned int size) const override {
-            for (auto comparator : _comparators) {
+        bool match(const char* data, unsigned int size) override {
+            for (auto& comparator : _comparators) {
                 if (!comparator->match(data, size)) {
                     return false;
                 }
@@ -38,7 +39,7 @@ namespace PLP {
         }
 
     private:
-        std::vector<TextComparator*> _comparators;
+        std::vector<std::shared_ptr<TextComparator>> _comparators;
     };
 
     class Contains : public TextComparator {
@@ -49,7 +50,7 @@ namespace PLP {
             return true;
         }
 
-        bool match(const char* data, unsigned int size) const override {
+        bool match(const char* data, unsigned int size) override {
             return std::string::npos != std::string(data, size).find(_text);
         }
 
@@ -57,9 +58,9 @@ namespace PLP {
         std::string _text;
     };
 
-    class MatchesRegex : public TextComparator {
+    class RegexMatch : public TextComparator {
     public:
-        MatchesRegex (const std::string& regexPattern, bool ignoreCase) : _regexPattern(regexPattern), _ignoreCase(ignoreCase) {}
+        RegexMatch(const std::string& regexPattern, bool ignoreCase) : _regexPattern(regexPattern), _ignoreCase(ignoreCase) {}
 
         bool initialize() override {
             std::regex_constants::syntax_option_type flags = std::regex_constants::optimize;
@@ -76,7 +77,7 @@ namespace PLP {
             return true;
         }
 
-        bool match(const char* data, unsigned int size) const override {
+        bool match(const char* data, unsigned int size) override {
             return std::regex_match(std::string(data, size), _regex);
         }
 
@@ -88,7 +89,8 @@ namespace PLP {
 
     class Split : public TextComparator {
     public:
-        Split(const std::string& splitText, const std::unordered_map<int, TextComparator*> sliceComparators) : _splitText(splitText){
+        Split(const std::string& splitText, const std::unordered_map<int, std::shared_ptr<TextComparator>>& sliceComparators) 
+            : _splitText(splitText){
             try {
                 _sliceComparators.resize(sliceComparators.size());
 
@@ -97,9 +99,11 @@ namespace PLP {
                 }
 
                 std::sort(_sliceComparators.begin(), _sliceComparators.end(),
-                    [](std::pair<int, TextComparator*>& comp1, std::pair<int, TextComparator*>& comp2) {
+                    [](std::pair<int, std::shared_ptr<TextComparator>>& comp1, std::pair<int, std::shared_ptr<TextComparator>>& comp2) {
                     return comp1.first > comp2.first;
                 });
+
+                _sliceStartLength.reserve(100);
             } catch (std::bad_alloc&) {
                 _internalFailure = true;
             }
@@ -118,9 +122,8 @@ namespace PLP {
             return true;
         }
 
-        bool match(const char* data, unsigned int size) const override {
-            std::vector<std::pair<unsigned int, unsigned int>> _sliceStartLength;
-            _sliceStartLength.reserve(10);
+        bool match(const char* data, unsigned int size) override {
+            _sliceStartLength.clear();
 
             std::string sData(data, size);
             unsigned int pos = 0;
@@ -128,12 +131,12 @@ namespace PLP {
             unsigned int length = 0;
             while ((pos = (unsigned int)sData.find(_splitText, offset)) != std::string::npos) {
                 length = pos - offset + (unsigned int)_splitText.size();
-                _sliceStartLength.push_back({ offset, length });
-                pos += (unsigned int)_splitText.size();
+                _sliceStartLength.emplace_back(offset, length);
+                offset += (unsigned int)_splitText.size();
             }
 
             if (offset < _splitText.size() - 1) {
-                _sliceStartLength.push_back({ offset, (unsigned int)_splitText.size() - offset });
+                _sliceStartLength.emplace_back(offset, (unsigned int)_splitText.size() - offset);
             }
 
             // quick check if one of the comparators is out of bounds
@@ -162,6 +165,7 @@ namespace PLP {
     private:
         bool _internalFailure = false;
         std::string _splitText;
-        std::vector<std::pair<int, TextComparator*>>  _sliceComparators;
+        std::vector<std::pair<int, std::shared_ptr<TextComparator>>>  _sliceComparators;
+        std::vector<std::pair<unsigned int, unsigned int>> _sliceStartLength;
     };
 }
