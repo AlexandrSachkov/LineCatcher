@@ -7,6 +7,7 @@ namespace PLP {
     public:
         LineBuffer(unsigned int size);
 
+        bool set(const char* data, unsigned int size);
         bool append(const char* data, unsigned int size);
         void get(char*& data, unsigned int& size);
         unsigned int getSize();

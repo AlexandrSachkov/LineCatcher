@@ -6,6 +6,16 @@ namespace PLP {
         _size = 0;
     }
 
+    bool LineBuffer::set(const char* data, unsigned int size) {
+        if (size > _data.size()) {
+            return false;
+        }
+
+        memcpy(_data.data(), data, size);
+        _size = size;
+        return true;
+    }
+
     bool LineBuffer::append(const char* data, unsigned int size) {
         if (_size + size > _data.size()) {
             return false;
