@@ -696,11 +696,11 @@ namespace PLP {
         tcTextComparator.addFunction("match", match);
         tcTextComparator.endClass();
 
-        auto tcContains = tcModule.beginClass<MatchString>("MatchString");
-        tcContains.addFactory([](const std::string& text, bool exact) {
+        auto tcMatchString = tcModule.beginClass<MatchString>("MatchString");
+        tcMatchString.addFactory([](const std::string& text, bool exact) {
             return std::shared_ptr<TextComparator>(new MatchString(text, exact));
         });
-        tcContains.endClass();
+        tcMatchString.endClass();
 
         auto tcMatchMultiple = tcModule.beginClass<MatchMultiple>("MatchMultiple");
         tcMatchMultiple.addFactory([](const std::vector<std::shared_ptr<TextComparator>>& comparators) {
@@ -714,17 +714,23 @@ namespace PLP {
         });
         tcMatchAny.endClass();
 
-        auto tcRegexMatch = tcModule.beginClass<MatchRegex>("MatchRegex");
-        tcRegexMatch.addFactory([](const std::string& regexPattern, bool ignoreCase) {
+        auto tcMatchRegex = tcModule.beginClass<MatchRegex>("MatchRegex");
+        tcMatchRegex.addFactory([](const std::string& regexPattern, bool ignoreCase) {
             return std::shared_ptr<TextComparator>(new MatchRegex(regexPattern, ignoreCase));
         });
-        tcRegexMatch.endClass();
+        tcMatchRegex.endClass();
 
-        auto tcSplit = tcModule.beginClass<MatchSubstrings>("MatchSubstrings");
-        tcSplit.addFactory([](const std::string& splitText, bool trimLine, const std::unordered_map<int, std::shared_ptr<TextComparator>>& sliceComparators) {
+        auto tcMatchSubstrings = tcModule.beginClass<MatchSubstrings>("MatchSubstrings");
+        tcMatchSubstrings.addFactory([](const std::string& splitText, bool trimLine, const std::unordered_map<int, std::shared_ptr<TextComparator>>& sliceComparators) {
             return std::shared_ptr<TextComparator>(new MatchSubstrings(splitText, trimLine, sliceComparators));
         });
-        tcSplit.endClass();
+        tcMatchSubstrings.endClass();
+
+        auto tcMatchWords = tcModule.beginClass<MatchWords>("MatchWords");
+        tcMatchWords.addFactory([](const std::unordered_map<int, std::shared_ptr<TextComparator>>& sliceComparators) {
+            return std::shared_ptr<TextComparator>(new MatchWords(sliceComparators));
+        });
+        tcMatchWords.endClass();
 
         tcModule.endModule();
         module.endModule();

@@ -2,6 +2,7 @@
 #include "ReturnType.h"
 
 #include <string>
+#include <vector>
 
 namespace PLP {
     std::wstring string_to_wstring(const std::string& str);
@@ -43,6 +44,25 @@ namespace PLP {
         } else {
             strStartOut = const_cast<char*>(str) + startPos;
             sizeOut = size - startPos - numSpaces;
+        }
+    }
+
+    static void splitIntoWords(const char* str, unsigned int size, std::vector<std::pair<const char*, unsigned int>>& words) {
+        words.clear();
+
+        unsigned int numCharsInWord = 0;
+        unsigned int wordStartPos = 0;
+        for (unsigned int i = 0; i < size; i++) {
+            if (str[i] != ' ') {
+                if (numCharsInWord == 0) {
+                    wordStartPos = i;
+                }
+                
+                numCharsInWord++;
+            } else if (numCharsInWord > 0) {
+                words.emplace_back(str + wordStartPos, numCharsInWord);
+                numCharsInWord = 0;
+            }
         }
     }
 

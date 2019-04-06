@@ -236,4 +236,72 @@ namespace PLP {
         std::vector<std::pair<int, std::shared_ptr<TextComparator>>>  _sliceComparators;
         std::vector<std::pair<const char*, unsigned int>> _substrings;
     };
+
+    class MatchWords : public TextComparator {
+    public:
+        MatchWords(const std::unordered_map<int, std::shared_ptr<TextComparator>>& wordComparators) {
+            try {
+                for (auto& it : wordComparators) {
+                    _wordComparators.push_back({ it.first, it.second });
+                }
+
+                std::sort(_wordComparators.begin(), _wordComparators.end(),
+                    [](const std::pair<int, std::shared_ptr<TextComparator>>& comp1, const std::pair<int, std::shared_ptr<TextComparator>>& comp2) {
+                    return comp1.first < comp2.first;
+                });
+
+                _words.reserve(100);
+            } catch (std::bad_alloc&) {
+                _internalFailure = true;
+            }
+        }
+
+        bool initialize() override {
+            if (_internalFailure) {
+                return false;
+            }
+
+            for (auto& comp : _wordComparators) {
+                if (!comp.second->initialize()) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        bool match(const char* str, unsigned int size) override {
+            splitIntoWords(str, size, _words);
+
+            // quick check if one of the comparators is out of bounds
+            for (auto& comparator : _wordComparators) {
+                if ((comparator.first >= 0 && comparator.first >= _words.size()) ||
+                    (comparator.first < 0 && -comparator.first >= _words.size())) {
+                    return false;
+                }
+            }
+
+            int wordIndex;
+            for (auto& comparator : _wordComparators) {
+                wordIndex = comparator.first;
+                if (wordIndex < 0) {
+                    wordIndex = (int)_words.size() + wordIndex;
+                }
+
+                if (!comparator.second->match(_words[wordIndex].first, _words[wordIndex].second)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        bool match(const std::string& str) {
+            return match(str.c_str(), (unsigned int)str.length());
+        }
+
+    private:
+        bool _internalFailure = false;
+        std::vector<std::pair<int, std::shared_ptr<TextComparator>>> _wordComparators;
+        std::vector<std::pair<const char*, unsigned int>> _words;
+    };
 }

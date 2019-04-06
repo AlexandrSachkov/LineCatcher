@@ -181,10 +181,10 @@ int main() {
 
     std::string text = "   this   is a test ";
     std::unordered_map<int, std::shared_ptr<PLP::TextComparator>> map = {
-        {0, std::shared_ptr<PLP::TextComparator>(new PLP::MatchString("this ", true))},
-        {-1, std::shared_ptr<PLP::TextComparator>(new PLP::MatchString("test", true))}
+        {0, std::shared_ptr<PLP::TextComparator>(new PLP::MatchString("this", true))},
+        {3, std::shared_ptr<PLP::TextComparator>(new PLP::MatchString("test", true))}
     };
-    std::shared_ptr<PLP::TextComparator> comp(new PLP::MatchSubstrings(" ", true, map));
+    std::shared_ptr<PLP::TextComparator> comp(new PLP::MatchWords(map));
     bool res = comp->initialize();
     res = comp->match(text);
 
