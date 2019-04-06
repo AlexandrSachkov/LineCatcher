@@ -688,57 +688,54 @@ namespace PLP {
         resultWriterClass.endClass();
 
         //Text compare
-        auto tcModule = module.beginModule("TC");
-
-        auto tcTextComparator = tcModule.beginClass<TextComparator>("TextComparator");
+        auto tcTextComparator = module.beginClass<TextComparator>("TextComparator");
         bool(TextComparator::*match)(const std::string&) = &TextComparator::match;
         tcTextComparator.addFunction("initialize", &TextComparator::initialize);
         tcTextComparator.addFunction("match", match);
         tcTextComparator.endClass();
 
-        auto tcMatchString = tcModule.beginClass<MatchString>("MatchString");
+        auto tcMatchString = module.beginClass<MatchString>("MatchString");
         tcMatchString.addFactory([](const std::string& text, bool exact) {
             return std::shared_ptr<TextComparator>(new MatchString(text, exact));
         });
         tcMatchString.endClass();
 
-        auto tcMatchMultiple = tcModule.beginClass<MatchMultiple>("MatchMultiple");
+        auto tcMatchMultiple = module.beginClass<MatchMultiple>("MatchMultiple");
         tcMatchMultiple.addFactory([](const std::vector<std::shared_ptr<TextComparator>>& comparators) {
             return std::shared_ptr<TextComparator>(new MatchMultiple(comparators));
         });
         tcMatchMultiple.endClass();
 
-        auto tcMatchAny = tcModule.beginClass<MatchAny>("MatchAny");
+        auto tcMatchAny = module.beginClass<MatchAny>("MatchAny");
         tcMatchAny.addFactory([](const std::vector<std::shared_ptr<TextComparator>>& comparators) {
             return std::shared_ptr<TextComparator>(new MatchAny(comparators));
         });
         tcMatchAny.endClass();
 
-        auto tcMatchRegex = tcModule.beginClass<MatchRegex>("MatchRegex");
+        auto tcMatchRegex = module.beginClass<MatchRegex>("MatchRegex");
         tcMatchRegex.addFactory([](const std::string& regexPattern, bool ignoreCase) {
             return std::shared_ptr<TextComparator>(new MatchRegex(regexPattern, ignoreCase));
         });
         tcMatchRegex.endClass();
 
-        auto tcMatchSubstrings = tcModule.beginClass<MatchSubstrings>("MatchSubstrings");
+        auto tcMatchSubstrings = module.beginClass<MatchSubstrings>("MatchSubstrings");
         tcMatchSubstrings.addFactory([](const std::string& splitText, bool trimLine, const std::unordered_map<int, std::shared_ptr<TextComparator>>& sliceComparators) {
             return std::shared_ptr<TextComparator>(new MatchSubstrings(splitText, trimLine, sliceComparators));
         });
         tcMatchSubstrings.endClass();
 
-        auto tcMatchWords = tcModule.beginClass<MatchWords>("MatchWords");
+        auto tcMatchWords = module.beginClass<MatchWords>("MatchWords");
         tcMatchWords.addFactory([](const std::unordered_map<int, std::shared_ptr<TextComparator>>& sliceComparators) {
             return std::shared_ptr<TextComparator>(new MatchWords(sliceComparators));
         });
         tcMatchWords.endClass();
 
-        auto tcMatchCustom = tcModule.beginClass<MatchCustom>("MatchCustom");
+        auto tcMatchCustom = module.beginClass<MatchCustom>("MatchCustom");
         tcMatchCustom.addFactory([](const std::function<bool(const std::string&)> func) {
             return std::shared_ptr<TextComparator>(new MatchCustom(func));
         });
         tcMatchCustom.endClass();
 
-        tcModule.endModule();
         module.endModule();
     }
 }
