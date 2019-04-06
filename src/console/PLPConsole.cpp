@@ -4,6 +4,7 @@
 #include "FileWriter.h"
 #include "ResultSetReader.h"
 #include "ResultSetWriter.h"
+#include "TextComparator.h"
 
 int main() {
     PLP::CoreI* core = PLP::createCore();
@@ -178,23 +179,14 @@ int main() {
     rWriter->release();
     fReader->release();*/
 
-    auto fReader = core->createFileReader(largeFile, 0, true);
-    //auto rReader = core->createResultSetReader("D:/Repositories/LogParser/resources/resourceIdResults.txt", 0);
-    auto rWriter = core->createResultSetWriter("simpleSearchResults.txt", 0, fReader, true);
-    std::function<void(int, unsigned long long)> updateProgress = [](int percent, unsigned long long numResults) {
-        printf("Progress: %i, %llu\n", percent, numResults);
+    std::string text = "   this   is a test ";
+    std::unordered_map<int, std::shared_ptr<PLP::TextComparator>> map = {
+        {0, std::shared_ptr<PLP::TextComparator>(new PLP::MatchString("this ", true))},
+        {-1, std::shared_ptr<PLP::TextComparator>(new PLP::MatchString("test", true))}
     };
-    if (!core->search(
-        fReader,
-        //rReader,
-        rWriter,
-        0, 0,
-        L"0x00000003dcf2a690",
-        true,
-        &updateProgress
-    )) {
-        return 1;
-    }
+    std::shared_ptr<PLP::TextComparator> comp(new PLP::MatchSubstrings(" ", true, map));
+    bool res = comp->initialize();
+    res = comp->match(text);
 
     double numSeconds = timer.deltaT() / 1000000000;
     printf("Completed in: %f seconds\n", numSeconds);

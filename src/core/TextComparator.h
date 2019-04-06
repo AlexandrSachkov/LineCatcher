@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Utils.h"
+
 #include <string>
 #include <regex>
 #include <vector>
@@ -12,6 +14,7 @@ namespace PLP {
     public:
         virtual bool initialize() = 0;
         virtual bool match(const char* data, unsigned int size) = 0;
+        virtual bool match(const std::string& str) = 0;
     };
 
     class MatchMultiple : public TextComparator {
@@ -38,29 +41,79 @@ namespace PLP {
             return true;
         }
 
+        bool match(const std::string& str) {
+            return match(str.c_str(), (unsigned int)str.length());
+        }
+
     private:
         std::vector<std::shared_ptr<TextComparator>> _comparators;
     };
 
-    class Contains : public TextComparator {
+    class MatchAny : public TextComparator {
     public:
-        Contains(const std::string& text) : _text(text) {}
+        MatchAny(const std::vector<std::shared_ptr<TextComparator>>& comparators) {
+            _comparators = comparators;
+        }
+
+        bool initialize() override {
+            for (auto& comparator : _comparators) {
+                if (!comparator->initialize()) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        bool match(const char* data, unsigned int size) override {
+            for (auto& comparator : _comparators) {
+                if (comparator->match(data, size)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        bool match(const std::string& str) {
+            return match(str.c_str(), (unsigned int)str.length());
+        }
+
+    private:
+        std::vector<std::shared_ptr<TextComparator>> _comparators;
+    };
+
+    class MatchString : public TextComparator {
+    public:
+        MatchString(const std::string& text, bool exact) {
+            if (exact) {
+                _match = [text](const char* data, unsigned int size) {
+                    return std::string(data, size).compare(text) == 0;
+                };
+            } else {
+                _match = [text](const char* data, unsigned int size) {
+                    return std::string::npos != std::string(data, size).find(text);
+                };
+            }
+        }
 
         bool initialize() override {
             return true;
         }
 
         bool match(const char* data, unsigned int size) override {
-            return std::string::npos != std::string(data, size).find(_text);
+            return _match(data, size);
+        }
+
+        bool match(const std::string& str) {
+            return match(str.c_str(), (unsigned int)str.length());
         }
 
     private:
-        std::string _text;
+        std::function<bool(const char* data, unsigned int size)> _match;
     };
 
-    class RegexMatch : public TextComparator {
+    class MatchRegex : public TextComparator {
     public:
-        RegexMatch(const std::string& regexPattern, bool ignoreCase) : _regexPattern(regexPattern), _ignoreCase(ignoreCase) {}
+        MatchRegex(const std::string& regexPattern, bool ignoreCase) : _regexPattern(regexPattern), _ignoreCase(ignoreCase) {}
 
         bool initialize() override {
             std::regex_constants::syntax_option_type flags = std::regex_constants::optimize;
@@ -81,29 +134,31 @@ namespace PLP {
             return std::regex_match(std::string(data, size), _regex);
         }
 
+        bool match(const std::string& str) {
+            return match(str.c_str(), (unsigned int)str.length());
+        }
+
     private:
         std::string _regexPattern;
         bool _ignoreCase;
         std::regex _regex;
     };
 
-    class Split : public TextComparator {
+    class MatchSubstrings : public TextComparator {
     public:
-        Split(const std::string& splitText, const std::unordered_map<int, std::shared_ptr<TextComparator>>& sliceComparators) 
-            : _splitText(splitText){
+        MatchSubstrings(const std::string& splitText, bool trimLine, const std::unordered_map<int, std::shared_ptr<TextComparator>>& sliceComparators)
+            : _splitText(splitText), _trimLine(trimLine) {
             try {
-                _sliceComparators.resize(sliceComparators.size());
-
                 for (auto& it : sliceComparators) {
                     _sliceComparators.push_back({ it.first, it.second });
                 }
 
                 std::sort(_sliceComparators.begin(), _sliceComparators.end(),
-                    [](std::pair<int, std::shared_ptr<TextComparator>>& comp1, std::pair<int, std::shared_ptr<TextComparator>>& comp2) {
-                    return comp1.first > comp2.first;
+                    [](const std::pair<int, std::shared_ptr<TextComparator>>& comp1, const std::pair<int, std::shared_ptr<TextComparator>>& comp2) {
+                    return comp1.first < comp2.first;
                 });
 
-                _sliceStartLength.reserve(100);
+                _substrings.reserve(100);
             } catch (std::bad_alloc&) {
                 _internalFailure = true;
             }
@@ -122,27 +177,35 @@ namespace PLP {
             return true;
         }
 
-        bool match(const char* data, unsigned int size) override {
-            _sliceStartLength.clear();
+        bool match(const char* str, unsigned int size) override {
+            _substrings.clear();
 
-            std::string sData(data, size);
-            unsigned int pos = 0;
+            char* adjustedStr = const_cast<char*>(str);
+            unsigned int adjustedStrSize = size;
+            if (_trimLine) {
+                stringTrim(str, size, adjustedStr, adjustedStrSize);
+            }
+            std::string sData(adjustedStr, adjustedStrSize);
+
+            size_t pos = 0;
             unsigned int offset = 0;
             unsigned int length = 0;
-            while ((pos = (unsigned int)sData.find(_splitText, offset)) != std::string::npos) {
-                length = pos - offset + (unsigned int)_splitText.size();
-                _sliceStartLength.emplace_back(offset, length);
-                offset += (unsigned int)_splitText.size();
+            while ((pos = sData.find(_splitText, offset)) != std::string::npos) {
+                length = (unsigned int)pos - offset + (unsigned int)_splitText.size();
+                _substrings.emplace_back(sData.data() + offset, length);
+                offset += length;
             }
 
-            if (offset < _splitText.size() - 1) {
-                _sliceStartLength.emplace_back(offset, (unsigned int)_splitText.size() - offset);
+            if (offset < sData.size() - 1) {
+                _substrings.emplace_back(sData.data() + offset, (unsigned int)sData.size() - offset);
+            }else if (_substrings.size() == 0) {
+                _substrings.emplace_back(sData.data(), 0);
             }
 
             // quick check if one of the comparators is out of bounds
             for (auto& comparator : _sliceComparators) {
-                if ((comparator.first >= 0 && comparator.first >= _sliceStartLength.size()) ||
-                    (comparator.first < 0 && -comparator.first >= _sliceStartLength.size())) {
+                if ((comparator.first >= 0 && comparator.first >= _substrings.size()) ||
+                    (comparator.first < 0 && -comparator.first >= _substrings.size())) {
                     return false;
                 }
             }
@@ -151,10 +214,10 @@ namespace PLP {
             for (auto& comparator : _sliceComparators) {
                 sliceIndex = comparator.first;
                 if (sliceIndex < 0) {
-                    sliceIndex = (int)_sliceStartLength.size() - sliceIndex;
+                    sliceIndex = (int)_substrings.size() + sliceIndex;
                 }
 
-                if (!comparator.second->match(data + _sliceStartLength[sliceIndex].first, _sliceStartLength[sliceIndex].second)) {
+                if (!comparator.second->match(_substrings[sliceIndex].first, _substrings[sliceIndex].second)) {
                     return false;
                 }
             }
@@ -162,10 +225,15 @@ namespace PLP {
             return true;
         }
 
+        bool match(const std::string& str) {
+            return match(str.c_str(), (unsigned int)str.length());
+        }
+
     private:
         bool _internalFailure = false;
         std::string _splitText;
+        bool _trimLine;
         std::vector<std::pair<int, std::shared_ptr<TextComparator>>>  _sliceComparators;
-        std::vector<std::pair<unsigned int, unsigned int>> _sliceStartLength;
+        std::vector<std::pair<const char*, unsigned int>> _substrings;
     };
 }

@@ -223,9 +223,9 @@ namespace PLP {
         const std::string text = wstring_to_string(searchText);
         std::unique_ptr<TextComparator> comparator = nullptr;
         if (plainTextSearch) {
-            comparator.reset(new Contains(text));
+            comparator.reset(new MatchString(text, false));
         } else {
-            comparator.reset(new RegexMatch(text, false));
+            comparator.reset(new MatchRegex(text, false));
         }
         if (!comparator->initialize()) {
             return false;
@@ -691,11 +691,14 @@ namespace PLP {
         auto tcModule = module.beginModule("TC");
 
         auto tcTextComparator = tcModule.beginClass<TextComparator>("TextComparator");
+        bool(TextComparator::*match)(const std::string&) = &TextComparator::match;
+        tcTextComparator.addFunction("initialize", &TextComparator::initialize);
+        tcTextComparator.addFunction("match", match);
         tcTextComparator.endClass();
 
-        auto tcContains = tcModule.beginClass<Contains>("Contains");
-        tcContains.addFactory([](const std::string& text) {
-            return std::shared_ptr<TextComparator>(new Contains(text));
+        auto tcContains = tcModule.beginClass<MatchString>("MatchString");
+        tcContains.addFactory([](const std::string& text, bool exact) {
+            return std::shared_ptr<TextComparator>(new MatchString(text, exact));
         });
         tcContains.endClass();
 
@@ -705,15 +708,21 @@ namespace PLP {
         });
         tcMatchMultiple.endClass();
 
-        auto tcRegexMatch = tcModule.beginClass<RegexMatch>("RegexMatch");
+        auto tcMatchAny = tcModule.beginClass<MatchAny>("MatchAny");
+        tcMatchAny.addFactory([](const std::vector<std::shared_ptr<TextComparator>>& comparators) {
+            return std::shared_ptr<TextComparator>(new MatchAny(comparators));
+        });
+        tcMatchAny.endClass();
+
+        auto tcRegexMatch = tcModule.beginClass<MatchRegex>("MatchRegex");
         tcRegexMatch.addFactory([](const std::string& regexPattern, bool ignoreCase) {
-            return std::shared_ptr<TextComparator>(new RegexMatch(regexPattern, ignoreCase));
+            return std::shared_ptr<TextComparator>(new MatchRegex(regexPattern, ignoreCase));
         });
         tcRegexMatch.endClass();
 
-        auto tcSplit = tcModule.beginClass<Split>("Split");
-        tcSplit.addFactory([](const std::string& splitText, const std::unordered_map<int, std::shared_ptr<TextComparator>>& sliceComparators) {
-            return std::shared_ptr<TextComparator>(new Split(splitText, sliceComparators));
+        auto tcSplit = tcModule.beginClass<MatchSubstrings>("MatchSubstrings");
+        tcSplit.addFactory([](const std::string& splitText, bool trimLine, const std::unordered_map<int, std::shared_ptr<TextComparator>>& sliceComparators) {
+            return std::shared_ptr<TextComparator>(new MatchSubstrings(splitText, trimLine, sliceComparators));
         });
         tcSplit.endClass();
 
