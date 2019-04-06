@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <algorithm>
 #include <memory>
+#include <cwctype>
 
 namespace PLP {
     class TextComparator {
@@ -83,15 +84,32 @@ namespace PLP {
 
     class MatchString : public TextComparator {
     public:
-        MatchString(const std::string& text, bool exact) {
+        MatchString(const std::string& text, bool exact, bool ignoreCase) {
+            std::wstring wText = string_to_wstring(text);
             if (exact) {
-                _match = [text](const char* data, unsigned int size) {
-                    return std::string(data, size).compare(text) == 0;
-                };
+                if (ignoreCase) {
+                    _match = [wText](const char* data, unsigned int size) {
+                        std::wstring wData(string_to_wstring(std::string(data, size))); //TODO refactor for better performance
+                        std::transform(wData.begin(), wData.end(), wData.begin(), ::towlower);
+                        return wData.compare(wText) == 0;
+                    };
+                } else {
+                    _match = [text](const char* data, unsigned int size) {
+                        return std::string(data, size).compare(text) == 0;
+                    };
+                }
             } else {
-                _match = [text](const char* data, unsigned int size) {
-                    return std::string::npos != std::string(data, size).find(text);
-                };
+                if (ignoreCase) {
+                    _match = [wText](const char* data, unsigned int size) {
+                        std::wstring wData(string_to_wstring(std::string(data, size))); //TODO refactor for better performance
+                        std::transform(wData.begin(), wData.end(), wData.begin(), ::towlower);
+                        return std::string::npos != wData.find(wText);
+                    };
+                } else {
+                    _match = [text](const char* data, unsigned int size) {
+                        return std::string::npos != std::string(data, size).find(text);
+                    };
+                }
             }
         }
 

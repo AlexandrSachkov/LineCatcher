@@ -223,9 +223,9 @@ namespace PLP {
         const std::string text = wstring_to_string(searchText);
         std::unique_ptr<TextComparator> comparator = nullptr;
         if (plainTextSearch) {
-            comparator.reset(new MatchString(text, false));
+            comparator.reset(new MatchString(text, false, ignoreCase));
         } else {
-            comparator.reset(new MatchRegex(text, false));
+            comparator.reset(new MatchRegex(text, ignoreCase));
         }
         if (!comparator->initialize()) {
             return false;
@@ -695,8 +695,8 @@ namespace PLP {
         tcTextComparator.endClass();
 
         auto tcMatchString = module.beginClass<MatchString>("MatchString");
-        tcMatchString.addFactory([](const std::string& text, bool exact) {
-            return std::shared_ptr<TextComparator>(new MatchString(text, exact));
+        tcMatchString.addFactory([](const std::string& text, bool exact, bool ignoreCase) {
+            return std::shared_ptr<TextComparator>(new MatchString(text, exact, ignoreCase));
         });
         tcMatchString.endClass();
 
