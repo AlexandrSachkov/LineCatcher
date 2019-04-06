@@ -179,9 +179,9 @@ int main() {
     rWriter->release();
     fReader->release();*/
 
-    std::string text = "   this   is a test ";
+    std::string text = "   This   is a test ";
     std::unordered_map<int, std::shared_ptr<PLP::TextComparator>> map = {
-        {0, std::shared_ptr<PLP::TextComparator>(new PLP::MatchString("this", true))},
+        {0, std::shared_ptr<PLP::TextComparator>(new PLP::MatchString("this", true, true))},
         {-1, std::shared_ptr<PLP::TextComparator>(new PLP::MatchCustom([](const std::string& word) {
             return word.size() > 2 && word[1] == 'e';
         }))}
