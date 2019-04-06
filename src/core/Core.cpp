@@ -732,6 +732,12 @@ namespace PLP {
         });
         tcMatchWords.endClass();
 
+        auto tcMatchCustom = tcModule.beginClass<MatchCustom>("MatchCustom");
+        tcMatchCustom.addFactory([](const std::function<bool(const std::string&)> func) {
+            return std::shared_ptr<TextComparator>(new MatchCustom(func));
+        });
+        tcMatchCustom.endClass();
+
         tcModule.endModule();
         module.endModule();
     }

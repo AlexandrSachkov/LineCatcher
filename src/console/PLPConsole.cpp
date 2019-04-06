@@ -182,7 +182,9 @@ int main() {
     std::string text = "   this   is a test ";
     std::unordered_map<int, std::shared_ptr<PLP::TextComparator>> map = {
         {0, std::shared_ptr<PLP::TextComparator>(new PLP::MatchString("this", true))},
-        {3, std::shared_ptr<PLP::TextComparator>(new PLP::MatchString("test", true))}
+        {-1, std::shared_ptr<PLP::TextComparator>(new PLP::MatchCustom([](const std::string& word) {
+            return word.size() > 2 && word[1] == 'e';
+        }))}
     };
     std::shared_ptr<PLP::TextComparator> comp(new PLP::MatchWords(map));
     bool res = comp->initialize();
@@ -192,4 +194,4 @@ int main() {
     printf("Completed in: %f seconds\n", numSeconds);
     //printf("Num matches: %i\n", numMatches);
     return 0;
-}
+ }

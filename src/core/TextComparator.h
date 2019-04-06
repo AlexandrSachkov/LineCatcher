@@ -304,4 +304,24 @@ namespace PLP {
         std::vector<std::pair<int, std::shared_ptr<TextComparator>>> _wordComparators;
         std::vector<std::pair<const char*, unsigned int>> _words;
     };
+
+    class MatchCustom : public TextComparator {
+    public:
+        MatchCustom(const std::function<bool(const std::string&)>& match) : _match(match) {}
+
+        bool initialize() override {
+            return true;
+        }
+
+        bool match(const char* data, unsigned int size) override {
+            return _match(std::string(data, size));
+        }
+
+        bool match(const std::string& str) {
+            return _match(str);
+        }
+
+    private:
+        std::function<bool(const std::string&)> _match;
+    };
 }
