@@ -26,6 +26,7 @@ namespace PLP {
 
         //C++ interface
         bool appendCurrLine(const FileReaderI* fReader) override;
+        bool appendCurrLine(unsigned long long lineNumber, unsigned long long fileOffset) override;
 
         //Lua interface
         bool appendCurrLine(const std::shared_ptr<FileReader> fReader);

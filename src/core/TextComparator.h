@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <memory>
 #include <cwctype>
+#include <functional>
 
 namespace PLP {
     class TextComparator {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MultilineSearchParams.h"
+#include "TextComparator.h"
 
 #include <string>
 #include <functional>
@@ -48,26 +49,12 @@ namespace PLP {
 
         virtual bool search(
             FileReaderI* fileReader,
-            ResultSetWriterI* indexWriter,
-            unsigned long long startLine,
-            unsigned long long endLine, //0 for end of file, inclusive
-            unsigned long long maxNumResults, //0 for all
-            const std::wstring& searchText,
-            bool plainTextSearch, //false for regex
-            bool ignoreCase,
-            const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
-        ) = 0;
-
-        virtual bool searchI(
-            FileReaderI* fileReader,
             ResultSetReaderI* indexReader,
             ResultSetWriterI* indexWriter,
-            unsigned long long startIndex,
-            unsigned long long endIndex, //0 for end of file, inclusive
-            unsigned long long maxNumResults, //0 for all
-            const std::wstring& searchText,
-            bool plainTextSearch, //false for regex
-            bool ignoreCase,
+            unsigned long long start,
+            unsigned long long end, //0 for end of file, inclusive
+            unsigned long long maxNumResults,
+            std::shared_ptr<TextComparator> comparator,
             const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
         ) = 0;
 
@@ -89,6 +76,16 @@ namespace PLP {
             unsigned long long endIndex, //0 for end of file, inclusive
             unsigned long long maxNumResults, //0 for all
             const std::vector<MultilineSearchParams>& searchParams,
+            const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
+        ) = 0;
+
+        virtual bool parse(
+            FileReaderI* fileReader,
+            ResultSetReaderI* indexReader,
+            unsigned long long start,
+            unsigned long long end, //0 for end of file/index, inclusive
+            std::shared_ptr<TextComparator> comparator,
+            const std::function<bool(unsigned long long lineNum, unsigned long long fileOffset, const char* line, unsigned int length)> action,
             const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
         ) = 0;
     };

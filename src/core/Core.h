@@ -65,31 +65,6 @@ namespace PLP {
             bool overwriteIfExists
         ) override;
 
-        bool search(
-            FileReaderI* fileReader,
-            ResultSetWriterI* indexWriter,
-            unsigned long long startLine,
-            unsigned long long endLine, //0 for end of file, inclusive
-            unsigned long long maxNumResults,
-            const std::wstring& searchText,
-            bool plainTextSearch, //false for regex
-            bool ignoreCase,
-            const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
-        ) override;
-
-        bool searchI(
-            FileReaderI* fileReader,
-            ResultSetReaderI* indexReader,
-            ResultSetWriterI* indexWriter,
-            unsigned long long startIndex,
-            unsigned long long endIndex, //0 for end of file, inclusive
-            unsigned long long maxNumResults,
-            const std::wstring& searchText,
-            bool plainTextSearch, //false for regex
-            bool ignoreCase,
-            const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
-        ) override;
-
         bool searchM(
             FileReaderI* fileReader,
             ResultSetWriterI* indexWriter,
@@ -136,29 +111,6 @@ namespace PLP {
             bool overwriteIfExists
         );
 
-        bool searchL(
-            std::shared_ptr<FileReader> fileReader,
-            std::shared_ptr<ResultSetWriter> indexWriter,
-            unsigned long long startLine,
-            unsigned long long endLine, //0 for end of file, inclusive
-            unsigned long long maxNumResults,
-            const std::string& searchText,
-            bool plainTextSearch, //false for regex
-            bool ignoreCase
-        );
-
-        bool searchIL(
-            std::shared_ptr<FileReader> fileReader,
-            std::shared_ptr<ResultSetReader> indexReader,
-            std::shared_ptr<ResultSetWriter> indexWriter,
-            unsigned long long startIndex,
-            unsigned long long endIndex, //0 for end of file, inclusive
-            unsigned long long maxNumResults,
-            const std::string& searchText,
-            bool plainTextSearch, //false for regex
-            bool ignoreCase
-        );
-
         bool searchML(
             std::shared_ptr<FileReader> fileReader,
             std::shared_ptr<ResultSetWriter> indexWriter,
@@ -176,6 +128,46 @@ namespace PLP {
             unsigned long long endIndex, //0 for end of file, inclusive
             unsigned long long maxNumResults, //0 for all
             const std::vector<MultilineSearchParams>& searchParams
+        );
+
+        bool parse(
+            FileReaderI* fileReader,
+            ResultSetReaderI* indexReader,
+            unsigned long long start,
+            unsigned long long end, //0 for end of file, inclusive
+            std::shared_ptr<TextComparator> comparator,
+            const std::function<bool(unsigned long long lineNum, unsigned long long fileOffset, const char* line, unsigned int length)> action,
+            const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
+        );
+
+        bool search(
+            FileReaderI* fileReader,
+            ResultSetReaderI* indexReader,
+            ResultSetWriterI* indexWriter,
+            unsigned long long start,
+            unsigned long long end, //0 for end of file, inclusive
+            unsigned long long maxNumResults,
+            std::shared_ptr<TextComparator> comparator,
+            const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
+        ) override;
+
+        bool searchL(
+            std::shared_ptr<FileReader> fileReader,
+            std::shared_ptr<ResultSetWriter> indexWriter,
+            unsigned long long start,
+            unsigned long long end, //0 for end of file, inclusive
+            unsigned long long maxNumResults,
+            std::shared_ptr<TextComparator> comparator
+        );
+
+        bool searchIL(
+            std::shared_ptr<FileReader> fileReader,
+            std::shared_ptr<ResultSetReader> indexReader,
+            std::shared_ptr<ResultSetWriter> indexWriter,
+            unsigned long long start,
+            unsigned long long end, //0 for end of file, inclusive
+            unsigned long long maxNumResults,
+            std::shared_ptr<TextComparator> comparator
         );
 
         void printConsoleL(const std::string& msg);

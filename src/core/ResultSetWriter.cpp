@@ -65,21 +65,23 @@ namespace PLP {
             return false;
         }
 
-        unsigned long long lineNum = fReader->getLineNumber();
-        if (!_writer->write(reinterpret_cast<const char*>(&lineNum), sizeof(unsigned long long))) {
+        return appendCurrLine(fReader->getLineNumber(), fReader->getLineFileOffset());
+    }
+
+    bool ResultSetWriter::appendCurrLine(const std::shared_ptr<FileReader> fReader) {
+        return appendCurrLine(fReader.get());
+    }
+
+    bool ResultSetWriter::appendCurrLine(unsigned long long lineNumber, unsigned long long fileOffset) {
+        if (!_writer->write(reinterpret_cast<const char*>(&lineNumber), sizeof(unsigned long long))) {
             return false;
         }
-        unsigned long long fileOffset = fReader->getLineFileOffset();
         if (!_writer->write(reinterpret_cast<const char*>(&fileOffset), sizeof(unsigned long long))) {
             return false;
         }
 
         _resultCount++;
         return true;
-    }
-
-    bool ResultSetWriter::appendCurrLine(const std::shared_ptr<FileReader> fReader) {
-        return appendCurrLine(fReader.get());
     }
 
     bool ResultSetWriter::flush() {
