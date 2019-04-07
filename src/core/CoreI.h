@@ -58,27 +58,6 @@ namespace PLP {
             const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
         ) = 0;
 
-        virtual bool searchM(
-            FileReaderI* fileReader,
-            ResultSetWriterI* indexWriter,
-            unsigned long long startLine,
-            unsigned long long endLine, //0 for end of file, inclusive
-            unsigned long long maxNumResults, //0 for all
-            const std::vector<MultilineSearchParams>& searchParams,
-            const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
-        ) = 0;
-
-        virtual bool searchMI(
-            FileReaderI* fileReader,
-            ResultSetReaderI* indexReader,
-            ResultSetWriterI* indexWriter,
-            unsigned long long startIndex,
-            unsigned long long endIndex, //0 for end of file, inclusive
-            unsigned long long maxNumResults, //0 for all
-            const std::vector<MultilineSearchParams>& searchParams,
-            const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
-        ) = 0;
-
         virtual bool parse(
             FileReaderI* fileReader,
             ResultSetReaderI* indexReader,
@@ -86,7 +65,7 @@ namespace PLP {
             unsigned long long end, //0 for end of file/index, inclusive
             std::shared_ptr<TextComparator> comparator,
             const std::function<bool(unsigned long long lineNum, unsigned long long fileOffset, const char* line, unsigned int length)> action,
-            const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
+            const std::function<void(int percent)>* progressUpdate
         ) = 0;
     };
 }

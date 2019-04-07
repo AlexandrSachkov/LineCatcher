@@ -183,72 +183,6 @@ namespace PLP {
         return resSet.release();
     }
 
-    bool Core::searchM(
-        FileReaderI* fileReader,
-        ResultSetWriterI* indexWriter,
-        unsigned long long startLine,
-        unsigned long long endLine, //0 for end of file, inclusive
-        unsigned long long maxNumResults, //0 for all
-        const std::vector<MultilineSearchParams>& searchParams,
-        const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
-    ) {
-        /*if (fileReader == nullptr || indexWriter == nullptr) {
-            Logger::send(ERR, "File reader and index writer cannot be null");
-            return false;
-        }
-        if (startLine > endLine) {
-            Logger::send(ERR, "Start line must be smaller or equal to end line");
-            return false;
-        }
-        if (searchParams.size() == 0) {
-            Logger::send(ERR, "No search parameters provided");
-            return false;
-        }
-        std::function<void(int, unsigned long long)> defaultProgressUpdate = [](int, unsigned long long) {};
-        if (progressUpdate == nullptr) {
-            progressUpdate = &defaultProgressUpdate;
-        }
-        if (maxNumResults == 0) {
-            maxNumResults = ULLONG_MAX;
-        }
-
-        std::vector<MultilineSearchParams> params = searchParams;
-        std::sort(params.begin(), params.end(), [](MultilineSearchParams& param1, MultilineSearchParams& param2) {
-            return param1.getLineOffset() > param2.getLineOffset();
-        });
-
-        const int startLineOffset = params[0].getLineOffset();
-
-        int numUniqueLines = 0;
-        for(int i = 0; i < params.size(); i++){
-            if (i == 0 || i != i - 1) {
-                numUniqueLines++;
-            }
-        }
-
-        CircularLineBuffer lineBuffer;
-        if (!lineBuffer.initialize(100000, numUniqueLines)) {
-            Logger::send(ERR, "Failed to initialize line buffer");
-            return false;
-        }*/
-        
-
-        return true;
-    }
-
-    bool Core::searchMI(
-        FileReaderI* fileReader,
-        ResultSetReaderI* indexReader,
-        ResultSetWriterI* indexWriter,
-        unsigned long long startLine,
-        unsigned long long endLine, //0 for end of file, inclusive
-        unsigned long long maxNumResults, //0 for all
-        const std::vector<MultilineSearchParams>& searchParams,
-        const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
-    ) {
-        return true;
-    }
-
     std::shared_ptr<FileReader> Core::createFileReaderL(
         const std::string& path,
         unsigned long long preferredBuffSizeBytes,
@@ -289,50 +223,6 @@ namespace PLP {
         );
     }
 
-    bool Core::searchML(
-        std::shared_ptr<FileReader> fileReader,
-        std::shared_ptr<ResultSetWriter> indexWriter,
-        unsigned long long startLine,
-        unsigned long long endLine, //0 for end of file, inclusive
-        unsigned long long maxNumResults, //0 for all
-        const std::vector<MultilineSearchParams>& searchParams
-    ) {
-        std::function<void(int, unsigned long long)> progressUpdate = [&](int percent, unsigned long long numResults) {
-            printConsoleL(std::to_string(percent) + "%, Found results: " + std::to_string(numResults));
-        };
-        return searchM(
-            fileReader.get(),
-            indexWriter.get(),
-            startLine, endLine,
-            maxNumResults,
-            searchParams,
-            &progressUpdate
-        );
-    }
-
-    bool Core::searchMIL(
-        std::shared_ptr<FileReader> fileReader,
-        std::shared_ptr<ResultSetReader> indexReader,
-        std::shared_ptr<ResultSetWriter> indexWriter,
-        unsigned long long startIndex,
-        unsigned long long endIndex, //0 for end of file, inclusive
-        unsigned long long maxNumResults, //0 for all
-        const std::vector<MultilineSearchParams>& searchParams
-    ) {
-        std::function<void(int, unsigned long long)> progressUpdate = [&](int percent, unsigned long long numResults) {
-            printConsoleL(std::to_string(percent) + "%, Found results: " + std::to_string(numResults));
-        };
-        return searchMI(
-            fileReader.get(),
-            indexReader.get(),
-            indexWriter.get(),
-            startIndex, endIndex,
-            maxNumResults,
-            searchParams,
-            &progressUpdate
-        );
-    }
-
     bool Core::parse(
         FileReaderI* fileReader,
         ResultSetReaderI* indexReader,
@@ -340,7 +230,7 @@ namespace PLP {
         unsigned long long end,
         std::shared_ptr<TextComparator> comparator,
         const std::function<bool(unsigned long long lineNum, unsigned long long fileOffset, const char* line, unsigned int length)> action,
-        const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
+        const std::function<void(int percent)>* progressUpdate
     ) {
         if (fileReader == nullptr) {
             Logger::send(ERR, "File reader and index writer cannot be null");
@@ -397,7 +287,7 @@ namespace PLP {
             };
         }
 
-        std::function<void(int, unsigned long long)> defaultProgressUpdate = [](int, unsigned long long) {};
+        std::function<void(int)> defaultProgressUpdate = [](int) {};
         if (progressUpdate == nullptr) {
             progressUpdate = &defaultProgressUpdate;
         }
@@ -420,7 +310,7 @@ namespace PLP {
         if (comparator->match(line, lineSize)) {
             if (!action(lineNumber, fileReader->getLineFileOffset(), line, lineSize)){
                 if (progressPercent < 100) {
-                    (*progressUpdate)(100, 0);
+                    (*progressUpdate)(100);
                 }
                 return true;
             }
@@ -429,7 +319,7 @@ namespace PLP {
         numProcessedLines++;
         if (numProcessedLines % numLinesTillProgressUpdate == 0) {
             progressPercent += percentPerProgressUpdate;
-            (*progressUpdate)(progressPercent, 0);
+            (*progressUpdate)(progressPercent);
         }
 
         // find and process the rest 
@@ -443,7 +333,7 @@ namespace PLP {
             numProcessedLines++;
             if (numProcessedLines % numLinesTillProgressUpdate == 0) {
                 progressPercent += percentPerProgressUpdate;
-                (*progressUpdate)(progressPercent, 0);
+                (*progressUpdate)(progressPercent);
             }
         }
         if (result == LineReaderResult::ERROR) {
@@ -452,7 +342,7 @@ namespace PLP {
         }
 
         if (progressPercent < 100) {
-            (*progressUpdate)(100, 0);
+            (*progressUpdate)(100);
         }
 
         return true;
@@ -476,7 +366,7 @@ namespace PLP {
             return true;
         };
 
-        std::function<void(int, unsigned long long)> progressUpdateInt = [&](int percent, unsigned long long numResults) {
+        std::function<void(int)> progressUpdateInt = [&](int percent) {
             (*progressUpdate)(percent, indexWriter->getNumResults());
         };
         return parse(
@@ -573,8 +463,6 @@ namespace PLP {
         plpClass.addFunction("createResultSetWriter", &Core::createResultSetWriterL);
         plpClass.addFunction("search", &Core::searchL);
         plpClass.addFunction("searchI", &Core::searchIL);
-        plpClass.addFunction("searchM", &Core::searchML);
-        plpClass.addFunction("searchMI", &Core::searchMIL);
         plpClass.addFunction("printConsole", &Core::printConsoleL);
         plpClass.addFunction("printConsoleEx", &Core::printConsoleExL);
         plpClass.addFunction("isCancelled", &Core::isCancelled);

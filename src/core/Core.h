@@ -65,27 +65,6 @@ namespace PLP {
             bool overwriteIfExists
         ) override;
 
-        bool searchM(
-            FileReaderI* fileReader,
-            ResultSetWriterI* indexWriter,
-            unsigned long long startLine,
-            unsigned long long endLine, //0 for end of file, inclusive
-            unsigned long long maxNumResults, //0 for all
-            const std::vector<MultilineSearchParams>& searchParams,
-            const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
-        ) override;
-
-        bool searchMI(
-            FileReaderI* fileReader,
-            ResultSetReaderI* indexReader,
-            ResultSetWriterI* indexWriter,
-            unsigned long long startLine,
-            unsigned long long endLine, //0 for end of file, inclusive
-            unsigned long long maxNumResults, //0 for all
-            const std::vector<MultilineSearchParams>& searchParams,
-            const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
-        ) override;
-
         //Lua interface
         std::shared_ptr<FileReader> createFileReaderL(
             const std::string& path,
@@ -137,7 +116,7 @@ namespace PLP {
             unsigned long long end, //0 for end of file, inclusive
             std::shared_ptr<TextComparator> comparator,
             const std::function<bool(unsigned long long lineNum, unsigned long long fileOffset, const char* line, unsigned int length)> action,
-            const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
+            const std::function<void(int percent)>* progressUpdate
         );
 
         bool search(
