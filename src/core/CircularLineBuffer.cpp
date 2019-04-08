@@ -4,6 +4,10 @@ namespace PLP {
     CircularLineBuffer::CircularLineBuffer() {}
 
     bool CircularLineBuffer::initialize(unsigned int lineSize, unsigned int numLines) {
+        if (lineSize == 0 || numLines == 0) {
+            return false;
+        }
+
         try {
             for (unsigned int i = 0; i < numLines; i++) {
                 _lineBuffers.emplace_back(lineSize);
@@ -35,5 +39,9 @@ namespace PLP {
 
         _lineBuffers[(_startPos + linePos) % _lineBuffers.size()].get(data, size);
         return true;
+    }
+
+    unsigned int CircularLineBuffer::getNumLines() {
+        return (unsigned int)_lineBuffers.size();
     }
 }
