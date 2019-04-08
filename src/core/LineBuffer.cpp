@@ -2,27 +2,30 @@
 
 namespace PLP {
     LineBuffer::LineBuffer(unsigned int size) {
-        _data.resize(size);
+        _data.resize(size + 1);
+        _data[0] = NULL;
         _size = 0;
     }
 
     bool LineBuffer::set(const char* data, unsigned int size) {
-        if (size > _data.size()) {
+        if (size > _data.size() - 1) {
             return false;
         }
 
         memcpy(_data.data(), data, size);
+        _data[size] = NULL;
         _size = size;
         return true;
     }
 
     bool LineBuffer::append(const char* data, unsigned int size) {
-        if (_size + size > _data.size()) {
+        if (_size + size > _data.size() - 1) {
             return false;
         }
 
         memcpy(_data.data() + _size, data, size);
         _size += size;
+        _data[_size] = NULL;
         return true;
     }
 
@@ -36,6 +39,7 @@ namespace PLP {
     }
 
     void LineBuffer::clear() {
+        _data[0] = NULL;
         _size = 0;
     }
 }
