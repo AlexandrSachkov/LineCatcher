@@ -37,44 +37,39 @@ namespace PLP {
         char* lineStart = nullptr;
         char* lineEnd = nullptr;
 
-        //__try {
-            do {
-                //load a new page if required
-                if (!_pageData || _pageSize == 0 || _pageOffset >= _pageSize || loadNextPage) {
-                    _pageOffset = 0;
-                    _pageData = const_cast<char*>(_pager->read(_fileOffset, _pageSize));
-                    if (!_pageData || _pageSize == 0) {
-                        return LineReaderResult::NOT_FOUND;
-                    }
-                    loadNextPage = false;
+        do {
+            //load a new page if required
+            if (!_pageData || _pageSize == 0 || _pageOffset >= _pageSize || loadNextPage) {
+                _pageOffset = 0;
+                _pageData = const_cast<char*>(_pager->read(_fileOffset, _pageSize));
+                if (!_pageData || _pageSize == 0) {
+                    return LineReaderResult::NOT_FOUND;
                 }
+                loadNextPage = false;
+            }
 
-                lineStart = _pageData + _pageOffset;
-                lineEnd = nullptr;
+            lineStart = _pageData + _pageOffset;
+            lineEnd = nullptr;
 
-                // find line ending
-                LineReaderResult result = findNextLineEnding(_pageData, _pageSize, _pageOffset, _maxLineSize, lineEnd);
-                if (result == LineReaderResult::ERROR) {
+            // find line ending
+            LineReaderResult result = findNextLineEnding(_pageData, _pageSize, _pageOffset, _maxLineSize, lineEnd);
+            if (result == LineReaderResult::ERROR) {
+                return LineReaderResult::ERROR;
+            }
+
+            // if this line continues on the next page
+            if (result == LineReaderResult::NOT_FOUND && (_pager->getFileSize() - _fileOffset) > (_pageSize - _pageOffset)) {
+                //can be converted to unsigned int because lineSegmentLength is smaller than _maxLineSize, and _maxLineSize is unsigned int
+                const unsigned int lineSegmentLength = (unsigned int)(_pageSize - _pageOffset);
+                if (!_pageBoundaryLineBuff->append(lineStart, lineSegmentLength)) {
+                    Logger::send(ERR, "Line size exceeds maximum");
                     return LineReaderResult::ERROR;
                 }
 
-                // if this line continues on the next page
-                if (result == LineReaderResult::NOT_FOUND && (_pager->getFileSize() - _fileOffset) > (_pageSize - _pageOffset)) {
-                    //can be converted to unsigned int because lineSegmentLength is smaller than _maxLineSize, and _maxLineSize is unsigned int
-                    const unsigned int lineSegmentLength = (unsigned int)(_pageSize - _pageOffset);
-                    if (!_pageBoundaryLineBuff->append(lineStart, lineSegmentLength)) {
-                        Logger::send(ERR, "Line size exceeds maximum");
-                        return LineReaderResult::ERROR;
-                    }
-
-                    _fileOffset += lineSegmentLength;
-                    loadNextPage = true;
-                }
-            } while (loadNextPage);
-        /*} __except (GetExceptionCode() == EXCEPTION_IN_PAGE_ERROR) {
-            Logger::send(ERR, "Failed during line processing");
-            return false;
-        }*/
+                _fileOffset += lineSegmentLength;
+                loadNextPage = true;
+            }
+        } while (loadNextPage);
 
 
         // if this line ends on EOF
