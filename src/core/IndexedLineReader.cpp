@@ -103,24 +103,27 @@ namespace PLP {
             return LineReaderResult::ERROR;
         }
 
-        unsigned long long prevIndexedLineNum = lineNumber / _indexHeader.lineIndexFreq * _indexHeader.lineIndexFreq;
-        unsigned long long prevIndexedLineFileOffset;
-        if (prevIndexedLineNum == 0) {
-            prevIndexedLineFileOffset = 0;
-        } else {
-            auto it = _fileIndex.find(prevIndexedLineNum);
-            if (it == _fileIndex.end()) {
-                Logger::send(ERR, "Failed to find nearest known file location");
-                return LineReaderResult::ERROR;
-            }
-            prevIndexedLineFileOffset = it->second;
-        }
-        
         char* lineData = nullptr;
         unsigned int length = 0;
-        LineReaderResult result = getLineUnverified(prevIndexedLineNum, prevIndexedLineFileOffset, lineData, length);
-        if (result != LineReaderResult::SUCCESS) {
-            return result;
+
+        unsigned long long prevIndexedLineNum = lineNumber / _indexHeader.lineIndexFreq * _indexHeader.lineIndexFreq;
+        if (lineNumber <= getLineNumber() || prevIndexedLineNum > getLineNumber()) {
+            unsigned long long prevIndexedLineFileOffset;
+            if (prevIndexedLineNum == 0) {
+                prevIndexedLineFileOffset = 0;
+            } else {
+                auto it = _fileIndex.find(prevIndexedLineNum);
+                if (it == _fileIndex.end()) {
+                    Logger::send(ERR, "Failed to find nearest known file location");
+                    return LineReaderResult::ERROR;
+                }
+                prevIndexedLineFileOffset = it->second;
+            }
+
+            LineReaderResult result = getLineUnverified(prevIndexedLineNum, prevIndexedLineFileOffset, lineData, length);
+            if (result != LineReaderResult::SUCCESS) {
+                return result;
+            }
         }
 
         while (getLineNumber() < lineNumber) {
