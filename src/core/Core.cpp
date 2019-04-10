@@ -254,6 +254,7 @@ namespace PLP {
 
         LineScanner scanner(fileReader, indexReader, start, end);
         if (!scanner.initialize()) {
+            Logger::send(ERR, "Failed to initialize line scanner");
             return false;
         }
 
@@ -310,6 +311,7 @@ namespace PLP {
             Logger::send(ERR, "Start line must be smaller or equal to end line");
             return false;
         }
+        end = end > 0 ? end : fileReader->getNumberOfLines() - 1;
 
         std::vector<std::pair<int, std::shared_ptr<TextComparator>>> vLineComparators;
         for (auto& pair : lineComparators) {
@@ -325,16 +327,64 @@ namespace PLP {
             return false;
         }
 
-        FrameBuffer frameBuff;
-        if (!frameBuff.initialize(vLineComparators[0].first, vLineComparators[vLineComparators.size() - 1].first, 100000)) {
-            Logger::send(ERR, "Failed to initialize line buffers");
+        MultilineScanner scanner(fileReader, indexReader, 
+            vLineComparators[0].first, vLineComparators[vLineComparators.size() - 1].first, 
+            start, end
+        );
+        if (!scanner.initialize()) {
+            Logger::send(ERR, "Failed to initialize multi-line scanner");
             return false;
         }
-
         
         const long double dLinesPerPercent = (end - start + 1) / 100.0;
         const unsigned long long numLinesTillProgressUpdate = dLinesPerPercent > 1.0 ? (unsigned long long)dLinesPerPercent : 1;
         const int percentPerProgressUpdate = dLinesPerPercent > 1.0 ? 1 : (int)(1.0 / dLinesPerPercent);
+
+        int progressPercent = 0;
+        unsigned long long numProcessedLines = 0;
+
+        unsigned long long lineNum;
+        unsigned long long fileOffset;
+        char* line;
+        unsigned int lineSize;
+
+        bool matched = true;
+        LineReaderResult result;
+        while ((result = scanner.nextFrame()) == LineReaderResult::SUCCESS) {
+            for (auto& comparator : vLineComparators) {
+                if (!scanner.getLine(comparator.first, lineNum, fileOffset, line, lineSize)) {
+                    return false;
+                }
+                if (!comparator.second->match(line, lineSize)) {
+                    matched = false;
+                    break;
+                }
+                matched = true;
+            }
+            if (matched) {
+                if (!scanner.getLine(0, lineNum, fileOffset, line, lineSize)) {
+                    return false;
+                }
+                if (!action(lineNum, fileOffset, line, lineSize)) {
+                    break;
+                }
+            }
+
+            numProcessedLines++;
+            if (numProcessedLines % numLinesTillProgressUpdate == 0) {
+                progressPercent += percentPerProgressUpdate;
+                (*progressUpdate)(progressPercent);
+            }
+        }
+
+        if (result == LineReaderResult::ERROR) {
+            Logger::send(ERR, "Failed to get line");
+            return false;
+        }
+
+        if (progressPercent < 100) {
+            (*progressUpdate)(100);
+        }
 
         return true;
     }
@@ -366,6 +416,38 @@ namespace PLP {
             start,
             end,
             comparator,
+            action,
+            &progressUpdateInt
+        );
+    }
+
+    bool Core::searchMultiline(
+        FileReaderI* fileReader,
+        ResultSetReaderI* indexReader,
+        ResultSetWriterI* indexWriter,
+        unsigned long long start,
+        unsigned long long end, //0 for end of file, inclusive
+        unsigned long long maxNumResults,
+        const std::unordered_map<int, std::shared_ptr<TextComparator>>& lineComparators,
+        const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
+    ) {
+        maxNumResults = maxNumResults > 0 ? maxNumResults : ULLONG_MAX;
+        auto action = [maxNumResults, indexWriter](unsigned long long lineNum, unsigned long long fileOffset, const char* line, unsigned int length) {
+            if (!indexWriter->appendCurrLine(lineNum, fileOffset) || indexWriter->getNumResults() >= maxNumResults) {
+                return false;
+            }
+            return true;
+        };
+
+        std::function<void(int)> progressUpdateInt = [&](int percent) {
+            (*progressUpdate)(percent, indexWriter->getNumResults());
+        };
+        return parseMultiline(
+            fileReader,
+            indexReader,
+            start,
+            end,
+            lineComparators,
             action,
             &progressUpdateInt
         );
@@ -420,6 +502,55 @@ namespace PLP {
         );
     }
 
+    bool Core::searchMultilineL(
+        std::shared_ptr<FileReader> fileReader,
+        std::shared_ptr<ResultSetWriter> indexWriter,
+        unsigned long long start,
+        unsigned long long end, //0 for end of file, inclusive
+        unsigned long long maxNumResults,
+        const std::unordered_map<int, std::shared_ptr<TextComparator>>& lineComparators
+    ) {
+        std::function<void(int, unsigned long long)> progressUpdate = [&](int percent, unsigned long long numResults) {
+            printConsoleL(std::to_string(percent) + "%, Found results: " + std::to_string(numResults));
+        };
+
+        return searchMultiline(
+            fileReader.get(),
+            nullptr,
+            indexWriter.get(),
+            start,
+            end,
+            maxNumResults,
+            lineComparators,
+            &progressUpdate
+        );
+    }
+
+    bool Core::searchMultilineIL(
+        std::shared_ptr<FileReader> fileReader,
+        std::shared_ptr<ResultSetReader> indexReader,
+        std::shared_ptr<ResultSetWriter> indexWriter,
+        unsigned long long start,
+        unsigned long long end, //0 for end of file, inclusive
+        unsigned long long maxNumResults,
+        const std::unordered_map<int, std::shared_ptr<TextComparator>>& lineComparators
+    ) {
+        std::function<void(int, unsigned long long)> progressUpdate = [&](int percent, unsigned long long numResults) {
+            printConsoleL(std::to_string(percent) + "%, Found results: " + std::to_string(numResults));
+        };
+
+        return searchMultiline(
+            fileReader.get(),
+            indexReader.get(),
+            indexWriter.get(),
+            start,
+            end,
+            maxNumResults,
+            lineComparators,
+            &progressUpdate
+        );
+    }
+
     void Core::printConsoleL(const std::string& msg) {
         printConsoleExL(msg, 0);
     }
@@ -445,6 +576,8 @@ namespace PLP {
         plpClass.addFunction("createResultSetWriter", &Core::createResultSetWriterL);
         plpClass.addFunction("search", &Core::searchL);
         plpClass.addFunction("searchI", &Core::searchIL);
+        plpClass.addFunction("searchMultiline", &Core::searchMultilineL);
+        plpClass.addFunction("searchMultilineI", &Core::searchMultilineIL);
         plpClass.addFunction("printConsole", &Core::printConsoleL);
         plpClass.addFunction("printConsoleEx", &Core::printConsoleExL);
         plpClass.addFunction("isCancelled", &Core::isCancelled);

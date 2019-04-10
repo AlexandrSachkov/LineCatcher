@@ -57,6 +57,17 @@ namespace PLP {
             const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
         ) = 0;
 
+        virtual bool searchMultiline(
+            FileReaderI* fileReader,
+            ResultSetReaderI* indexReader,
+            ResultSetWriterI* indexWriter,
+            unsigned long long start,
+            unsigned long long end, //0 for end of file, inclusive
+            unsigned long long maxNumResults,
+            const std::unordered_map<int, std::shared_ptr<TextComparator>>& lineComparators,
+            const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
+        ) = 0;
+
         virtual bool parse(
             FileReaderI* fileReader,
             ResultSetReaderI* indexReader,

@@ -270,11 +270,7 @@ namespace PLP {
         return _nextFrame();
     }
 
-    unsigned long long MultilineScanner::getLineNumber() {
-        return _currLineNum;
-    }
-
-    unsigned long long MultilineScanner::getFileOffset() {
-        return _currFileOffset;
+    bool MultilineScanner::getLine(int index, unsigned long long& lineNum, unsigned long long& fileOffset, char*& data, unsigned int& size) {
+        return _frameBuff.get(index, lineNum, fileOffset, data, size);
     }
 }

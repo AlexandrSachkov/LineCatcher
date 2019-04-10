@@ -121,6 +121,17 @@ namespace PLP {
             const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
         ) override;
 
+        bool Core::searchMultiline(
+            FileReaderI* fileReader,
+            ResultSetReaderI* indexReader,
+            ResultSetWriterI* indexWriter,
+            unsigned long long start,
+            unsigned long long end, //0 for end of file, inclusive
+            unsigned long long maxNumResults,
+            const std::unordered_map<int, std::shared_ptr<TextComparator>>& lineComparators,
+            const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
+        ) override;
+
         bool searchL(
             std::shared_ptr<FileReader> fileReader,
             std::shared_ptr<ResultSetWriter> indexWriter,
@@ -138,6 +149,25 @@ namespace PLP {
             unsigned long long end, //0 for end of file, inclusive
             unsigned long long maxNumResults,
             std::shared_ptr<TextComparator> comparator
+        );
+
+        bool searchMultilineL(
+            std::shared_ptr<FileReader> fileReader,
+            std::shared_ptr<ResultSetWriter> indexWriter,
+            unsigned long long start,
+            unsigned long long end, //0 for end of file, inclusive
+            unsigned long long maxNumResults,
+            const std::unordered_map<int, std::shared_ptr<TextComparator>>& lineComparators
+        );
+
+        bool searchMultilineIL(
+            std::shared_ptr<FileReader> fileReader,
+            std::shared_ptr<ResultSetReader> indexReader,
+            std::shared_ptr<ResultSetWriter> indexWriter,
+            unsigned long long start,
+            unsigned long long end, //0 for end of file, inclusive
+            unsigned long long maxNumResults,
+            const std::unordered_map<int, std::shared_ptr<TextComparator>>& lineComparators
         );
 
         void printConsoleL(const std::string& msg);
