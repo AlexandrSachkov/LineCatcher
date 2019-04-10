@@ -505,6 +505,21 @@ namespace PLP {
             lineScanner.addFunction("nextLine", nextLine);
             lineScanner.endClass();
         }
+        {
+            auto lineScanner = module.beginClass<LineScanner>("LineScannerI");
+            lineScanner.addFactory([](std::shared_ptr<FileReader> fileReader, std::shared_ptr<ResultSetReader> indexReader, 
+                unsigned long long startLine, unsigned long long endLine
+                ) {
+                auto lineScanner = std::shared_ptr<LineScanner>(new LineScanner(fileReader.get(), indexReader.get(), startLine, endLine));
+                if (lineScanner->initialize()) {
+                    return lineScanner;
+                }
+                return std::shared_ptr<LineScanner>();
+            });
+            std::tuple<int, unsigned long long, std::string>(LineScanner::*nextLine)() = &LineScanner::nextLine;
+            lineScanner.addFunction("nextLine", nextLine);
+            lineScanner.endClass();
+        }
         
 
         //Text compare
