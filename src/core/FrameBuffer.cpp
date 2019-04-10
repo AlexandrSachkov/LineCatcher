@@ -13,15 +13,19 @@ namespace PLP {
         return _buffer.initialize(lineSize, numLines);
     }
 
-    bool FrameBuffer::get(int index, char*& data, unsigned int& size) {
+    bool FrameBuffer::get(int index, unsigned long long& lineNum, unsigned long long& fileOffset, char*& data, unsigned int& size) {
         if (index < startIndex || index > endIndex) {
             return false;
         }
 
-        return _buffer.get(index - startIndex, data, size);
+        return _buffer.get(index - startIndex, lineNum, fileOffset, data, size);
     }
 
-    bool FrameBuffer::pushBack(const char* data, unsigned int size) {
-        return _buffer.pushBack(data, size);
+    bool FrameBuffer::pushBack(unsigned long long lineNum, unsigned long long fileOffset, const char* data, unsigned int size) {
+        return _buffer.pushBack(lineNum, fileOffset, data, size);
+    }
+
+    unsigned int FrameBuffer::getSize() {
+        return _buffer.getSize();
     }
 }

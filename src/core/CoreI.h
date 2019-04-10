@@ -1,6 +1,5 @@
 #pragma once
 
-#include "MultilineSearchParams.h"
 #include "TextComparator.h"
 
 #include <string>

@@ -12,8 +12,9 @@
 #include "LineReader.h"
 #include "Logger.h"
 #include "ReturnType.h"
-#include "CircularLineBuffer.h"
+#include "FrameBuffer.h"
 #include "TextComparator.h"
+#include "Scanner.h"
 
 #include "lua.hpp"
 #include "LuaIntf/LuaIntf.h"
@@ -241,13 +242,13 @@ namespace PLP {
             return false;
         }
 
-        std::function<LineReaderResult(unsigned long long start, unsigned long long& lineNumber, char*& line, unsigned int& lineSize)> getLine;
-        std::function<LineReaderResult(unsigned long long& lineNumber, char*& line, unsigned int& lineSize)> nextLine;
+        std::function<LineReaderResult(unsigned long long start, unsigned long long& lineNumber, char*& line, unsigned int& lineSize)> getFirstEntry;
+        std::function<LineReaderResult(unsigned long long& lineNumber, char*& line, unsigned int& lineSize)> getNextEntry;
         std::function<bool(void)> isFinished;
 
         LineReaderResult result;
         if (indexReader) {
-            getLine = [indexReader, fileReader](unsigned long long start, unsigned long long& lineNumber, char*& line, unsigned int& lineSize) {
+            getFirstEntry = [indexReader, fileReader](unsigned long long start, unsigned long long& lineNumber, char*& line, unsigned int& lineSize) {
                 if (!indexReader->getResult(start, lineNumber)) {
                     Logger::send(ERR, "Failed to get index");
                     return LineReaderResult::ERROR;
@@ -255,7 +256,7 @@ namespace PLP {
                 return fileReader->getLineFromResult(indexReader, line, lineSize);
             };
             
-            nextLine = [indexReader, fileReader](unsigned long long& lineNumber, char*& line, unsigned int& lineSize) {
+            getNextEntry = [indexReader, fileReader](unsigned long long& lineNumber, char*& line, unsigned int& lineSize) {
                 if (!indexReader->nextResult(lineNumber)) {
                     return LineReaderResult::NOT_FOUND;
                 }
@@ -267,14 +268,14 @@ namespace PLP {
                 return indexReader->getResultNumber() >= end;
             };
         } else {
-            getLine = [&result, fileReader](unsigned long long start, unsigned long long& lineNumber, char*& line, unsigned int& lineSize) {
+            getFirstEntry = [&result, fileReader](unsigned long long start, unsigned long long& lineNumber, char*& line, unsigned int& lineSize) {
                 if ((result = fileReader->getLine(start, line, lineSize)) == LineReaderResult::SUCCESS) {
                     lineNumber = fileReader->getLineNumber();
                 }
                 return result;
             };
 
-            nextLine = [&result, fileReader](unsigned long long& lineNumber, char*& line, unsigned int& lineSize) {
+            getNextEntry = [&result, fileReader](unsigned long long& lineNumber, char*& line, unsigned int& lineSize) {
                 if ((result = fileReader->nextLine(line, lineSize)) == LineReaderResult::SUCCESS) {
                     lineNumber = fileReader->getLineNumber();
                 }
@@ -302,7 +303,7 @@ namespace PLP {
         char* line;
         unsigned int lineSize;
         unsigned long long numProcessedLines = 0;
-        if (getLine(start, lineNumber, line, lineSize) == LineReaderResult::ERROR) {
+        if (getFirstEntry(start, lineNumber, line, lineSize) == LineReaderResult::ERROR) {
             Logger::send(ERR, "Failed to get line");
             return false;
         }
@@ -323,7 +324,7 @@ namespace PLP {
         }
 
         // find and process the rest 
-        while (!isFinished() && (result = nextLine(lineNumber, line, lineSize)) == LineReaderResult::SUCCESS) {
+        while (!isFinished() && (result = getNextEntry(lineNumber, line, lineSize)) == LineReaderResult::SUCCESS) {
             if (comparator->match(line, lineSize)) {
                 if (!action(lineNumber, fileReader->getLineFileOffset(), line, lineSize)) {
                     break;
@@ -344,6 +345,52 @@ namespace PLP {
         if (progressPercent < 100) {
             (*progressUpdate)(100);
         }
+
+        return true;
+    }
+
+    bool Core::parseMultiline(
+        FileReaderI* fileReader,
+        ResultSetReaderI* indexReader,
+        unsigned long long start,
+        unsigned long long end, //0 for end of file, inclusive
+        const std::unordered_map<int, std::shared_ptr<TextComparator>>& lineComparators,
+        const std::function<bool(unsigned long long lineNum, unsigned long long fileOffset, const char* line, unsigned int length)> action,
+        const std::function<void(int percent)>* progressUpdate
+    ) {
+        if (fileReader == nullptr) {
+            Logger::send(ERR, "File reader and index writer cannot be null");
+            return false;
+        }
+        if (start > end) {
+            Logger::send(ERR, "Start line must be smaller or equal to end line");
+            return false;
+        }
+
+        std::vector<std::pair<int, std::shared_ptr<TextComparator>>> vLineComparators;
+        for (auto& pair : lineComparators) {
+            vLineComparators.push_back(pair);
+        }
+        std::sort(vLineComparators.begin(), vLineComparators.end(),
+            [](const std::pair<int, std::shared_ptr<TextComparator>>& comp1, const std::pair<int, std::shared_ptr<TextComparator>>& comp2) {
+            return comp1.first < comp2.first;
+        });
+
+        if (vLineComparators.size() == 0) {
+            Logger::send(ERR, "Must have at least one line comparator");
+            return false;
+        }
+
+        FrameBuffer frameBuff;
+        if (!frameBuff.initialize(vLineComparators[0].first, vLineComparators[vLineComparators.size() - 1].first, 100000)) {
+            Logger::send(ERR, "Failed to initialize line buffers");
+            return false;
+        }
+
+        
+        const long double dLinesPerPercent = (end - start + 1) / 100.0;
+        const unsigned long long numLinesTillProgressUpdate = dLinesPerPercent > 1.0 ? (unsigned long long)dLinesPerPercent : 1;
+        const int percentPerProgressUpdate = dLinesPerPercent > 1.0 ? 1 : (int)(1.0 / dLinesPerPercent);
 
         return true;
     }
@@ -447,15 +494,6 @@ namespace PLP {
         module.addConstant("NOT_FOUND", LineReaderResult::NOT_FOUND);
         module.addConstant("SUCCESS", LineReaderResult::SUCCESS);
 
-        auto mspClass = module.beginClass<MultilineSearchParams>("MSP");
-        mspClass.addConstructor(LUA_ARGS(int, int, bool, const std::string&, bool, bool));
-        mspClass.addFunction("getLineOffset", &MultilineSearchParams::getLineOffset);
-        mspClass.addFunction("getWordIndex", &MultilineSearchParams::getWordIndex);
-        mspClass.addFunction("getSearchText", &MultilineSearchParams::getSearchText);
-        mspClass.addFunction("plainText", &MultilineSearchParams::plainText);
-        mspClass.addFunction("ignoreCase", &MultilineSearchParams::ignoreCase);
-        mspClass.endClass();
-
         auto plpClass = module.beginClass<Core>("Core");
         plpClass.addFunction("createFileReader", &Core::createFileReaderL);
         plpClass.addFunction("createFileWriter", &Core::createFileWriterL);
@@ -468,19 +506,21 @@ namespace PLP {
         plpClass.addFunction("isCancelled", &Core::isCancelled);
         plpClass.endClass();
 
-        auto fileReaderClass = module.beginClass<FileReader>("FileReader");
-        std::tuple<int, std::string>(FileReader::*nextLine)() = &FileReader::nextLine;
-        std::tuple<int, std::string>(FileReader::*getLine)(unsigned long long) = &FileReader::getLine;
-        std::tuple<int, std::string>(FileReader::*getLineFromResult)(const std::shared_ptr<ResultSetReader>) 
-            = &FileReader::getLineFromResult;
-        fileReaderClass.addFunction("nextLine", nextLine);
-        fileReaderClass.addFunction("getLine", getLine);
-        fileReaderClass.addFunction("getLineFromResult", getLineFromResult);
-        fileReaderClass.addFunction("getLineNumber", &FileReader::getLineNumber);
-        fileReaderClass.addFunction("getNumberOfLines", &FileReader::getNumberOfLines);
-        fileReaderClass.addFunction("restart", &FileReader::restart);
-        fileReaderClass.addFunction("release", &FileReader::release);
-        fileReaderClass.endClass();
+        {
+            auto fileReaderClass = module.beginClass<FileReader>("FileReader");
+            std::tuple<int, std::string>(FileReader::*nextLine)() = &FileReader::nextLine;
+            std::tuple<int, std::string>(FileReader::*getLine)(unsigned long long) = &FileReader::getLine;
+            std::tuple<int, std::string>(FileReader::*getLineFromResult)(const std::shared_ptr<ResultSetReader>)
+                = &FileReader::getLineFromResult;
+            fileReaderClass.addFunction("nextLine", nextLine);
+            fileReaderClass.addFunction("getLine", getLine);
+            fileReaderClass.addFunction("getLineFromResult", getLineFromResult);
+            fileReaderClass.addFunction("getLineNumber", &FileReader::getLineNumber);
+            fileReaderClass.addFunction("getNumberOfLines", &FileReader::getNumberOfLines);
+            fileReaderClass.addFunction("restart", &FileReader::restart);
+            fileReaderClass.addFunction("release", &FileReader::release);
+            fileReaderClass.endClass();
+        }
 
         auto fileWriterClass = module.beginClass<FileWriter>("FileWriter");
         bool(FileWriter::*append)(const std::string&) = &FileWriter::append;
@@ -507,6 +547,21 @@ namespace PLP {
         resultWriterClass.addFunction("getNumResults", &ResultSetWriter::getNumResults);
         resultWriterClass.addFunction("release", &ResultSetWriter::release);
         resultWriterClass.endClass();
+
+        {
+            auto lineScanner = module.beginClass<LineScanner>("LineScanner");
+            lineScanner.addFactory([](std::shared_ptr<FileReader> fileReader, unsigned long long startLine, unsigned long long endLine) {
+                auto lineScanner = std::shared_ptr<LineScanner>(new LineScanner(fileReader.get(), nullptr, startLine, endLine));
+                if (lineScanner->initialize()) {
+                    return lineScanner;
+                }
+                return std::shared_ptr<LineScanner>();
+            });
+            std::tuple<int, unsigned long long, std::string>(LineScanner::*nextLine)() = &LineScanner::nextLine;
+            lineScanner.addFunction("nextLine", nextLine);
+            lineScanner.endClass();
+        }
+        
 
         //Text compare
         auto tcTextComparator = module.beginClass<TextComparator>("TextComparator");

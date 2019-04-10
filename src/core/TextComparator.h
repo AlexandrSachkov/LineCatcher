@@ -169,7 +169,7 @@ namespace PLP {
             : _splitText(splitText), _trimLine(trimLine) {
             try {
                 for (auto& it : sliceComparators) {
-                    _sliceComparators.push_back({ it.first, it.second });
+                    _sliceComparators.push_back(it);
                 }
 
                 std::sort(_sliceComparators.begin(), _sliceComparators.end(),

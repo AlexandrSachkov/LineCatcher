@@ -90,31 +90,22 @@ namespace PLP {
             bool overwriteIfExists
         );
 
-        bool searchML(
-            std::shared_ptr<FileReader> fileReader,
-            std::shared_ptr<ResultSetWriter> indexWriter,
-            unsigned long long startLine,
-            unsigned long long endLine, //0 for end of file, inclusive
-            unsigned long long maxNumResults, //0 for all
-            const std::vector<MultilineSearchParams>& searchParams
-        );
-
-        bool searchMIL(
-            std::shared_ptr<FileReader> fileReader,
-            std::shared_ptr<ResultSetReader> indexReader,
-            std::shared_ptr<ResultSetWriter> indexWriter,
-            unsigned long long startIndex,
-            unsigned long long endIndex, //0 for end of file, inclusive
-            unsigned long long maxNumResults, //0 for all
-            const std::vector<MultilineSearchParams>& searchParams
-        );
-
         bool parse(
             FileReaderI* fileReader,
             ResultSetReaderI* indexReader,
             unsigned long long start,
             unsigned long long end, //0 for end of file, inclusive
             std::shared_ptr<TextComparator> comparator,
+            const std::function<bool(unsigned long long lineNum, unsigned long long fileOffset, const char* line, unsigned int length)> action,
+            const std::function<void(int percent)>* progressUpdate
+        );
+
+        bool parseMultiline(
+            FileReaderI* fileReader,
+            ResultSetReaderI* indexReader,
+            unsigned long long start,
+            unsigned long long end, //0 for end of file, inclusive
+            const std::unordered_map<int, std::shared_ptr<TextComparator>>& lineComparators,
             const std::function<bool(unsigned long long lineNum, unsigned long long fileOffset, const char* line, unsigned int length)> action,
             const std::function<void(int percent)>* progressUpdate
         );
