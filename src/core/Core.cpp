@@ -241,52 +241,7 @@ namespace PLP {
             Logger::send(ERR, "Start line must be smaller or equal to end line");
             return false;
         }
-
-        std::function<LineReaderResult(unsigned long long start, unsigned long long& lineNumber, char*& line, unsigned int& lineSize)> getFirstEntry;
-        std::function<LineReaderResult(unsigned long long& lineNumber, char*& line, unsigned int& lineSize)> getNextEntry;
-        std::function<bool(void)> isFinished;
-
-        LineReaderResult result;
-        if (indexReader) {
-            getFirstEntry = [indexReader, fileReader](unsigned long long start, unsigned long long& lineNumber, char*& line, unsigned int& lineSize) {
-                if (!indexReader->getResult(start, lineNumber)) {
-                    Logger::send(ERR, "Failed to get index");
-                    return LineReaderResult::ERROR;
-                }
-                return fileReader->getLineFromResult(indexReader, line, lineSize);
-            };
-            
-            getNextEntry = [indexReader, fileReader](unsigned long long& lineNumber, char*& line, unsigned int& lineSize) {
-                if (!indexReader->nextResult(lineNumber)) {
-                    return LineReaderResult::NOT_FOUND;
-                }
-                return fileReader->getLineFromResult(indexReader, line, lineSize);
-            };
-
-            end = end > 0 ? end : indexReader->getNumResults() - 1;
-            isFinished = [indexReader, end]() {
-                return indexReader->getResultNumber() >= end;
-            };
-        } else {
-            getFirstEntry = [&result, fileReader](unsigned long long start, unsigned long long& lineNumber, char*& line, unsigned int& lineSize) {
-                if ((result = fileReader->getLine(start, line, lineSize)) == LineReaderResult::SUCCESS) {
-                    lineNumber = fileReader->getLineNumber();
-                }
-                return result;
-            };
-
-            getNextEntry = [&result, fileReader](unsigned long long& lineNumber, char*& line, unsigned int& lineSize) {
-                if ((result = fileReader->nextLine(line, lineSize)) == LineReaderResult::SUCCESS) {
-                    lineNumber = fileReader->getLineNumber();
-                }
-                return result;
-            };
-
-            end = end > 0 ? end : fileReader->getNumberOfLines() - 1;
-            isFinished = [fileReader, end]() {
-                return fileReader->getLineNumber() >= end;
-            };
-        }
+        end = end > 0 ? end : fileReader->getNumberOfLines() - 1;
 
         std::function<void(int)> defaultProgressUpdate = [](int) {};
         if (progressUpdate == nullptr) {
@@ -297,36 +252,23 @@ namespace PLP {
         const unsigned long long numLinesTillProgressUpdate = dLinesPerPercent > 1.0 ? (unsigned long long)dLinesPerPercent : 1;
         const int percentPerProgressUpdate = dLinesPerPercent > 1.0 ? 1 : (int)(1.0 / dLinesPerPercent);
 
-        // find and process first line
-        int progressPercent = 0;
-        unsigned long long lineNumber = 0;
-        char* line;
-        unsigned int lineSize;
-        unsigned long long numProcessedLines = 0;
-        if (getFirstEntry(start, lineNumber, line, lineSize) == LineReaderResult::ERROR) {
-            Logger::send(ERR, "Failed to get line");
+        LineScanner scanner(fileReader, indexReader, start, end);
+        if (!scanner.initialize()) {
             return false;
         }
 
-        if (comparator->match(line, lineSize)) {
-            if (!action(lineNumber, fileReader->getLineFileOffset(), line, lineSize)){
-                if (progressPercent < 100) {
-                    (*progressUpdate)(100);
-                }
-                return true;
-            }
-        }
+        int progressPercent = 0;
+        unsigned long long numProcessedLines = 0;
 
-        numProcessedLines++;
-        if (numProcessedLines % numLinesTillProgressUpdate == 0) {
-            progressPercent += percentPerProgressUpdate;
-            (*progressUpdate)(progressPercent);
-        }
+        unsigned long long lineNum;
+        unsigned long long fileOffset;
+        char* line;
+        unsigned int lineSize;
 
-        // find and process the rest 
-        while (!isFinished() && (result = getNextEntry(lineNumber, line, lineSize)) == LineReaderResult::SUCCESS) {
+        LineReaderResult result;
+        while ((result = scanner.nextLine(lineNum, fileOffset, line, lineSize)) == LineReaderResult::SUCCESS) {
             if (comparator->match(line, lineSize)) {
-                if (!action(lineNumber, fileReader->getLineFileOffset(), line, lineSize)) {
+                if (!action(lineNum, fileOffset, line, lineSize)) {
                     break;
                 }
             }
@@ -337,6 +279,7 @@ namespace PLP {
                 (*progressUpdate)(progressPercent);
             }
         }
+
         if (result == LineReaderResult::ERROR) {
             Logger::send(ERR, "Failed to get line");
             return false;
@@ -345,6 +288,7 @@ namespace PLP {
         if (progressPercent < 100) {
             (*progressUpdate)(100);
         }
+
 
         return true;
     }

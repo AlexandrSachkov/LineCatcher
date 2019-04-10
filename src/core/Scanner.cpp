@@ -1,6 +1,5 @@
 #include "Scanner.h"
 
-#include <limits>
 #include <cstdlib>
 
 namespace PLP {
@@ -14,7 +13,7 @@ namespace PLP {
         }
 
         if (_endLine == 0) {
-            _endLine = ULLONG_MAX;
+            _endLine = _fileReader->getNumberOfLines() - 1;
         } else if (_startLine > _endLine) {
             return false;
         }
@@ -125,7 +124,7 @@ namespace PLP {
         }
 
         if (_endLine == 0) {
-            _endLine = ULLONG_MAX;
+            _endLine = _fileReader->getNumberOfLines() - 1;
         } else if (_startLine > _endLine) {
             return false;
         }
