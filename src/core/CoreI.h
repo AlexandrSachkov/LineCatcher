@@ -67,15 +67,5 @@ namespace PLP {
             const std::unordered_map<int, std::shared_ptr<TextComparator>>& lineComparators,
             const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
         ) = 0;
-
-        virtual bool parse(
-            FileReaderI* fileReader,
-            ResultSetReaderI* indexReader,
-            unsigned long long start,
-            unsigned long long end, //0 for end of file/index, inclusive
-            std::shared_ptr<TextComparator> comparator,
-            const std::function<bool(unsigned long long lineNum, unsigned long long fileOffset, const char* line, unsigned int length)> action,
-            const std::function<void(int percent)>* progressUpdate
-        ) = 0;
     };
 }

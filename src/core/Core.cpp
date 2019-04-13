@@ -224,7 +224,7 @@ namespace PLP {
         );
     }
 
-    bool Core::parse(
+    bool Core::searchGeneral(
         FileReaderI* fileReader,
         ResultSetReaderI* indexReader,
         unsigned long long start,
@@ -294,7 +294,7 @@ namespace PLP {
         return true;
     }
 
-    bool Core::parseMultiline(
+    bool Core::searchMultilineGeneral(
         FileReaderI* fileReader,
         ResultSetReaderI* indexReader,
         unsigned long long start,
@@ -410,7 +410,7 @@ namespace PLP {
         std::function<void(int)> progressUpdateInt = [&](int percent) {
             (*progressUpdate)(percent, indexWriter->getNumResults());
         };
-        return parse(
+        return searchGeneral(
             fileReader,
             indexReader,
             start,
@@ -442,7 +442,7 @@ namespace PLP {
         std::function<void(int)> progressUpdateInt = [&](int percent) {
             (*progressUpdate)(percent, indexWriter->getNumResults());
         };
-        return parseMultiline(
+        return searchMultilineGeneral(
             fileReader,
             indexReader,
             start,

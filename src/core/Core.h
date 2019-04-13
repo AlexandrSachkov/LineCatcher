@@ -90,7 +90,7 @@ namespace PLP {
             bool overwriteIfExists
         );
 
-        bool parse(
+        bool searchGeneral(
             FileReaderI* fileReader,
             ResultSetReaderI* indexReader,
             unsigned long long start,
@@ -100,7 +100,7 @@ namespace PLP {
             const std::function<void(int percent)>* progressUpdate
         );
 
-        bool parseMultiline(
+        bool searchMultilineGeneral(
             FileReaderI* fileReader,
             ResultSetReaderI* indexReader,
             unsigned long long start,
