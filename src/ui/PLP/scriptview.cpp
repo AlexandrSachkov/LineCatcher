@@ -28,6 +28,7 @@ ScriptView::ScriptView(PLP::CoreI* plpCore, QWidget *parent) : QWidget(parent)
     mainLayout->setSpacing(0);
 
     setWindowFlags(Qt::Window);
+    setWindowTitle("Script Editor");
 
     QHBoxLayout* scriptLoadControlLayout = new QHBoxLayout();
     mainLayout->addLayout(scriptLoadControlLayout);

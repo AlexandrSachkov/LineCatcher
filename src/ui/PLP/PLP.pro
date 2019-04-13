@@ -34,7 +34,9 @@ SOURCES += \
     ullspinbox.cpp \
     indexview.cpp \
     scripteditor.cpp \
-    luasyntaxhighlighter.cpp
+    luasyntaxhighlighter.cpp \
+    standardsearchview.cpp \
+    advancedsearchview.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -47,7 +49,9 @@ HEADERS += \
     ullspinbox.h \
     indexview.h \
     scripteditor.h \
-    luasyntaxhighlighter.h
+    luasyntaxhighlighter.h \
+    standardsearchview.h \
+    advancedsearchview.h
 
 FORMS +=
 

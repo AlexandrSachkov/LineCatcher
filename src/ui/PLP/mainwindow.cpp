@@ -39,6 +39,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     QMenu* runMenu = new QMenu("Run");
     menuBar()->addMenu(runMenu);
 
+    QAction* runStandardSearch = new QAction("Search", runMenu);
+    runMenu->addAction(runStandardSearch);
+    connect(runStandardSearch, SIGNAL(triggered(void)), this, SLOT(showStandardSearch(void)));
+
+    QAction* runAdvancedSearch = new QAction("Search (Advanced)", runMenu);
+    runMenu->addAction(runAdvancedSearch);
+    connect(runAdvancedSearch, SIGNAL(triggered(void)), this, SLOT(showAdvancedSearch(void)));
+
     QAction* runScript = new QAction("Script");
     runMenu->addAction(runScript);
     connect(runScript, SIGNAL(triggered(void)), this, SLOT(showScriptView(void)));
@@ -59,6 +67,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         bool zz = true;
         //TODO
     }
+
+    _standardSearchView = new StandardSearchView(_plpCore, this);
+    _standardSearchView->hide();
+
+    _advancedSearchView = new AdvancedSearchView(_plpCore, this);
+    _advancedSearchView->hide();
 
     _scriptView = new ScriptView(_plpCore, this);
     _scriptView->hide();
@@ -138,4 +152,12 @@ void MainWindow::openIndex() {
 
 void MainWindow::showScriptView() {
     _scriptView->show();
+}
+
+void MainWindow::showStandardSearch() {
+    _standardSearchView->show();
+}
+
+void MainWindow::showAdvancedSearch() {
+    _advancedSearchView->show();
 }

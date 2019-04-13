@@ -1,6 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "standardsearchview.h"
+#include "advancedsearchview.h"
 #include "scriptview.h"
 
 #include <QMainWindow>
@@ -25,6 +27,8 @@ public slots:
     void openFile();
     void openIndex();
     void showScriptView();
+    void showStandardSearch();
+    void showAdvancedSearch();
 
 private:
     QWidget* _centralWidget;
@@ -35,6 +39,9 @@ private:
     //Ui::MainWindow *_ui;
     QTabWidget* _fileViewer;
     QTabWidget* _resultSetViewer;
+
+    StandardSearchView* _standardSearchView;
+    AdvancedSearchView* _advancedSearchView;
     ScriptView* _scriptView;
 
     PLP::CoreI* _plpCore;
