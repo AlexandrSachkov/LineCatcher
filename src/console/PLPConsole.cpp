@@ -179,16 +179,33 @@ int main() {
     rWriter->release();
     fReader->release();*/
 
-    std::string text = "   This   is a test ";
-    std::unordered_map<int, std::shared_ptr<PLP::TextComparator>> map = {
-        {0, std::shared_ptr<PLP::TextComparator>(new PLP::MatchString("this", true, true))},
-        {-1, std::shared_ptr<PLP::TextComparator>(new PLP::MatchCustom([](const std::string& word) {
-            return word.size() > 2 && word[1] == 'e';
-        }))}
+    PLP::FileReaderI* fileReader = core->createFileReader("D:/Repositories/LogParser/resources/largeGeneratedFile.txt", 0, true);
+    PLP::ResultSetReaderI* indexReader = nullptr;
+    PLP::ResultSetWriterI* indexWriter = core->createResultSetWriter("D:/Repositories/LogParser/resources/test", 0, fileReader, true);
+    std::shared_ptr<PLP::TextComparator> comparator = nullptr;
+    bool plainText = true;
+    bool ignoreCase = false;
+    if (plainText) {
+        comparator.reset(new PLP::MatchString("10", false, ignoreCase));
+    } else {
+        comparator.reset(new PLP::MatchRegex("10", ignoreCase));
+    }
+
+    if (!comparator->initialize()) {
+        return 1;
+    }
+
+    std::function<void(int, unsigned long long)> progressUpdate = [&](int percent, unsigned long long numResults) {
+        printf("%i", percent);
     };
-    std::shared_ptr<PLP::TextComparator> comp(new PLP::MatchWords(map));
-    bool res = comp->initialize();
-    res = comp->match(text);
+
+    core->search(
+                fileReader, indexReader, indexWriter,
+                0, 0, 0,
+                comparator,
+                &progressUpdate
+    );
+    indexWriter->release();
 
     double numSeconds = timer.deltaT() / 1000000000;
     printf("Completed in: %f seconds\n", numSeconds);

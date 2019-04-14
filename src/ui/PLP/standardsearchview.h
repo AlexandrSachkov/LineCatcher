@@ -2,7 +2,12 @@
 #define STANDARDSEARCHVIEW_H
 
 #include <QWidget>
+#include <QProgressDialog>
+#include <QLineEdit>
+#include <QRadioButton>
+#include <QCheckBox>
 
+#include "ullspinbox.h"
 #include "CoreI.h"
 
 class StandardSearchView : public QWidget
@@ -16,13 +21,28 @@ public:
     void createSearchLimiterContent(QLayout* mainLayout);
     void createSearchOptionContent(QLayout* mainLayout);
 signals:
+    void progressUpdate(int percent, unsigned long long numResults);
 
-public slots:
-
+private slots:
+    void openFile();
+    void openIndex();
+    void startSearch();
+    void onProgressUpdate(int percent, unsigned long long numResults);
 private:
     const int ROW_LABEL_WIDTH = 300;
     PLP::CoreI* _plpCore;
-    QFont fieldFont;
+    QProgressDialog* _progressDialog = nullptr;
+
+    QLineEdit* _filePath;
+    QLineEdit* _indexPath;
+    QLineEdit* _destName;
+    ULLSpinBox* _fromLineBox;
+    ULLSpinBox* _toLineBox;
+    ULLSpinBox* _numResultsBox;
+    QLineEdit* _searchField;
+    QRadioButton* _plainText;
+    QRadioButton* _regex;
+    QCheckBox* _ignoreCase;
 };
 
 #endif // STANDARDSEARCHVIEW_H
