@@ -65,6 +65,11 @@ namespace PLP {
             bool overwriteIfExists
         ) override;
 
+        void release(FileReaderI*) override;
+        void release(FileWriterI*) override;
+        void release(ResultSetReaderI*) override;
+        void release(ResultSetWriterI*) override;
+
         //Lua interface
         std::shared_ptr<FileReader> createFileReaderL(
             const std::string& path,

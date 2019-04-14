@@ -184,6 +184,30 @@ namespace PLP {
         return resSet.release();
     }
 
+    void Core::release(FileReaderI* obj) {
+        if (obj) {
+            delete obj;
+        }
+    }
+
+    void Core::release(FileWriterI* obj) {
+        if (obj) {
+            delete obj;
+        }
+    }
+
+    void Core::release(ResultSetReaderI* obj) {
+        if (obj) {
+            delete obj;
+        }
+    }
+
+    void Core::release(ResultSetWriterI* obj) {
+        if (obj) {
+            delete obj;
+        }
+    }
+
     std::shared_ptr<FileReader> Core::createFileReaderL(
         const std::string& path,
         unsigned long long preferredBuffSizeBytes,

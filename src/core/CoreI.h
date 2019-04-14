@@ -46,6 +46,11 @@ namespace PLP {
             bool overwriteIfExists
         ) = 0;
 
+        virtual void release(FileReaderI*) = 0;
+        virtual void release(FileWriterI*) = 0;
+        virtual void release(ResultSetReaderI*) = 0;
+        virtual void release(ResultSetWriterI*) = 0;
+
         virtual bool search(
             FileReaderI* fileReader,
             ResultSetReaderI* indexReader,
