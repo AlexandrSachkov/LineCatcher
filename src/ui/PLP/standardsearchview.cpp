@@ -1,5 +1,6 @@
 #include "standardsearchview.h"
 #include "ullspinbox.h"
+#include "common.h"
 
 #include <QBoxLayout>
 #include <QFormLayout>
@@ -9,6 +10,7 @@
 #include <QGroupBox>
 #include <QRadioButton>
 #include <QCheckBox>
+#include <QSpacerItem>
 
 StandardSearchView::StandardSearchView(PLP::CoreI* plpCore, QWidget *parent) : QWidget(parent)
 {
@@ -17,63 +19,99 @@ StandardSearchView::StandardSearchView(PLP::CoreI* plpCore, QWidget *parent) : Q
     QVBoxLayout* mainLayout = new QVBoxLayout();
     mainLayout->setSizeConstraint(QLayout::SetFixedSize);
     this->setLayout(mainLayout);
-    mainLayout->setContentsMargins(2, 2, 2, 2);
-    mainLayout->setSpacing(0);
+    mainLayout->setContentsMargins(5, 5, 5, 5);
+    mainLayout->setSpacing(5);
 
     setWindowFlags(Qt::Window);
     setWindowTitle("Search");
 
-    QFormLayout* contentLayout = new QFormLayout();
-    mainLayout->addLayout(contentLayout);
+    createSourceContent(mainLayout);
+    createDestinationContent(mainLayout);
+    createSearchLimiterContent(mainLayout);
+    createSearchOptionContent(mainLayout);
 
+    QPushButton* runSearch = new QPushButton("Search", this);
+    mainLayout->addWidget(runSearch);
+
+    QFont font = this->font();
+    font.setPointSize(12);
+    this->setFont(font);
+}
+
+void StandardSearchView::createSourceContent(QLayout* mainLayout){
+    QGroupBox* sourceGroup = new QGroupBox("Source", this);
+    sourceGroup->setStyleSheet(SEARCH_GROUP_STYLESHEET);
+    mainLayout->addWidget(sourceGroup);
+
+    QFormLayout* sourceLayout = new QFormLayout();
+    sourceGroup->setLayout(sourceLayout);
+
+    QHBoxLayout* openFileLayout = new QHBoxLayout();
     QLineEdit* filePath = new QLineEdit(this);
     filePath->setReadOnly(true);
     QPushButton* openFile = new QPushButton("Open", this);
     openFile->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    QHBoxLayout* openFileLayout = new QHBoxLayout();
+
     openFileLayout->addWidget(filePath);
     openFileLayout->addWidget(openFile);
-    contentLayout->addRow("File: ", openFileLayout);
+    sourceLayout->addRow("File: ", openFileLayout);
 
+    QHBoxLayout* openIndexLayout = new QHBoxLayout();
     QLineEdit* indexPath = new QLineEdit(this);
     indexPath->setReadOnly(true);
     QPushButton* openIndex = new QPushButton("Open", this);
     openIndex->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    QHBoxLayout* openIndexLayout = new QHBoxLayout();
+
     openIndexLayout->addWidget(indexPath);
     openIndexLayout->addWidget(openIndex);
-    contentLayout->addRow("Index (Optional): ", openIndexLayout);
 
-    // Line range
-    QLabel* fromLineLabel = new QLabel("From:", this);
+    sourceLayout->addRow("Index (Optional): ", openIndexLayout);
+}
+
+void StandardSearchView::createDestinationContent(QLayout* mainLayout){
+    QGroupBox* destGroup = new QGroupBox("Save results to", this);
+    destGroup->setStyleSheet(SEARCH_GROUP_STYLESHEET);
+    mainLayout->addWidget(destGroup);
+
+    //Open file
+    QFormLayout* destLayout = new QFormLayout();
+    destGroup->setLayout(destLayout);
+
+    QLineEdit* name = new QLineEdit(this);
+    destLayout->addRow("File name: ", name);
+}
+
+void StandardSearchView::createSearchLimiterContent(QLayout* mainLayout){
+    QGroupBox* limiterGroup = new QGroupBox("Limiters", this);
+    limiterGroup->setStyleSheet(SEARCH_GROUP_STYLESHEET);
+    mainLayout->addWidget(limiterGroup);
+
+    QFormLayout* limiterLayout = new QFormLayout();
+    limiterGroup->setLayout(limiterLayout);
+
     ULLSpinBox* fromLineBox = new ULLSpinBox(this);
     fromLineBox->setRange(0, ULLONG_MAX);
-    fromLineLabel->setBuddy(fromLineBox);
+    limiterLayout->addRow("Start line#:", fromLineBox);
 
-    QLabel* toLineLabel = new QLabel("To:", this);
     ULLSpinBox* toLineBox = new ULLSpinBox(this);
     toLineBox->setRange(0, ULLONG_MAX);
-    toLineLabel->setBuddy(toLineBox);
+    limiterLayout->addRow("End line#:", toLineBox);
 
-    QHBoxLayout* lineRangeLayout = new QHBoxLayout();
-    lineRangeLayout->addWidget(fromLineLabel);
-    lineRangeLayout->addWidget(fromLineBox);
-    lineRangeLayout->addWidget(toLineLabel);
-    lineRangeLayout->addWidget(toLineBox);
-    contentLayout->addRow("Line Range: ", lineRangeLayout);
-
-    // Num results
     ULLSpinBox* numResultsBox = new ULLSpinBox(this);
     numResultsBox->setRange(0, ULLONG_MAX);
-    contentLayout->addRow("Max # results: ", numResultsBox);
+    limiterLayout->addRow("Max result#: ", numResultsBox);
+}
+
+void StandardSearchView::createSearchOptionContent(QLayout* mainLayout) {
+    QGroupBox* searchGroup = new QGroupBox("Search", this);
+    searchGroup->setStyleSheet(SEARCH_GROUP_STYLESHEET);
+    mainLayout->addWidget(searchGroup);
+
+    QFormLayout* searchLayout = new QFormLayout();
+    searchGroup->setLayout(searchLayout);
 
     QLineEdit* searchField = new QLineEdit(this);
-    contentLayout->addRow("Search pattern: ", searchField);
-
-    QGroupBox* groupBox = new QGroupBox("Search pattern options", this);
-    QVBoxLayout* searchOptionsLayout = new QVBoxLayout();
-    groupBox->setLayout(searchOptionsLayout);
-    contentLayout->addWidget(groupBox);
+    searchLayout->addRow("Pattern: ", searchField);
 
     QRadioButton* plainText = new QRadioButton("Plain text", this);
     plainText->setChecked(true);
@@ -81,15 +119,8 @@ StandardSearchView::StandardSearchView(PLP::CoreI* plpCore, QWidget *parent) : Q
     QHBoxLayout* plainTextRegexLayout = new QHBoxLayout();
     plainTextRegexLayout->addWidget(plainText);
     plainTextRegexLayout->addWidget(regex);
-    searchOptionsLayout->addLayout(plainTextRegexLayout);
+    searchLayout->addRow(plainTextRegexLayout);
 
     QCheckBox* ignoreCase = new QCheckBox("Ignore case", this);
-    searchOptionsLayout->addWidget(ignoreCase);
-
-    QPushButton* runSearch = new QPushButton("Search", this);
-    contentLayout->addWidget(runSearch);
-
-    QFont f("Courier New", 14);
-    f.setStyleHint(QFont::Monospace);
-    this->setFont(f);
+    searchLayout->addRow(ignoreCase);
 }

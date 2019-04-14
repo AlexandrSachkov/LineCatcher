@@ -36,7 +36,8 @@ SOURCES += \
     scripteditor.cpp \
     luasyntaxhighlighter.cpp \
     standardsearchview.cpp \
-    advancedsearchview.cpp
+    advancedsearchview.cpp \
+    progressdialog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -51,7 +52,9 @@ HEADERS += \
     scripteditor.h \
     luasyntaxhighlighter.h \
     standardsearchview.h \
-    advancedsearchview.h
+    advancedsearchview.h \
+    common.h \
+    progressdialog.h
 
 FORMS +=
 
