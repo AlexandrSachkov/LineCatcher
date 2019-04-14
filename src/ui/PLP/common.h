@@ -17,13 +17,4 @@ static const QString SEARCH_GROUP_STYLESHEET =
         "* {font-size: 14px;}"
         ;
 
-static const QString PLAINTEXT_REGEX_GROUP_STYLESHEET =
-        "QGroupBox {"
-            "border: none;"
-            "font: bold 14px;"
-            "margin-top: -6px;"
-        "}"
-        "* {font-size: 14px;}"
-        ;
-
 #endif // COMMON_H

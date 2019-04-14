@@ -32,9 +32,30 @@ private slots:
     void onProgressUpdate(int percent, unsigned long long numResults);
     void onSearchError();
 private:
+    void startRegularSearch(
+            PLP::FileReaderI* fileReader,
+            PLP::ResultSetReaderI* indexReader,
+            PLP::ResultSetWriterI* indexWriter,
+            unsigned long long startLine,
+            unsigned long long endLine,
+            unsigned long long maxNumResults
+            );
+
+    void startMultilineSearch(
+            PLP::FileReaderI* fileReader,
+            PLP::ResultSetReaderI* indexReader,
+            PLP::ResultSetWriterI* indexWriter,
+            unsigned long long startLine,
+            unsigned long long endLine,
+            unsigned long long maxNumResults
+            );
+
     const int ROW_LABEL_WIDTH = 300;
+    const int NUM_ROWS = 5;
+
     PLP::CoreI* _plpCore;
     QProgressDialog* _progressDialog = nullptr;
+    bool _multiline = false;
 
     QLineEdit* _filePath;
     QLineEdit* _indexPath;
@@ -46,11 +67,10 @@ private:
     QCheckBox* _regex;
     QCheckBox* _ignoreCase;
 
+    std::vector<QCheckBox*> _lineEnabledCheckBoxes;
     std::vector<QSpinBox*> _lineOffsetBoxes;
-    std::vector<QSpinBox*> _wordOffsetBoxes;
     std::vector<QLineEdit*> _searchPatternBoxes;
-    std::vector<QRadioButton*> _plainTextButtons;
-    std::vector<QRadioButton*> _regexButtons;
+    std::vector<QCheckBox*> _regexCheckBoxes;
     std::vector<QCheckBox*> _ignoreCaseCheckBoxes;
 };
 

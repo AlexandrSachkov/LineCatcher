@@ -15,9 +15,12 @@
 #include <QSpinBox>
 #include <QGridLayout>
 
+#include <unordered_map>
+
 SearchView::SearchView(PLP::CoreI* plpCore, bool multiline, QWidget *parent) : QWidget(parent)
 {
     _plpCore = plpCore;
+    _multiline = multiline;
 
     QVBoxLayout* mainLayout = new QVBoxLayout();
     mainLayout->setSizeConstraint(QLayout::SetFixedSize);
@@ -140,38 +143,30 @@ void SearchView::createMultilineSearchOptionContent(QLayout* mainLayout){
     mainLayout->addWidget(searchGroup);
 
     QGridLayout* formLayout = new QGridLayout();
-    formLayout->setSpacing(2);
+    formLayout->setSpacing(4);
     searchGroup->setLayout(formLayout);
 
-    const int NUM_ROWS = 5;
+    //Enabled
+    {
+        for(int i = 0; i < NUM_ROWS; i++){
+            QCheckBox* lineEnabledCheckBox = new QCheckBox(this);
+            _lineEnabledCheckBoxes.push_back(lineEnabledCheckBox);
+            formLayout->addWidget(lineEnabledCheckBox, i + 1, 0);
+        }
+    }
 
     //Line offset
     {
         QLabel* lineOffsetLabel = new QLabel("Line #", this);
         lineOffsetLabel->setAlignment(Qt::AlignHCenter);
-        formLayout->addWidget(lineOffsetLabel, 0, 0);
+        formLayout->addWidget(lineOffsetLabel, 0, 1);
 
         for(int i = 0; i < NUM_ROWS; i++){
             QSpinBox* lineOffsetBox = new QSpinBox(this);
             lineOffsetBox->setRange(-10, 10);
             lineOffsetBox->setButtonSymbols(QAbstractSpinBox::ButtonSymbols::NoButtons);
             _lineOffsetBoxes.push_back(lineOffsetBox);
-            formLayout->addWidget(lineOffsetBox, i + 1, 0);
-        }
-    }
-
-    //Word offset
-    {
-        QLabel* wordOffsetLabel = new QLabel("Word # (Optional)", this);
-        wordOffsetLabel->setAlignment(Qt::AlignHCenter);
-        formLayout->addWidget(wordOffsetLabel, 0, 1);
-
-        for(int i = 0; i < NUM_ROWS; i++){
-            QSpinBox* wordOffsetBox = new QSpinBox(this);
-            wordOffsetBox->setRange(-1000, 1000);
-            wordOffsetBox->setButtonSymbols(QAbstractSpinBox::ButtonSymbols::NoButtons);
-            _wordOffsetBoxes.push_back(wordOffsetBox);
-            formLayout->addWidget(wordOffsetBox, i + 1, 1);
+            formLayout->addWidget(lineOffsetBox, i + 1, 1);
         }
     }
 
@@ -188,24 +183,12 @@ void SearchView::createMultilineSearchOptionContent(QLayout* mainLayout){
         }
     }
 
-    //Plain text / Regex
+    //Regex
     {
         for(int i = 0; i < NUM_ROWS; i++){
-            QGroupBox* plainTextRegexGroup = new QGroupBox("", this);
-            plainTextRegexGroup->setStyleSheet(PLAINTEXT_REGEX_GROUP_STYLESHEET);
-            QHBoxLayout* plainTextRegexGroupLayout = new QHBoxLayout();
-            plainTextRegexGroup->setLayout(plainTextRegexGroupLayout);
-
-            QRadioButton* plainTextButton = new QRadioButton("Plain text", this);
-            plainTextButton->setChecked(true);
-            _plainTextButtons.push_back(plainTextButton);
-            plainTextRegexGroupLayout->addWidget(plainTextButton);
-
-            QRadioButton* regexButton = new QRadioButton("Regex", this);
-            _regexButtons.push_back(regexButton);
-            plainTextRegexGroupLayout->addWidget(regexButton);
-
-            formLayout->addWidget(plainTextRegexGroup, i + 1, 3);
+            QCheckBox* regexCheckBox = new QCheckBox("Regex", this);
+            _regexCheckBoxes.push_back(regexCheckBox);
+            formLayout->addWidget(regexCheckBox, i + 1, 3);
         }
     }
 
@@ -226,9 +209,6 @@ void SearchView::startSearch() {
     unsigned long long startLine = _fromLineBox->value();
     unsigned long long endLine = _toLineBox->value();
     unsigned long long maxNumResults = _numResultsBox->value();
-    QString searchPattern = _searchField->text();
-    bool regex = _regex->isChecked();
-    bool ignoreCase = _ignoreCase->isChecked();
 
     //validate user input
     if(dataPath.simplified().isEmpty()){
@@ -241,8 +221,8 @@ void SearchView::startSearch() {
         return;
     }
 
-    if(searchPattern.isEmpty()){
-        QMessageBox::information(this,"PLP","Search pattern cannot be empty",QMessageBox::Ok);
+    if(startLine > endLine){
+        QMessageBox::information(this,"PLP","Start line must be smaller or equal to end line",QMessageBox::Ok);
         return;
     }
 
@@ -270,6 +250,30 @@ void SearchView::startSearch() {
         return;
     }
 
+    if(_multiline){
+        startMultilineSearch(fileReader, indexReader, indexWriter, startLine, endLine, maxNumResults);
+    }else{
+        startRegularSearch(fileReader, indexReader, indexWriter, startLine, endLine, maxNumResults);
+    }
+}
+
+void SearchView::startRegularSearch(
+        PLP::FileReaderI* fileReader,
+        PLP::ResultSetReaderI* indexReader,
+        PLP::ResultSetWriterI* indexWriter,
+        unsigned long long startLine,
+        unsigned long long endLine,
+        unsigned long long maxNumResults
+        ){
+    QString searchPattern = _searchField->text();
+    if(searchPattern.isEmpty()){
+        QMessageBox::information(this,"PLP","Search pattern cannot be empty",QMessageBox::Ok);
+        return;
+    }
+
+    bool regex = _regex->isChecked();
+    bool ignoreCase = _ignoreCase->isChecked();
+
     PLP::TextComparator* comparator = nullptr;
     if(regex){
         comparator = new PLP::MatchRegex(searchPattern.toStdString(), ignoreCase);
@@ -287,8 +291,6 @@ void SearchView::startSearch() {
         }
         return;
     }
-
-
 
     std::function<void(int, unsigned long long)> update = [&](int percent, unsigned long long numResults){
         emit progressUpdate(percent, numResults);
@@ -313,6 +315,109 @@ void SearchView::startSearch() {
        core->release(indexReader);
        core->release(indexWriter);
        delete comparator;
+    });
+}
+
+void SearchView::startMultilineSearch(
+        PLP::FileReaderI* fileReader,
+        PLP::ResultSetReaderI* indexReader,
+        PLP::ResultSetWriterI* indexWriter,
+        unsigned long long startLine,
+        unsigned long long endLine,
+        unsigned long long maxNumResults
+        ){
+
+    bool error = false;
+    std::unordered_map<int, PLP::TextComparator*> lineComparators;
+    for(int i=0; i < NUM_ROWS; i++){
+        if(_lineEnabledCheckBoxes[i]->isChecked()){
+            if(_searchPatternBoxes[i]->text().isEmpty()){
+                QMessageBox::information(
+                            this,
+                            "PLP",
+                            "Line #" + QString::number(_lineOffsetBoxes[i]->value()) + " cannot be empty",
+                            QMessageBox::Ok
+                );
+                error = true;
+                break;
+            }
+
+            if(_regexCheckBoxes[i]->isChecked()){
+                PLP::TextComparator* comparator = new PLP::MatchRegex(
+                            _searchPatternBoxes[i]->text().toStdString(),
+                            _ignoreCaseCheckBoxes[i]->isChecked()
+                            );
+                lineComparators.emplace(_lineOffsetBoxes[i]->value(), comparator);
+            }else{
+                PLP::TextComparator* comparator = new PLP::MatchString(
+                            _searchPatternBoxes[i]->text().toStdString(),
+                            false,
+                            _ignoreCaseCheckBoxes[i]->isChecked()
+                            );
+                lineComparators.emplace(_lineOffsetBoxes[i]->value(), comparator);
+            }
+        }
+    }
+
+    std::function<void()> cleanup = [&](){
+        _plpCore->release(indexWriter);
+        _plpCore->release(indexReader);
+        _plpCore->release(fileReader);
+
+        for(auto& pair : lineComparators){
+            delete pair.second;
+        }
+    };
+
+    if(error){
+        cleanup();
+        return;
+    }
+
+    for(auto& pair : lineComparators){
+        if(!pair.second->initialize()){
+            QMessageBox::information(
+                        this,
+                        "PLP",
+                        "Failed to initialize comparator on Line #" + QString::number(pair.first),
+                        QMessageBox::Ok
+                        );
+            error = true;
+        }
+    }
+
+    if(error){
+        cleanup();
+        return;
+    }
+
+    std::function<void(int, unsigned long long)> update = [&](int percent, unsigned long long numResults){
+        emit progressUpdate(percent, numResults);
+    };
+
+    if(!_progressDialog){
+        _progressDialog = new QProgressDialog("", "Cancel", 0, 100, this);
+        _progressDialog->setWindowTitle("Searching...");
+        _progressDialog->setWindowModality(Qt::WindowModal);
+        _progressDialog->setMinimumWidth(400);
+    }
+    _progressDialog->show();
+
+    PLP::CoreI* core = _plpCore;
+    QtConcurrent::run([this, core, fileReader, indexReader, indexWriter,
+                      startLine, endLine, maxNumResults, lineComparators, update, cleanup](){
+       if(!core->searchMultiline(fileReader, indexReader, indexWriter,
+                    startLine, endLine, maxNumResults,lineComparators,&update)){
+            emit searchError();
+       }
+
+       _plpCore->release(fileReader);
+       _plpCore->release(indexReader);
+       _plpCore->release(indexWriter);
+
+       for(auto& pair : lineComparators){
+           delete pair.second;
+       }
     });
 }
 
