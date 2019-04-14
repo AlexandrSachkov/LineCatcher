@@ -1,4 +1,4 @@
-#include "standardsearchview.h"
+#include "searchview.h"
 #include "common.h"
 
 #include <QBoxLayout>
@@ -13,7 +13,7 @@
 #include <QMessageBox>
 #include <QFileDialog>
 
-StandardSearchView::StandardSearchView(PLP::CoreI* plpCore, QWidget *parent) : QWidget(parent)
+SearchView::SearchView(PLP::CoreI* plpCore, QWidget *parent) : QWidget(parent)
 {
     _plpCore = plpCore;
 
@@ -43,7 +43,7 @@ StandardSearchView::StandardSearchView(PLP::CoreI* plpCore, QWidget *parent) : Q
     this->setFont(font);
 }
 
-void StandardSearchView::createSourceContent(QLayout* mainLayout){
+void SearchView::createSourceContent(QLayout* mainLayout){
     QGroupBox* sourceGroup = new QGroupBox("Source", this);
     sourceGroup->setStyleSheet(SEARCH_GROUP_STYLESHEET);
     mainLayout->addWidget(sourceGroup);
@@ -75,7 +75,7 @@ void StandardSearchView::createSourceContent(QLayout* mainLayout){
     sourceLayout->addRow("Index (Optional): ", openIndexLayout);
 }
 
-void StandardSearchView::createDestinationContent(QLayout* mainLayout){
+void SearchView::createDestinationContent(QLayout* mainLayout){
     QGroupBox* destGroup = new QGroupBox("Save results to", this);
     destGroup->setStyleSheet(SEARCH_GROUP_STYLESHEET);
     mainLayout->addWidget(destGroup);
@@ -88,7 +88,7 @@ void StandardSearchView::createDestinationContent(QLayout* mainLayout){
     destLayout->addRow("File name: ", _destName);
 }
 
-void StandardSearchView::createSearchLimiterContent(QLayout* mainLayout){
+void SearchView::createSearchLimiterContent(QLayout* mainLayout){
     QGroupBox* limiterGroup = new QGroupBox("Limiters", this);
     limiterGroup->setStyleSheet(SEARCH_GROUP_STYLESHEET);
     mainLayout->addWidget(limiterGroup);
@@ -109,7 +109,7 @@ void StandardSearchView::createSearchLimiterContent(QLayout* mainLayout){
     limiterLayout->addRow("Max result#: ", _numResultsBox);
 }
 
-void StandardSearchView::createSearchOptionContent(QLayout* mainLayout) {
+void SearchView::createSearchOptionContent(QLayout* mainLayout) {
     QGroupBox* searchGroup = new QGroupBox("Search", this);
     searchGroup->setStyleSheet(SEARCH_GROUP_STYLESHEET);
     mainLayout->addWidget(searchGroup);
@@ -132,7 +132,30 @@ void StandardSearchView::createSearchOptionContent(QLayout* mainLayout) {
     searchLayout->addRow(_ignoreCase);
 }
 
-void StandardSearchView::startSearch() {
+void SearchView::createMultilineSearchOptionContent(QLayout* mainLayout){
+    QGroupBox* searchGroup = new QGroupBox("Search", this);
+    searchGroup->setStyleSheet(SEARCH_GROUP_STYLESHEET);
+    mainLayout->addWidget(searchGroup);
+
+    QFormLayout* searchLayout = new QFormLayout();
+    searchGroup->setLayout(searchLayout);
+
+    _searchField = new QLineEdit(this);
+    searchLayout->addRow("Pattern: ", _searchField);
+
+    _plainText = new QRadioButton("Plain text", this);
+    _plainText->setChecked(true);
+    _regex = new QRadioButton("Regex", this);
+    QHBoxLayout* plainTextRegexLayout = new QHBoxLayout();
+    plainTextRegexLayout->addWidget(_plainText);
+    plainTextRegexLayout->addWidget(_regex);
+    searchLayout->addRow(plainTextRegexLayout);
+
+    _ignoreCase = new QCheckBox("Ignore case", this);
+    searchLayout->addRow(_ignoreCase);
+}
+
+void SearchView::startSearch() {
     QString dataPath = _filePath->text();
     QString indexPath = _indexPath->text();
     QString destPath = _destName->text();
@@ -229,7 +252,7 @@ void StandardSearchView::startSearch() {
     });
 }
 
-void StandardSearchView::openFile() {
+void SearchView::openFile() {
     QString path = QFileDialog::getOpenFileName(this, "Select file to open");
     if(path.isEmpty()){
         return;
@@ -238,7 +261,7 @@ void StandardSearchView::openFile() {
     _filePath->setText(path);
 }
 
-void StandardSearchView::openIndex(){
+void SearchView::openIndex(){
     QString path = QFileDialog::getOpenFileName(this, tr("Select indices to open")/*, "", tr("Index (*.plpidx)")*/);
     if(path.isEmpty()){
         return;
@@ -247,12 +270,12 @@ void StandardSearchView::openIndex(){
     _indexPath->setText(path);
 }
 
-void StandardSearchView::onProgressUpdate(int percent, unsigned long long numResults) {
+void SearchView::onProgressUpdate(int percent, unsigned long long numResults) {
     _progressDialog->setValue(percent);
     _progressDialog->setLabelText("Results: " + QString::number(numResults));
 }
 
-void StandardSearchView::onSearchError() {
+void SearchView::onSearchError() {
     _progressDialog->reset();
     _progressDialog->hide();
 

@@ -1,8 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "standardsearchview.h"
-#include "advancedsearchview.h"
+#include "searchview.h"
 #include "scriptview.h"
 
 #include <QMainWindow>
@@ -40,8 +39,8 @@ private:
     QTabWidget* _fileViewer;
     QTabWidget* _resultSetViewer;
 
-    StandardSearchView* _standardSearchView;
-    AdvancedSearchView* _advancedSearchView;
+    SearchView* _standardSearchView;
+    SearchView* _advancedSearchView;
     ScriptView* _scriptView;
 
     PLP::CoreI* _plpCore;

@@ -10,16 +10,17 @@
 #include "ullspinbox.h"
 #include "CoreI.h"
 
-class StandardSearchView : public QWidget
+class SearchView : public QWidget
 {
     Q_OBJECT
 public:
-    explicit StandardSearchView(PLP::CoreI* plpCore, QWidget *parent = nullptr);
+    explicit SearchView(PLP::CoreI* plpCore, QWidget *parent = nullptr);
 
     void createSourceContent(QLayout* mainLayout);
     void createDestinationContent(QLayout* mainLayout);
     void createSearchLimiterContent(QLayout* mainLayout);
     void createSearchOptionContent(QLayout* mainLayout);
+    void createMultilineSearchOptionContent(QLayout* mainLayout);
 signals:
     void progressUpdate(int percent, unsigned long long numResults);
     void searchError();
