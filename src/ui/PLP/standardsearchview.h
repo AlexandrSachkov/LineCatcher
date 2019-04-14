@@ -22,12 +22,13 @@ public:
     void createSearchOptionContent(QLayout* mainLayout);
 signals:
     void progressUpdate(int percent, unsigned long long numResults);
-
+    void searchError();
 private slots:
     void openFile();
     void openIndex();
     void startSearch();
     void onProgressUpdate(int percent, unsigned long long numResults);
+    void onSearchError();
 private:
     const int ROW_LABEL_WIDTH = 300;
     PLP::CoreI* _plpCore;

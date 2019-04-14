@@ -35,6 +35,9 @@ StandardSearchView::StandardSearchView(PLP::CoreI* plpCore, QWidget *parent) : Q
     connect(runSearch, SIGNAL(clicked(void)), this, SLOT(startSearch(void)));
     mainLayout->addWidget(runSearch);
 
+    connect(this, SIGNAL(progressUpdate(int, unsigned long long)), this, SLOT(onProgressUpdate(int, unsigned long long)));
+    connect(this, SIGNAL(searchError(void)), this, SLOT(onSearchError(void)));
+
     QFont font = this->font();
     font.setPointSize(12);
     this->setFont(font);
@@ -141,75 +144,61 @@ void StandardSearchView::startSearch() {
     bool ignoreCase = _ignoreCase->isChecked();
 
     if(dataPath.simplified().isEmpty()){
-        QMessageBox::information(this,
-                             "PLP",
-                             "Source file path cannot be empty",
-                             QMessageBox::Ok);
+        QMessageBox::information(this,"PLP","Source file path cannot be empty",QMessageBox::Ok);
         return;
     }
 
     if(destPath.simplified().isEmpty()){
-        QMessageBox::information(this,
-                             "PLP",
-                             "Save to file name cannot be empty",
-                             QMessageBox::Ok);
+        QMessageBox::information(this,"PLP","Save to file name cannot be empty",QMessageBox::Ok);
         return;
     }
 
     if(searchPattern.isEmpty()){
-        QMessageBox::information(this,
-                             "PLP",
-                             "Search pattern cannot be empty",
-                             QMessageBox::Ok);
+        QMessageBox::information(this,"PLP","Search pattern cannot be empty",QMessageBox::Ok);
         return;
     }
 
+    bool success = true;
     PLP::FileReaderI* fileReader = _plpCore->createFileReader(dataPath.toStdString(), 0, true);
     if(!fileReader){
-        QMessageBox::information(this,
-                             "PLP",
-                             "File reader failed to initialize",
-                             QMessageBox::Ok);
-        return;
+        QMessageBox::information(this,"PLP","File reader failed to initialize",QMessageBox::Ok);
+        success = false;
     }
 
     PLP::ResultSetReaderI* indexReader = nullptr;
     if(!indexPath.simplified().isEmpty()){
         indexReader = _plpCore->createResultSetReader(indexPath.toStdString(), 0);
         if(!indexReader){
-            QMessageBox::information(this,
-                                 "PLP",
-                                 "Index reader failed to initialize",
-                                 QMessageBox::Ok);
-            return;
+            QMessageBox::information(this,"PLP","Index reader failed to initialize",QMessageBox::Ok);
+            success = false;
         }
     }
     PLP::ResultSetWriterI* indexWriter = _plpCore->createResultSetWriter(destPath.toStdString(), 0, fileReader, true);
     if(!indexWriter){
-        QMessageBox::information(this,
-                             "PLP",
-                             "Index writer failed to initialize",
-                             QMessageBox::Ok);
-        return;
+        QMessageBox::information(this,"PLP","Index writer failed to initialize",QMessageBox::Ok);
+        success = false;
     }
 
-    std::shared_ptr<PLP::TextComparator> comparator = nullptr;
+    PLP::TextComparator* comparator = nullptr;
     if(plainText){
-        comparator.reset(new PLP::MatchString(searchPattern.toStdString(), false, ignoreCase));
+        comparator = new PLP::MatchString(searchPattern.toStdString(), false, ignoreCase);
     }else{
-        comparator.reset(new PLP::MatchRegex(searchPattern.toStdString(), ignoreCase));
+        comparator = new PLP::MatchRegex(searchPattern.toStdString(), ignoreCase);
+    }
+
+    if(!comparator){
+        success = false;
     }
 
     if(!comparator->initialize()){
-        QMessageBox::information(this,
-                             "PLP",
-                             "Comparator failed to initialize",
-                             QMessageBox::Ok);
-        return;
+        QMessageBox::information(this,"PLP","Comparator failed to initialize",QMessageBox::Ok);
+        success = false;
     }
 
-    std::function<void(int, unsigned long long)> progressUpdate = [&](int percent, unsigned long long numResults){
-        //emit progressUpdate(percent, numResults);
+
+
+    std::function<void(int, unsigned long long)> update = [&](int percent, unsigned long long numResults){
+        emit progressUpdate(percent, numResults);
     };
 
     if(!_progressDialog){
@@ -220,23 +209,18 @@ void StandardSearchView::startSearch() {
     }
     _progressDialog->show();
 
-    /*_plpCore->search(
-                fileReader, indexReader, indexWriter,
-                startLine, endLine, maxNumResults,
-                comparator,
-                &progressUpdate
-    );*/
-
-    QtConcurrent::run([&, progressUpdate](){
-        return _plpCore->search(
-                    fileReader, indexReader, indexWriter,
-                    startLine, endLine, maxNumResults,
-                    comparator,
-                    &progressUpdate
-        );
+    PLP::CoreI* core = _plpCore;
+    QtConcurrent::run([this, core, fileReader, indexReader, indexWriter,
+                      startLine, endLine, maxNumResults, comparator, update](){
+       if(!core->search(fileReader, indexReader, indexWriter,
+                    startLine, endLine, maxNumResults,comparator,&update)){
+            emit searchError();
+       }
+       core->release(fileReader);
+       core->release(indexReader);
+       core->release(indexWriter);
+       delete comparator;
     });
-
-    bool zz = true;
 }
 
 void StandardSearchView::openFile() {
@@ -260,4 +244,11 @@ void StandardSearchView::openIndex(){
 void StandardSearchView::onProgressUpdate(int percent, unsigned long long numResults) {
     _progressDialog->setValue(percent);
     _progressDialog->setLabelText("Results: " + QString::number(numResults));
+}
+
+void StandardSearchView::onSearchError() {
+    _progressDialog->reset();
+    _progressDialog->hide();
+
+    QMessageBox::critical(this,"PLP","Search failed",QMessageBox::Ok);
 }

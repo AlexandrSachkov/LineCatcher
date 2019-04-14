@@ -100,7 +100,7 @@ namespace PLP {
             ResultSetReaderI* indexReader,
             unsigned long long start,
             unsigned long long end, //0 for end of file, inclusive
-            std::shared_ptr<TextComparator> comparator,
+            TextComparator* comparator,
             const std::function<bool(unsigned long long lineNum, unsigned long long fileOffset, const char* line, unsigned int length)> action,
             const std::function<void(int percent)>* progressUpdate
         );
@@ -110,7 +110,7 @@ namespace PLP {
             ResultSetReaderI* indexReader,
             unsigned long long start,
             unsigned long long end, //0 for end of file, inclusive
-            const std::unordered_map<int, std::shared_ptr<TextComparator>>& lineComparators,
+            const std::unordered_map<int, TextComparator*>& lineComparators,
             const std::function<bool(unsigned long long lineNum, unsigned long long fileOffset, const char* line, unsigned int length)> action,
             const std::function<void(int percent)>* progressUpdate
         );
@@ -122,7 +122,7 @@ namespace PLP {
             unsigned long long start,
             unsigned long long end, //0 for end of file, inclusive
             unsigned long long maxNumResults,
-            std::shared_ptr<TextComparator> comparator,
+            TextComparator* comparator,
             const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
         ) override;
 
@@ -133,7 +133,7 @@ namespace PLP {
             unsigned long long start,
             unsigned long long end, //0 for end of file, inclusive
             unsigned long long maxNumResults,
-            const std::unordered_map<int, std::shared_ptr<TextComparator>>& lineComparators,
+            const std::unordered_map<int, TextComparator*>& lineComparators,
             const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
         ) override;
 

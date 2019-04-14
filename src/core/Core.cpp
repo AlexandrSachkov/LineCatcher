@@ -253,12 +253,16 @@ namespace PLP {
         ResultSetReaderI* indexReader,
         unsigned long long start,
         unsigned long long end,
-        std::shared_ptr<TextComparator> comparator,
+        TextComparator* comparator,
         const std::function<bool(unsigned long long lineNum, unsigned long long fileOffset, const char* line, unsigned int length)> action,
         const std::function<void(int percent)>* progressUpdate
     ) {
         if (fileReader == nullptr) {
             Logger::send(ERR, "File reader and index writer cannot be null");
+            return false;
+        }
+        if (comparator == nullptr) {
+            Logger::send(ERR, "Comparator cannot be null");
             return false;
         }
         if (start > end) {
@@ -323,7 +327,7 @@ namespace PLP {
         ResultSetReaderI* indexReader,
         unsigned long long start,
         unsigned long long end, //0 for end of file, inclusive
-        const std::unordered_map<int, std::shared_ptr<TextComparator>>& lineComparators,
+        const std::unordered_map<int, TextComparator*>& lineComparators,
         const std::function<bool(unsigned long long lineNum, unsigned long long fileOffset, const char* line, unsigned int length)> action,
         const std::function<void(int percent)>* progressUpdate
     ) {
@@ -337,12 +341,12 @@ namespace PLP {
         }
         end = end > 0 ? end : fileReader->getNumberOfLines() - 1;
 
-        std::vector<std::pair<int, std::shared_ptr<TextComparator>>> vLineComparators;
+        std::vector<std::pair<int, TextComparator*>> vLineComparators;
         for (auto& pair : lineComparators) {
             vLineComparators.push_back(pair);
         }
         std::sort(vLineComparators.begin(), vLineComparators.end(),
-            [](const std::pair<int, std::shared_ptr<TextComparator>>& comp1, const std::pair<int, std::shared_ptr<TextComparator>>& comp2) {
+            [](const std::pair<int, TextComparator*>& comp1, const std::pair<int, TextComparator*>& comp2) {
             return comp1.first < comp2.first;
         });
 
@@ -420,7 +424,7 @@ namespace PLP {
         unsigned long long start,
         unsigned long long end, //0 for end of file, inclusive
         unsigned long long maxNumResults,
-        std::shared_ptr<TextComparator> comparator,
+        TextComparator* comparator,
         const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
     ) {
         maxNumResults = maxNumResults > 0 ? maxNumResults : ULLONG_MAX;
@@ -452,7 +456,7 @@ namespace PLP {
         unsigned long long start,
         unsigned long long end, //0 for end of file, inclusive
         unsigned long long maxNumResults,
-        const std::unordered_map<int, std::shared_ptr<TextComparator>>& lineComparators,
+        const std::unordered_map<int, TextComparator*>& lineComparators,
         const std::function<void(int percent, unsigned long long numResults)>* progressUpdate
     ) {
         maxNumResults = maxNumResults > 0 ? maxNumResults : ULLONG_MAX;
@@ -496,7 +500,7 @@ namespace PLP {
             start,
             end,
             maxNumResults,
-            comparator,
+            comparator.get(),
             &progressUpdate
         );
     }
@@ -521,7 +525,7 @@ namespace PLP {
             start,
             end,
             maxNumResults,
-            comparator,
+            comparator.get(),
             &progressUpdate
         );
     }
@@ -538,6 +542,11 @@ namespace PLP {
             printConsoleL(std::to_string(percent) + "%, Found results: " + std::to_string(numResults));
         };
 
+        std::unordered_map<int, TextComparator*> comparators;
+        for (auto& pair : lineComparators) {
+            comparators.emplace(pair.first, pair.second.get());
+        }
+
         return searchMultiline(
             fileReader.get(),
             nullptr,
@@ -545,7 +554,7 @@ namespace PLP {
             start,
             end,
             maxNumResults,
-            lineComparators,
+            comparators,
             &progressUpdate
         );
     }
@@ -563,6 +572,11 @@ namespace PLP {
             printConsoleL(std::to_string(percent) + "%, Found results: " + std::to_string(numResults));
         };
 
+        std::unordered_map<int, TextComparator*> comparators;
+        for (auto& pair : lineComparators) {
+            comparators.emplace(pair.first, pair.second.get());
+        }
+
         return searchMultiline(
             fileReader.get(),
             indexReader.get(),
@@ -570,7 +584,7 @@ namespace PLP {
             start,
             end,
             maxNumResults,
-            lineComparators,
+            comparators,
             &progressUpdate
         );
     }

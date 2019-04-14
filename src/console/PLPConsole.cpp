@@ -182,13 +182,13 @@ int main() {
     PLP::FileReaderI* fileReader = core->createFileReader("D:/Repositories/LogParser/resources/largeGeneratedFile.txt", 0, true);
     PLP::ResultSetReaderI* indexReader = nullptr;
     PLP::ResultSetWriterI* indexWriter = core->createResultSetWriter("D:/Repositories/LogParser/resources/test", 0, fileReader, true);
-    std::shared_ptr<PLP::TextComparator> comparator = nullptr;
+    PLP::TextComparator* comparator = nullptr;
     bool plainText = true;
     bool ignoreCase = false;
     if (plainText) {
-        comparator.reset(new PLP::MatchString("10", false, ignoreCase));
+        comparator = new PLP::MatchString("10", false, ignoreCase);
     } else {
-        comparator.reset(new PLP::MatchRegex("10", ignoreCase));
+        comparator = new PLP::MatchRegex("10", ignoreCase);
     }
 
     if (!comparator->initialize()) {
