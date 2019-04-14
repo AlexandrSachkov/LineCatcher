@@ -143,6 +143,7 @@ void StandardSearchView::startSearch() {
     bool plainText = _plainText->isChecked();
     bool ignoreCase = _ignoreCase->isChecked();
 
+    //validate user input
     if(dataPath.simplified().isEmpty()){
         QMessageBox::information(this,"PLP","Source file path cannot be empty",QMessageBox::Ok);
         return;
@@ -158,11 +159,11 @@ void StandardSearchView::startSearch() {
         return;
     }
 
-    bool success = true;
+    // Create required objects
     PLP::FileReaderI* fileReader = _plpCore->createFileReader(dataPath.toStdString(), 0, true);
     if(!fileReader){
         QMessageBox::information(this,"PLP","File reader failed to initialize",QMessageBox::Ok);
-        success = false;
+        return;
     }
 
     PLP::ResultSetReaderI* indexReader = nullptr;
@@ -170,13 +171,16 @@ void StandardSearchView::startSearch() {
         indexReader = _plpCore->createResultSetReader(indexPath.toStdString(), 0);
         if(!indexReader){
             QMessageBox::information(this,"PLP","Index reader failed to initialize",QMessageBox::Ok);
-            success = false;
+            _plpCore->release(fileReader);
+            return;
         }
     }
     PLP::ResultSetWriterI* indexWriter = _plpCore->createResultSetWriter(destPath.toStdString(), 0, fileReader, true);
     if(!indexWriter){
         QMessageBox::information(this,"PLP","Index writer failed to initialize",QMessageBox::Ok);
-        success = false;
+        _plpCore->release(fileReader);
+        _plpCore->release(indexReader);
+        return;
     }
 
     PLP::TextComparator* comparator = nullptr;
@@ -186,13 +190,15 @@ void StandardSearchView::startSearch() {
         comparator = new PLP::MatchRegex(searchPattern.toStdString(), ignoreCase);
     }
 
-    if(!comparator){
-        success = false;
-    }
-
-    if(!comparator->initialize()){
+    if(!comparator || !comparator->initialize()){
         QMessageBox::information(this,"PLP","Comparator failed to initialize",QMessageBox::Ok);
-        success = false;
+        _plpCore->release(fileReader);
+        _plpCore->release(indexReader);
+        _plpCore->release(indexWriter);
+        if(comparator){
+            delete comparator;
+        }
+        return;
     }
 
 
