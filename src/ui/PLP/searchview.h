@@ -6,6 +6,7 @@
 #include <QLineEdit>
 #include <QRadioButton>
 #include <QCheckBox>
+#include <QSpinBox>
 
 #include "ullspinbox.h"
 #include "CoreI.h"
@@ -14,7 +15,7 @@ class SearchView : public QWidget
 {
     Q_OBJECT
 public:
-    explicit SearchView(PLP::CoreI* plpCore, QWidget *parent = nullptr);
+    explicit SearchView(PLP::CoreI* plpCore, bool multiline, QWidget *parent = nullptr);
 
     void createSourceContent(QLayout* mainLayout);
     void createDestinationContent(QLayout* mainLayout);
@@ -45,6 +46,13 @@ private:
     QRadioButton* _plainText;
     QRadioButton* _regex;
     QCheckBox* _ignoreCase;
+
+    std::vector<QSpinBox*> _lineOffsetBoxes;
+    std::vector<QSpinBox*> _wordOffsetBoxes;
+    std::vector<QLineEdit*> _searchPatternBoxes;
+    std::vector<QRadioButton*> _plainTextButtons;
+    std::vector<QRadioButton*> _regexButtons;
+    std::vector<QCheckBox*> _ignoreCaseCheckBoxes;
 };
 
 #endif // STANDARDSEARCHVIEW_H

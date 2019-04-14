@@ -12,8 +12,10 @@
 #include <QtConcurrent/QtConcurrent>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QSpinBox>
+#include <QGridLayout>
 
-SearchView::SearchView(PLP::CoreI* plpCore, QWidget *parent) : QWidget(parent)
+SearchView::SearchView(PLP::CoreI* plpCore, bool multiline, QWidget *parent) : QWidget(parent)
 {
     _plpCore = plpCore;
 
@@ -29,7 +31,12 @@ SearchView::SearchView(PLP::CoreI* plpCore, QWidget *parent) : QWidget(parent)
     createSourceContent(mainLayout);
     createDestinationContent(mainLayout);
     createSearchLimiterContent(mainLayout);
-    createSearchOptionContent(mainLayout);
+
+    if(multiline){
+        createMultilineSearchOptionContent(mainLayout);
+    }else{
+        createSearchOptionContent(mainLayout);
+    }
 
     QPushButton* runSearch = new QPushButton("Search", this);
     connect(runSearch, SIGNAL(clicked(void)), this, SLOT(startSearch(void)));
@@ -137,22 +144,84 @@ void SearchView::createMultilineSearchOptionContent(QLayout* mainLayout){
     searchGroup->setStyleSheet(SEARCH_GROUP_STYLESHEET);
     mainLayout->addWidget(searchGroup);
 
-    QFormLayout* searchLayout = new QFormLayout();
-    searchGroup->setLayout(searchLayout);
+    QGridLayout* formLayout = new QGridLayout();
+    formLayout->setSpacing(2);
+    searchGroup->setLayout(formLayout);
 
-    _searchField = new QLineEdit(this);
-    searchLayout->addRow("Pattern: ", _searchField);
+    const int NUM_ROWS = 5;
 
-    _plainText = new QRadioButton("Plain text", this);
-    _plainText->setChecked(true);
-    _regex = new QRadioButton("Regex", this);
-    QHBoxLayout* plainTextRegexLayout = new QHBoxLayout();
-    plainTextRegexLayout->addWidget(_plainText);
-    plainTextRegexLayout->addWidget(_regex);
-    searchLayout->addRow(plainTextRegexLayout);
+    //Line offset
+    {
+        QLabel* lineOffsetLabel = new QLabel("Line #", this);
+        lineOffsetLabel->setAlignment(Qt::AlignHCenter);
+        formLayout->addWidget(lineOffsetLabel, 0, 0);
 
-    _ignoreCase = new QCheckBox("Ignore case", this);
-    searchLayout->addRow(_ignoreCase);
+        for(int i = 0; i < NUM_ROWS; i++){
+            QSpinBox* lineOffsetBox = new QSpinBox(this);
+            lineOffsetBox->setRange(-10, 10);
+            lineOffsetBox->setButtonSymbols(QAbstractSpinBox::ButtonSymbols::NoButtons);
+            _lineOffsetBoxes.push_back(lineOffsetBox);
+            formLayout->addWidget(lineOffsetBox, i + 1, 0);
+        }
+    }
+
+    //Word offset
+    {
+        QLabel* wordOffsetLabel = new QLabel("Word # (Optional)", this);
+        wordOffsetLabel->setAlignment(Qt::AlignHCenter);
+        formLayout->addWidget(wordOffsetLabel, 0, 1);
+
+        for(int i = 0; i < NUM_ROWS; i++){
+            QSpinBox* wordOffsetBox = new QSpinBox(this);
+            wordOffsetBox->setRange(-1000, 1000);
+            wordOffsetBox->setButtonSymbols(QAbstractSpinBox::ButtonSymbols::NoButtons);
+            _wordOffsetBoxes.push_back(wordOffsetBox);
+            formLayout->addWidget(wordOffsetBox, i + 1, 1);
+        }
+    }
+
+    //Search pattern
+    {
+        QLabel* searchPatternLabel = new QLabel("Search pattern", this);
+        searchPatternLabel->setAlignment(Qt::AlignHCenter);
+        formLayout->addWidget(searchPatternLabel, 0, 2);
+
+        for(int i = 0; i < NUM_ROWS; i++){
+            QLineEdit* searchPatternBox = new QLineEdit(this);
+            _searchPatternBoxes.push_back(searchPatternBox);
+            formLayout->addWidget(searchPatternBox, i + 1, 2);
+        }
+    }
+
+    //Plain text / Regex
+    {
+        for(int i = 0; i < NUM_ROWS; i++){
+            QGroupBox* plainTextRegexGroup = new QGroupBox("", this);
+            plainTextRegexGroup->setStyleSheet(PLAINTEXT_REGEX_GROUP_STYLESHEET);
+            QHBoxLayout* plainTextRegexGroupLayout = new QHBoxLayout();
+            plainTextRegexGroup->setLayout(plainTextRegexGroupLayout);
+
+            QRadioButton* plainTextButton = new QRadioButton("Plain text", this);
+            plainTextButton->setChecked(true);
+            _plainTextButtons.push_back(plainTextButton);
+            plainTextRegexGroupLayout->addWidget(plainTextButton);
+
+            QRadioButton* regexButton = new QRadioButton("Regex", this);
+            _regexButtons.push_back(regexButton);
+            plainTextRegexGroupLayout->addWidget(regexButton);
+
+            formLayout->addWidget(plainTextRegexGroup, i + 1, 3);
+        }
+    }
+
+    //Ignore case
+    {
+        for(int i = 0; i < NUM_ROWS; i++){
+            QCheckBox* ignoreCaseCheckBox = new QCheckBox("Ignore case", this);
+            _ignoreCaseCheckBoxes.push_back(ignoreCaseCheckBox);
+            formLayout->addWidget(ignoreCaseCheckBox, i + 1, 4);
+        }
+    }
 }
 
 void SearchView::startSearch() {

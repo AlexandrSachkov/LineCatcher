@@ -68,10 +68,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         //TODO
     }
 
-    _standardSearchView = new SearchView(_plpCore, this);
+    _standardSearchView = new SearchView(_plpCore, false, this);
     _standardSearchView->hide();
 
-    _advancedSearchView = new SearchView(_plpCore, this);
+    _advancedSearchView = new SearchView(_plpCore, true, this);
     _advancedSearchView->hide();
 
     _scriptView = new ScriptView(_plpCore, this);
