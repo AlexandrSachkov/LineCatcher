@@ -43,8 +43,7 @@ private:
     ULLSpinBox* _toLineBox;
     ULLSpinBox* _numResultsBox;
     QLineEdit* _searchField;
-    QRadioButton* _plainText;
-    QRadioButton* _regex;
+    QCheckBox* _regex;
     QCheckBox* _ignoreCase;
 
     std::vector<QSpinBox*> _lineOffsetBoxes;

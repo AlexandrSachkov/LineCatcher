@@ -127,13 +127,8 @@ void SearchView::createSearchOptionContent(QLayout* mainLayout) {
     _searchField = new QLineEdit(this);
     searchLayout->addRow("Pattern: ", _searchField);
 
-    _plainText = new QRadioButton("Plain text", this);
-    _plainText->setChecked(true);
-    _regex = new QRadioButton("Regex", this);
-    QHBoxLayout* plainTextRegexLayout = new QHBoxLayout();
-    plainTextRegexLayout->addWidget(_plainText);
-    plainTextRegexLayout->addWidget(_regex);
-    searchLayout->addRow(plainTextRegexLayout);
+    _regex = new QCheckBox("Regex", this);
+    searchLayout->addRow(_regex);
 
     _ignoreCase = new QCheckBox("Ignore case", this);
     searchLayout->addRow(_ignoreCase);
@@ -232,7 +227,7 @@ void SearchView::startSearch() {
     unsigned long long endLine = _toLineBox->value();
     unsigned long long maxNumResults = _numResultsBox->value();
     QString searchPattern = _searchField->text();
-    bool plainText = _plainText->isChecked();
+    bool regex = _regex->isChecked();
     bool ignoreCase = _ignoreCase->isChecked();
 
     //validate user input
@@ -276,10 +271,10 @@ void SearchView::startSearch() {
     }
 
     PLP::TextComparator* comparator = nullptr;
-    if(plainText){
-        comparator = new PLP::MatchString(searchPattern.toStdString(), false, ignoreCase);
-    }else{
+    if(regex){
         comparator = new PLP::MatchRegex(searchPattern.toStdString(), ignoreCase);
+    }else{
+        comparator = new PLP::MatchString(searchPattern.toStdString(), false, ignoreCase);
     }
 
     if(!comparator || !comparator->initialize()){
