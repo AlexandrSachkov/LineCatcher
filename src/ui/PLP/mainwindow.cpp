@@ -80,7 +80,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 }
 
 MainWindow::~MainWindow() {
-    //delete _ui;
+    delete _fileViewer;
+    delete _resultSetViewer;
+
+    delete _standardSearchView;
+    delete _advancedSearchView;
+    delete _scriptView;
+
+    PLP::release(_plpCore);
 }
 
 void MainWindow::closeTab(int index) {

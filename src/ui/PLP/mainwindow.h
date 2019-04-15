@@ -35,7 +35,6 @@ private:
     QAction* _openFile;
     QAction* _exit;
 
-    //Ui::MainWindow *_ui;
     QTabWidget* _fileViewer;
     QTabWidget* _resultSetViewer;
 
