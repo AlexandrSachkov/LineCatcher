@@ -20,7 +20,7 @@ namespace PLP {
         bool initialize(const std::wstring& path, unsigned long long preferredBuffSize/*, TaskRunner& asyncTaskRunner*/);
         const char* read(unsigned long long fileOffset, unsigned long long& size) override;
         unsigned long long getFileSize() override;
-        std::wstring getFilePath() override;
+        const std::wstring& getFilePath() override;
         
         /*const char* getNextPage(unsigned long long& size);
         void resetToBeginning();

@@ -28,7 +28,7 @@ namespace PLP {
         LineReaderResult getLine(unsigned long long lineNumber, char*& data, unsigned int& size) override;
         LineReaderResult getLineFromResult(const ResultSetReaderI* rsReader, char*& data, unsigned int& size) override;
         unsigned long long getLineFileOffset() const override;
-        void getFilePath(std::wstring& path) const override;
+        const wchar_t* getFilePath() const override;
 
         //Lua interface
         std::tuple<int, std::string> nextLine();

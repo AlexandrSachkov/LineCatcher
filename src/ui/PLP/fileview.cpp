@@ -18,8 +18,7 @@ FileView::FileView(std::unique_ptr<PLP::FileReaderI> fileReader, QWidget *parent
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
 
-    std::wstring path;
-    fileReader->getFilePath(path);
+    std::wstring path(fileReader->getFilePath());
     _filePath = QString::fromStdWString(path);
 
     QHBoxLayout* lineSelectionLayout = new QHBoxLayout();
@@ -78,8 +77,7 @@ const QString& FileView::getFilePath() {
 }
 
 void FileView::openIndex(std::unique_ptr<PLP::ResultSetReaderI> indexReader){
-    std::wstring path;
-    indexReader->getFilePath(path);
+    std::wstring path(indexReader->getFilePath());
     QString qPath = QString::fromStdWString(path);
     QString fileName = qPath.split('/').last();
 

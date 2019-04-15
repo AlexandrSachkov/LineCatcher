@@ -117,8 +117,8 @@ namespace PLP {
         return _lineReader->getCurrentLineFileOffset();
     }
 
-    void FileReader::getFilePath(std::wstring& path) const {
-        path = _pager->getFilePath();
+    const wchar_t* FileReader::getFilePath() const {
+        return _pager->getFilePath().c_str();
     }
 
     void FileReader::restart() {

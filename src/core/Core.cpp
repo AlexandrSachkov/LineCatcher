@@ -176,8 +176,7 @@ namespace PLP {
         }
 
         std::unique_ptr<ResultSetWriter> resSet(new ResultSetWriter());
-        std::wstring dataPath;
-        fReader->getFilePath(dataPath);
+        std::wstring dataPath(fReader->getFilePath());
 
         if (!resSet->initialize(
             string_to_wstring(path), 

@@ -171,7 +171,7 @@ namespace PLP {
         return _fileSize;
     }
 
-    std::wstring FStreamPagedReader::getFilePath() {
+    const std::wstring& FStreamPagedReader::getFilePath() {
         return _filePath;
     }
 }

@@ -15,7 +15,7 @@ namespace PLP {
         bool initialize(const std::wstring& path, unsigned long long preferredBuffSize = 0);
         const char* read(unsigned long long fileOffset, unsigned long long& size);
         unsigned long long getFileSize();
-        std::wstring getFilePath();
+        const std::wstring& getFilePath();
     private:
         static const unsigned long long MAX_PAGE_SIZE_BYTES = 1073741824; //1 GB
 

@@ -122,7 +122,7 @@ namespace PLP {
         return _fileSize;
     }
 
-    std::wstring MemMappedPagedReader::getFilePath() {
+    const std::wstring& MemMappedPagedReader::getFilePath() {
         return _filePath;
     }
 }

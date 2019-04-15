@@ -29,8 +29,8 @@ namespace PLP {
         unsigned long long getLineNumber() const override;
         unsigned long long getNumResults() const override;
         unsigned long long getResultNumber() const override;
-        void getFilePath(std::wstring& path) const override;
-        void getDataFilePath(std::wstring& path) const override;
+        const wchar_t* getFilePath() const override;
+        const char* getDataFilePath() const override;
         void restart() override;
         void release() override;
 

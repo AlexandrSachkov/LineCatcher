@@ -142,9 +142,8 @@ void MainWindow::openIndex() {
             return;
         }
 
-        std::wstring dataPath;
-        indexReader->getDataFilePath(dataPath);
-        QString qDataPath = QString::fromStdWString(dataPath);
+        std::string dataPath(indexReader->getDataFilePath());
+        QString qDataPath = QString::fromStdString(dataPath);
 
         int numTabs = _fileViewer->count();
         for(int i = 0; i < numTabs; i++){
