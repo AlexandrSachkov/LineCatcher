@@ -39,6 +39,12 @@ namespace PLP {
         return new PLP::Core();
     }
 
+    void release(PLP::CoreI* obj) {
+        if (obj) {
+            delete obj;
+        }
+    }
+
     Core::Core() {}
     Core::~Core() {
         _fileOpThread->stopAndJoin();

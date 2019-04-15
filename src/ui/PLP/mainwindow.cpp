@@ -63,9 +63,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(_fileViewer, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
 
     _plpCore = PLP::createCore();
-    if(_plpCore && !_plpCore->initialize()){
-        bool zz = true;
-        //TODO
+    if(!_plpCore || !_plpCore->initialize()){
+        QMessageBox::critical(this,"PLP","Application failed to initialize and needs to exit.",QMessageBox::Ok);
+        PLP::release(_plpCore);
+        exit(1);
     }
 
     _standardSearchView = new SearchView(_plpCore, false, this);

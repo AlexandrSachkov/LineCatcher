@@ -186,4 +186,5 @@ namespace PLP {
     };
 
     PLP_LIB_API PLP::CoreI* createCore();
+    PLP_LIB_API void release(PLP::CoreI*);
 }
