@@ -17,6 +17,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     _centralWidget = new QWidget();
     setCentralWidget(_centralWidget);
 
+    _plpCore = PLP::createCore();
+    if(!_plpCore || !_plpCore->initialize()){
+        QMessageBox::critical(this,"PLP","Application failed to initialize and needs to exit.",QMessageBox::Ok);
+        PLP::release(_plpCore);
+        exit(1);
+    }
+
     _mainLayout = new QVBoxLayout(_centralWidget);
     _centralWidget->setLayout(_mainLayout);
     _mainLayout->setSpacing(6);
@@ -61,13 +68,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     _mainLayout->addWidget(_fileViewer);
     _fileViewer->setTabsClosable(true);
     connect(_fileViewer, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
-
-    _plpCore = PLP::createCore();
-    if(!_plpCore || !_plpCore->initialize()){
-        QMessageBox::critical(this,"PLP","Application failed to initialize and needs to exit.",QMessageBox::Ok);
-        PLP::release(_plpCore);
-        exit(1);
-    }
 
     _standardSearchView = new SearchView(_plpCore, false, this);
     _standardSearchView->hide();
