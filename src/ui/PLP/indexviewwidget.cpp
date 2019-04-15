@@ -59,22 +59,18 @@ IndexViewWidget::IndexViewWidget(
 
 void IndexViewWidget::resizeEvent(QResizeEvent *e){
     QPlainTextEdit::resizeEvent(e);
-
     calcNumVisibleLines();
-    qDebug() << "Resized" << "\n";
 
     QRect cr = contentsRect();
     _lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
 }
 
 void IndexViewWidget::textChangedImpl() {
-    qDebug() << "Text changed" << "\n";
     calcNumVisibleLines();
 }
 
 void IndexViewWidget::calcNumVisibleLines() {
     _numVisibleLines = this->height() / this->fontMetrics().height();
-    qDebug() << "Num lines: " <<_numVisibleLines <<"\n";
 }
 
 int IndexViewWidget::lineNumberAreaWidth() const
@@ -91,14 +87,10 @@ int IndexViewWidget::lineNumberAreaWidth() const
     return space;
 }
 
-
-
 void IndexViewWidget::updateLineNumberAreaWidth(int /* newBlockCount */)
 {
     setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
 }
-
-
 
 void IndexViewWidget::updateLineNumberArea(const QRect &rect, int dy)
 {

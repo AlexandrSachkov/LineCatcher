@@ -54,16 +54,13 @@ PagedFileViewWidget::PagedFileViewWidget(
 
 void PagedFileViewWidget::resizeEvent(QResizeEvent *e){
     QPlainTextEdit::resizeEvent(e);
-
     calcNumVisibleLines();
-    qDebug() << "Resized" << "\n";
 
     QRect cr = contentsRect();
     _lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
 }
 
 void PagedFileViewWidget::textChangedImpl() {
-    qDebug() << "Text changed" << "\n";
     calcNumVisibleLines();
 }
 
@@ -82,7 +79,6 @@ void PagedFileViewWidget::mouseMoveEvent(QMouseEvent *e) {
 
 void PagedFileViewWidget::calcNumVisibleLines() {
     _numVisibleLines = this->height() / this->fontMetrics().height();
-    qDebug() << "Num lines: " <<_numVisibleLines <<"\n";
 }
 
 int PagedFileViewWidget::lineNumberAreaWidth() const
@@ -98,14 +94,10 @@ int PagedFileViewWidget::lineNumberAreaWidth() const
     return space;
 }
 
-
-
 void PagedFileViewWidget::updateLineNumberAreaWidth(int /* newBlockCount */)
 {
     setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
 }
-
-
 
 void PagedFileViewWidget::updateLineNumberArea(const QRect &rect, int dy)
 {

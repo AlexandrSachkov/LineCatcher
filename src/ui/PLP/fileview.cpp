@@ -58,7 +58,8 @@ FileView::FileView(std::unique_ptr<PLP::FileReaderI> fileReader, QWidget *parent
 }
 
 FileView::~FileView() {
-    bool zz = true;
+    delete _dataView;
+    delete _indexViewer;
 }
 
 void FileView::closeTab(int index) {
