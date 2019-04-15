@@ -120,7 +120,7 @@ void MainWindow::openFile() {
     std::unique_ptr<PLP::FileReaderI> fileReader =
             std::unique_ptr<PLP::FileReaderI>(_plpCore->createFileReader(path.toStdString(), PLP::OPTIMAL_BLOCK_SIZE_BYTES * 2, true));
     if(!fileReader){
-        //TODO add error message
+        QMessageBox::critical(this,"PLP","Failed to open file.",QMessageBox::Ok);
         return;
     }
 
@@ -138,6 +138,7 @@ void MainWindow::openIndex() {
         std::unique_ptr<PLP::ResultSetReaderI> indexReader =
                 std::unique_ptr<PLP::ResultSetReaderI>(_plpCore->createResultSetReader(path.toStdString(), PLP::OPTIMAL_BLOCK_SIZE_BYTES * 2));
         if(!indexReader){
+            QMessageBox::critical(this,"PLP","Failed to open index.",QMessageBox::Ok);
             return;
         }
 
