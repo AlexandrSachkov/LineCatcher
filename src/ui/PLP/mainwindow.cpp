@@ -107,7 +107,7 @@ void MainWindow::openFile() {
         return;
     }
 
-    /*int numTabs = _fileViewer->count();
+    int numTabs = _fileViewer->count();
     for(int i = 0; i < numTabs; i++){
         FileView* fileView = static_cast<FileView*>(_fileViewer->widget(i));
         const QString& existingPath = fileView->getFilePath();
@@ -115,7 +115,7 @@ void MainWindow::openFile() {
             _fileViewer->setCurrentIndex(i);
             return;
         }
-    }*/
+    }
 
     std::unique_ptr<PLP::FileReaderI> fileReader =
             std::unique_ptr<PLP::FileReaderI>(_plpCore->createFileReader(path.toStdString(), PLP::OPTIMAL_BLOCK_SIZE_BYTES * 2, true));
