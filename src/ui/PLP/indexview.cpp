@@ -9,6 +9,9 @@ IndexView::IndexView(
     QWidget* parent
     ) : QWidget(parent) {
 
+    std::wstring path(indexReader->getFilePath());
+    _filePath = QString::fromStdWString(path);
+
     QVBoxLayout* mainLayout = new QVBoxLayout();
     this->setLayout(mainLayout);
     mainLayout->setContentsMargins(0, 0, 0, 0);
@@ -32,4 +35,8 @@ IndexView::IndexView(
 
     IndexViewWidget* indexView = new IndexViewWidget(std::move(indexReader), fileViewer, lineNavBox, this);
     mainLayout->addWidget(indexView);
+}
+
+const QString& IndexView::getFilePath(){
+    return _filePath;
 }

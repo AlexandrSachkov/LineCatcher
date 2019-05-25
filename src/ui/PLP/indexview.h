@@ -20,9 +20,14 @@ public:
         QWidget *parent = nullptr
     );
 
+    const QString& getFilePath();
+
 signals:
 
 public slots:
+
+private:
+    QString _filePath;
 };
 
 #endif // INDEXVIEW_H

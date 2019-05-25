@@ -30,6 +30,11 @@ public slots:
     void showAdvancedSearch();
 
 private:
+    bool openFile(const std::vector<QString>& candidates);
+    bool openFile(const QString& path);
+    void openIndex(const QString& path);
+    QString getDirFromPath(const QString& path);
+
     QWidget* _centralWidget;
     QVBoxLayout* _mainLayout;
     QAction* _openFile;

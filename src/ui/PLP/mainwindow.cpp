@@ -102,19 +102,35 @@ void MainWindow::closeTab(int index) {
     }
 }
 
+bool MainWindow::openFile(const std::vector<QString>& candidates){
+    for(auto& candidate : candidates){
+        if(openFile(candidate)){
+            return true;
+        }
+    }
+    return false;
+}
+
 void MainWindow::openFile() {
     QString path = QFileDialog::getOpenFileName(this, "Select file to open");
     if(path.isEmpty()){
         return;
     }
 
+    if(!openFile(path)){
+        QMessageBox::critical(this,"PLP","Failed to open file.",QMessageBox::Ok);
+    }
+}
+
+bool MainWindow::openFile(const QString& path)
+{
     int numTabs = _fileViewer->count();
     for(int i = 0; i < numTabs; i++){
         FileView* fileView = static_cast<FileView*>(_fileViewer->widget(i));
         const QString& existingPath = fileView->getFilePath();
         if(path.compare(existingPath) == 0){
             _fileViewer->setCurrentIndex(i);
-            return;
+            return true;
         }
     }
 
@@ -125,8 +141,7 @@ void MainWindow::openFile() {
             }
         );
     if(!fileReader){
-        QMessageBox::critical(this,"PLP","Failed to open file.",QMessageBox::Ok);
-        return;
+        return false;
     }
 
     FileView* fileView = new FileView(std::move(fileReader), this);
@@ -135,36 +150,63 @@ void MainWindow::openFile() {
     _fileViewer->setTabToolTip(_fileViewer->count() - 1, path);
     _fileViewer->setCurrentIndex(_fileViewer->count() - 1);
     fileView->show();
+
+    return true;
 }
 
 void MainWindow::openIndex() {
     QStringList paths = QFileDialog::getOpenFileNames(this, tr("Select indices to open")/*, "", tr("Index (*.plpidx)")*/);
     for(QString path : paths){
-        CoreObjPtr<PLP::ResultSetReaderI> indexReader(
-            _plpCore->createResultSetReader(path.toStdString(), PLP::OPTIMAL_BLOCK_SIZE_BYTES * 2),
-            [&](PLP::ResultSetReaderI* p){
-                _plpCore->release(p);
-            }
-        );
-        if(!indexReader){
-            QMessageBox::critical(this,"PLP","Failed to open index.",QMessageBox::Ok);
-            return;
+        openIndex(path);
+    }
+}
+
+QString MainWindow::getDirFromPath(const QString& path){
+    int pos = path.lastIndexOf('/');
+    if(pos == -1){
+        return "";
+    }
+
+    return path.left(pos);
+}
+
+void MainWindow::openIndex(const QString& path){
+    CoreObjPtr<PLP::ResultSetReaderI> indexReader(
+        _plpCore->createResultSetReader(path.toStdString(), PLP::OPTIMAL_BLOCK_SIZE_BYTES * 2),
+        [&](PLP::ResultSetReaderI* p){
+            _plpCore->release(p);
         }
+    );
+    if(!indexReader){
+        QMessageBox::critical(this,"PLP","Failed to open index: " + path,QMessageBox::Ok);
+        return;
+    }
 
-        std::string dataPath(indexReader->getDataFilePath());
-        QString qDataPath = QString::fromStdString(dataPath);
+    QString qDataFileOriginalPath = QString::fromStdString(indexReader->getDataFilePath());
+    QString qDataFileLocalPath = getDirFromPath(path) + path.split('/').last();
+    std::vector<QString> possibleFileLocations({qDataFileOriginalPath, qDataFileLocalPath});
+    if(!openFile(possibleFileLocations)){
+        QMessageBox::critical(this,
+          "PLP","Failed to open file: " + qDataFileOriginalPath + ", " + qDataFileLocalPath,
+          QMessageBox::Ok
+        );
+        return;
+    }
 
+    for(auto& possibleLocation : possibleFileLocations){
         int numTabs = _fileViewer->count();
         for(int i = 0; i < numTabs; i++){
             FileView* fileView = static_cast<FileView*>(_fileViewer->widget(i));
             const QString& existingPath = fileView->getFilePath();
-            if(qDataPath.compare(existingPath) == 0){
+            if(possibleLocation.compare(existingPath) == 0){
                 _fileViewer->setCurrentIndex(i);
                 fileView->openIndex(std::move(indexReader));
                 return;
             }
         }
     }
+
+    QMessageBox::critical(this,"PLP","Failed to open index: " + path,QMessageBox::Ok);
 }
 
 void MainWindow::showScriptView() {

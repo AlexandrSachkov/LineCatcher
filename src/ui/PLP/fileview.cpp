@@ -80,8 +80,18 @@ const QString& FileView::getFilePath() {
 void FileView::openIndex(CoreObjPtr<PLP::ResultSetReaderI> indexReader){
     std::wstring path(indexReader->getFilePath());
     QString qPath = QString::fromStdWString(path);
-    QString fileName = qPath.split('/').last();
 
+    int numTabs = _indexViewer->count();
+    for(int i = 0; i < numTabs; i++){
+        IndexView* indexView = static_cast<IndexView*>(_indexViewer->widget(i));
+        const QString& existingPath = indexView->getFilePath();
+        if(qPath.compare(existingPath) == 0){
+            _indexViewer->setCurrentIndex(i);
+            return;
+        }
+    }
+
+    QString fileName = qPath.split('/').last();
     IndexView* indexView = new IndexView(std::move(indexReader), _dataView, this);
     _indexViewer->addTab(indexView, fileName);
     _indexViewer->setTabToolTip(_indexViewer->count() - 1, qPath);
