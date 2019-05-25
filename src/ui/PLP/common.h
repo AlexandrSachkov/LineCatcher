@@ -17,4 +17,15 @@ static const QString SEARCH_GROUP_STYLESHEET =
         "* {font-size: 14px;}"
         ;
 
+namespace Common {
+    static QString getDirFromPath(const QString& path){
+        int pos = path.lastIndexOf('/');
+        if(pos == -1){
+            return "";
+        }
+
+        return path.left(pos);
+    }
+}
+
 #endif // COMMON_H

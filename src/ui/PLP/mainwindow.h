@@ -20,6 +20,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    void openIndex(const QString& path);
 
 public slots:
     void closeTab(int index);
@@ -32,8 +33,6 @@ public slots:
 private:
     bool openFile(const std::vector<QString>& candidates);
     bool openFile(const QString& path);
-    void openIndex(const QString& path);
-    QString getDirFromPath(const QString& path);
 
     QWidget* _centralWidget;
     QVBoxLayout* _mainLayout;

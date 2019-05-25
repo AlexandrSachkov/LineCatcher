@@ -25,12 +25,15 @@ public:
 signals:
     void progressUpdate(int percent, unsigned long long numResults);
     void searchError();
+    void searchCompleted();
 private slots:
     void openFile();
     void openIndex();
+    void openDestinationDir();
     void startSearch();
     void onProgressUpdate(int percent, unsigned long long numResults);
     void onSearchError();
+    void onSearchCompletion();
 private:
     void startRegularSearch(
             PLP::FileReaderI* fileReader,
@@ -59,6 +62,7 @@ private:
 
     QLineEdit* _filePath;
     QLineEdit* _indexPath;
+    QLineEdit* _destDir;
     QLineEdit* _destName;
     ULLSpinBox* _fromLineBox;
     ULLSpinBox* _toLineBox;

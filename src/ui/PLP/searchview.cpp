@@ -1,5 +1,6 @@
 #include "searchview.h"
 #include "common.h"
+#include "mainwindow.h"
 
 #include <QBoxLayout>
 #include <QFormLayout>
@@ -47,6 +48,7 @@ SearchView::SearchView(PLP::CoreI* plpCore, bool multiline, QWidget *parent) : Q
 
     connect(this, SIGNAL(progressUpdate(int, unsigned long long)), this, SLOT(onProgressUpdate(int, unsigned long long)));
     connect(this, SIGNAL(searchError(void)), this, SLOT(onSearchError(void)));
+    connect(this, SIGNAL(searchCompleted(void)), this, SLOT(onSearchCompletion(void)));
 
     QFont font = this->font();
     font.setPointSize(12);
@@ -93,6 +95,17 @@ void SearchView::createDestinationContent(QLayout* mainLayout){
     //Open file
     QFormLayout* destLayout = new QFormLayout();
     destGroup->setLayout(destLayout);
+
+    QHBoxLayout* openDirLayout = new QHBoxLayout();
+    _destDir = new QLineEdit(this);
+    _destDir->setReadOnly(true);
+    QPushButton* openDir = new QPushButton("Open", this);
+    connect(openDir, SIGNAL(clicked(void)), this, SLOT(openDestinationDir(void)));
+    openDir->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+
+    openDirLayout->addWidget(_destDir);
+    openDirLayout->addWidget(openDir);
+    destLayout->addRow("Directory: ", openDirLayout);
 
     _destName = new QLineEdit(this);
     destLayout->addRow("File name: ", _destName);
@@ -205,7 +218,8 @@ void SearchView::createMultilineSearchOptionContent(QLayout* mainLayout){
 void SearchView::startSearch() {
     QString dataPath = _filePath->text();
     QString indexPath = _indexPath->text();
-    QString destPath = _destName->text();
+    QString destDir = _destDir->text();
+    QString destName = _destName->text();
     unsigned long long startLine = _fromLineBox->value();
     unsigned long long endLine = _toLineBox->value();
     unsigned long long maxNumResults = _numResultsBox->value();
@@ -216,7 +230,12 @@ void SearchView::startSearch() {
         return;
     }
 
-    if(destPath.simplified().isEmpty()){
+    if(destDir.simplified().isEmpty()){
+        QMessageBox::information(this,"PLP","Save to file directory cannot be empty",QMessageBox::Ok);
+        return;
+    }
+
+    if(destName.simplified().isEmpty()){
         QMessageBox::information(this,"PLP","Save to file name cannot be empty",QMessageBox::Ok);
         return;
     }
@@ -242,6 +261,8 @@ void SearchView::startSearch() {
             return;
         }
     }
+
+    QString destPath = destDir + "/" + destName;
     PLP::ResultSetWriterI* indexWriter = _plpCore->createResultSetWriter(destPath.toStdString(), 0, fileReader, true);
     if(!indexWriter){
         QMessageBox::information(this,"PLP","Index writer failed to initialize",QMessageBox::Ok);
@@ -315,6 +336,8 @@ void SearchView::startRegularSearch(
        core->release(indexReader);
        core->release(indexWriter);
        delete comparator;
+
+       emit searchCompleted();
     });
 }
 
@@ -333,10 +356,10 @@ void SearchView::startMultilineSearch(
         if(_lineEnabledCheckBoxes[i]->isChecked()){
             if(_searchPatternBoxes[i]->text().isEmpty()){
                 QMessageBox::information(
-                            this,
-                            "PLP",
-                            "Line #" + QString::number(_lineOffsetBoxes[i]->value()) + " cannot be empty",
-                            QMessageBox::Ok
+                    this,
+                    "PLP",
+                    "Line #" + QString::number(_lineOffsetBoxes[i]->value()) + " cannot be empty",
+                    QMessageBox::Ok
                 );
                 error = true;
                 break;
@@ -344,16 +367,16 @@ void SearchView::startMultilineSearch(
 
             if(_regexCheckBoxes[i]->isChecked()){
                 PLP::TextComparator* comparator = new PLP::MatchRegex(
-                            _searchPatternBoxes[i]->text().toStdString(),
-                            _ignoreCaseCheckBoxes[i]->isChecked()
-                            );
+                    _searchPatternBoxes[i]->text().toStdString(),
+                    _ignoreCaseCheckBoxes[i]->isChecked()
+                );
                 lineComparators.emplace(_lineOffsetBoxes[i]->value(), comparator);
             }else{
                 PLP::TextComparator* comparator = new PLP::MatchString(
-                            _searchPatternBoxes[i]->text().toStdString(),
-                            false,
-                            _ignoreCaseCheckBoxes[i]->isChecked()
-                            );
+                    _searchPatternBoxes[i]->text().toStdString(),
+                    false,
+                    _ignoreCaseCheckBoxes[i]->isChecked()
+                );
                 lineComparators.emplace(_lineOffsetBoxes[i]->value(), comparator);
             }
         }
@@ -377,11 +400,11 @@ void SearchView::startMultilineSearch(
     for(auto& pair : lineComparators){
         if(!pair.second->initialize()){
             QMessageBox::information(
-                        this,
-                        "PLP",
-                        "Failed to initialize comparator on Line #" + QString::number(pair.first),
-                        QMessageBox::Ok
-                        );
+                this,
+                "PLP",
+                "Failed to initialize comparator on Line #" + QString::number(pair.first),
+                QMessageBox::Ok
+            );
             error = true;
         }
     }
@@ -418,6 +441,8 @@ void SearchView::startMultilineSearch(
        for(auto& pair : lineComparators){
            delete pair.second;
        }
+
+       emit searchCompleted();
     });
 }
 
@@ -428,6 +453,9 @@ void SearchView::openFile() {
     }
 
     _filePath->setText(path);
+    if(_destDir->text().isEmpty()){
+        _destDir->setText(Common::getDirFromPath(path));
+    }
 }
 
 void SearchView::openIndex(){
@@ -437,6 +465,16 @@ void SearchView::openIndex(){
     }
 
     _indexPath->setText(path);
+}
+
+void SearchView::openDestinationDir(){
+    QFileDialog::getExistingDirectory(this, tr("Select directory"));
+    QString path = QFileDialog::getExistingDirectory(this, tr("Select directory"));
+    if(path.isEmpty()){
+        return;
+    }
+
+    _destDir->setText(path);
 }
 
 void SearchView::onProgressUpdate(int percent, unsigned long long numResults) {
@@ -449,4 +487,13 @@ void SearchView::onSearchError() {
     _progressDialog->hide();
 
     QMessageBox::critical(this,"PLP","Search failed",QMessageBox::Ok);
+}
+
+void SearchView::onSearchCompletion(){
+    _progressDialog->reset();
+    _progressDialog->hide();
+
+    QString indexPath = _destDir->text() + "/" + _destName->text();
+    static_cast<MainWindow*>(parent())->openIndex(indexPath);
+    this->hide();
 }

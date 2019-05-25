@@ -2,6 +2,7 @@
 
 #include "fileview.h"
 #include "coreobjptr.h"
+#include "common.h"
 #include <QTabBar>
 #include <QDebug>
 #include <QFileDialog>
@@ -161,15 +162,6 @@ void MainWindow::openIndex() {
     }
 }
 
-QString MainWindow::getDirFromPath(const QString& path){
-    int pos = path.lastIndexOf('/');
-    if(pos == -1){
-        return "";
-    }
-
-    return path.left(pos);
-}
-
 void MainWindow::openIndex(const QString& path){
     CoreObjPtr<PLP::ResultSetReaderI> indexReader(
         _plpCore->createResultSetReader(path.toStdString(), PLP::OPTIMAL_BLOCK_SIZE_BYTES * 2),
@@ -183,7 +175,7 @@ void MainWindow::openIndex(const QString& path){
     }
 
     QString qDataFileOriginalPath = QString::fromStdString(indexReader->getDataFilePath());
-    QString qDataFileLocalPath = getDirFromPath(path) + path.split('/').last();
+    QString qDataFileLocalPath = Common::getDirFromPath(path) + path.split('/').last();
     std::vector<QString> possibleFileLocations({qDataFileOriginalPath, qDataFileLocalPath});
     if(!openFile(possibleFileLocations)){
         QMessageBox::critical(this,
