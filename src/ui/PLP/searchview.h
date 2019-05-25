@@ -24,16 +24,15 @@ public:
     void createMultilineSearchOptionContent(QLayout* mainLayout);
 signals:
     void progressUpdate(int percent, unsigned long long numResults);
-    void searchError();
-    void searchCompleted();
+    void searchCompleted(bool success);
 private slots:
     void openFile();
     void openIndex();
     void openDestinationDir();
     void startSearch();
     void onProgressUpdate(int percent, unsigned long long numResults);
-    void onSearchError();
-    void onSearchCompletion();
+    void onSearchCancelled();
+    void onSearchCompletion(bool success);
 private:
     void startRegularSearch(
             PLP::FileReaderI* fileReader,

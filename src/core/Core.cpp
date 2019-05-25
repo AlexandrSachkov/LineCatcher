@@ -262,6 +262,8 @@ namespace PLP {
         const std::function<bool(unsigned long long lineNum, unsigned long long fileOffset, const char* line, unsigned int length)> action,
         const std::function<void(int percent)>* progressUpdate
     ) {
+        _cancelled = false;
+
         if (fileReader == nullptr) {
             Logger::send(ERR, "File reader and index writer cannot be null");
             return false;
@@ -312,6 +314,10 @@ namespace PLP {
                 progressPercent += percentPerProgressUpdate;
                 (*progressUpdate)(progressPercent);
             }
+
+            if (numProcessedLines % 10000000 == 0 && _cancelled) {
+                return false;
+            }
         }
 
         if (result == LineReaderResult::ERROR) {
@@ -336,6 +342,8 @@ namespace PLP {
         const std::function<bool(unsigned long long lineNum, unsigned long long fileOffset, const char* line, unsigned int length)> action,
         const std::function<void(int percent)>* progressUpdate
     ) {
+        _cancelled = false;
+
         if (fileReader == nullptr) {
             Logger::send(ERR, "File reader and index writer cannot be null");
             return false;
@@ -407,6 +415,10 @@ namespace PLP {
             if (numProcessedLines % numLinesTillProgressUpdate == 0) {
                 progressPercent += percentPerProgressUpdate;
                 (*progressUpdate)(progressPercent);
+            }
+
+            if (numProcessedLines % 10000000 == 0 && _cancelled) {
+                return false;
             }
         }
 

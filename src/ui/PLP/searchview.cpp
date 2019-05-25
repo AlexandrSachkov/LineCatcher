@@ -47,8 +47,7 @@ SearchView::SearchView(PLP::CoreI* plpCore, bool multiline, QWidget *parent) : Q
     mainLayout->addWidget(runSearch);
 
     connect(this, SIGNAL(progressUpdate(int, unsigned long long)), this, SLOT(onProgressUpdate(int, unsigned long long)));
-    connect(this, SIGNAL(searchError(void)), this, SLOT(onSearchError(void)));
-    connect(this, SIGNAL(searchCompleted(void)), this, SLOT(onSearchCompletion(void)));
+    connect(this, SIGNAL(searchCompleted(bool)), this, SLOT(onSearchCompletion(bool)));
 
     QFont font = this->font();
     font.setPointSize(12);
@@ -322,22 +321,22 @@ void SearchView::startRegularSearch(
         _progressDialog->setWindowTitle("Searching...");
         _progressDialog->setWindowModality(Qt::WindowModal);
         _progressDialog->setMinimumWidth(400);
+        connect(_progressDialog, SIGNAL(canceled(void)), this, SLOT(onSearchCancelled(void)));
     }
     _progressDialog->show();
 
     PLP::CoreI* core = _plpCore;
     QtConcurrent::run([this, core, fileReader, indexReader, indexWriter,
                       startLine, endLine, maxNumResults, comparator, update](){
-       if(!core->search(fileReader, indexReader, indexWriter,
-                    startLine, endLine, maxNumResults,comparator,&update)){
-            emit searchError();
-       }
+       bool result = core->search(fileReader, indexReader, indexWriter,
+                    startLine, endLine, maxNumResults,comparator,&update);
+
        core->release(fileReader);
        core->release(indexReader);
        core->release(indexWriter);
        delete comparator;
 
-       emit searchCompleted();
+       emit searchCompleted(result);
     });
 }
 
@@ -423,16 +422,15 @@ void SearchView::startMultilineSearch(
         _progressDialog->setWindowTitle("Searching...");
         _progressDialog->setWindowModality(Qt::WindowModal);
         _progressDialog->setMinimumWidth(400);
+        connect(_progressDialog, SIGNAL(canceled(void)), this, SLOT(onSearchCancelled(void)));
     }
     _progressDialog->show();
 
     PLP::CoreI* core = _plpCore;
     QtConcurrent::run([this, core, fileReader, indexReader, indexWriter,
                       startLine, endLine, maxNumResults, lineComparators, update, cleanup](){
-       if(!core->searchMultiline(fileReader, indexReader, indexWriter,
-                    startLine, endLine, maxNumResults,lineComparators,&update)){
-            emit searchError();
-       }
+       bool result = core->searchMultiline(fileReader, indexReader, indexWriter,
+                    startLine, endLine, maxNumResults,lineComparators,&update);
 
        _plpCore->release(fileReader);
        _plpCore->release(indexReader);
@@ -442,7 +440,7 @@ void SearchView::startMultilineSearch(
            delete pair.second;
        }
 
-       emit searchCompleted();
+       emit searchCompleted(result);
     });
 }
 
@@ -481,18 +479,24 @@ void SearchView::onProgressUpdate(int percent, unsigned long long numResults) {
     _progressDialog->setLabelText("Results: " + QString::number(numResults));
 }
 
-void SearchView::onSearchError() {
+void SearchView::onSearchCompletion(bool success){
     _progressDialog->reset();
     _progressDialog->hide();
 
-    QMessageBox::critical(this,"PLP","Search failed",QMessageBox::Ok);
-}
+    if(_plpCore->isCancelled()){
+        return;
+    }
 
-void SearchView::onSearchCompletion(){
-    _progressDialog->reset();
-    _progressDialog->hide();
+    if(!success){
+        QMessageBox::critical(this,"PLP","Search failed",QMessageBox::Ok);
+        return;
+    }
 
     QString indexPath = _destDir->text() + "/" + _destName->text();
     static_cast<MainWindow*>(parent())->openIndex(indexPath);
     this->hide();
+}
+
+void SearchView::onSearchCancelled(){
+    _plpCore->cancelOperation();
 }

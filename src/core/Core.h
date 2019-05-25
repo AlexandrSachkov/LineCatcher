@@ -35,7 +35,7 @@ namespace PLP {
         bool initialize();
         bool runScript(const std::wstring* scriptLua) override;
         void cancelOperation() override;
-        bool isCancelled();
+        bool isCancelled() override;
         
         bool attachLogOutput(const char* name, const std::function<void(int, const char*)>* func);
         void detachLogOutput(const char* name);
