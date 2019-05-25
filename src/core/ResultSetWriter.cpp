@@ -73,6 +73,11 @@ namespace PLP {
     }
 
     bool ResultSetWriter::appendCurrLine(unsigned long long lineNumber, unsigned long long fileOffset) {
+        if (lineNumber == _prevLineNum && _resultCount > 0) {
+            Logger::send(ERR, "Indexes must be consecutive");
+            return false;
+        }
+
         if (!_writer->write(reinterpret_cast<const char*>(&lineNumber), sizeof(unsigned long long))) {
             return false;
         }
@@ -81,6 +86,7 @@ namespace PLP {
         }
 
         _resultCount++;
+        _prevLineNum = lineNumber;
         return true;
     }
 
