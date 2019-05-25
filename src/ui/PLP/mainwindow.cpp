@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 
 #include "fileview.h"
+#include "coreobjptr.h"
 #include <QTabBar>
 #include <QDebug>
 #include <QFileDialog>
@@ -117,8 +118,12 @@ void MainWindow::openFile() {
         }
     }
 
-    std::unique_ptr<PLP::FileReaderI> fileReader =
-            std::unique_ptr<PLP::FileReaderI>(_plpCore->createFileReader(path.toStdString(), PLP::OPTIMAL_BLOCK_SIZE_BYTES * 2, true));
+    CoreObjPtr<PLP::FileReaderI> fileReader(
+            _plpCore->createFileReader(path.toStdString(), PLP::OPTIMAL_BLOCK_SIZE_BYTES * 2, true),
+            [&](PLP::FileReaderI* p){
+                _plpCore->release(p);
+            }
+        );
     if(!fileReader){
         QMessageBox::critical(this,"PLP","Failed to open file.",QMessageBox::Ok);
         return;
@@ -135,8 +140,12 @@ void MainWindow::openFile() {
 void MainWindow::openIndex() {
     QStringList paths = QFileDialog::getOpenFileNames(this, tr("Select indices to open")/*, "", tr("Index (*.plpidx)")*/);
     for(QString path : paths){
-        std::unique_ptr<PLP::ResultSetReaderI> indexReader =
-                std::unique_ptr<PLP::ResultSetReaderI>(_plpCore->createResultSetReader(path.toStdString(), PLP::OPTIMAL_BLOCK_SIZE_BYTES * 2));
+        CoreObjPtr<PLP::ResultSetReaderI> indexReader(
+            _plpCore->createResultSetReader(path.toStdString(), PLP::OPTIMAL_BLOCK_SIZE_BYTES * 2),
+            [&](PLP::ResultSetReaderI* p){
+                _plpCore->release(p);
+            }
+        );
         if(!indexReader){
             QMessageBox::critical(this,"PLP","Failed to open index.",QMessageBox::Ok);
             return;

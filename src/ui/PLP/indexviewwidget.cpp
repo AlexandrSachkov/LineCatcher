@@ -8,7 +8,7 @@
 
 
 IndexViewWidget::IndexViewWidget(
-        std::unique_ptr<PLP::ResultSetReaderI> indexReader,
+        CoreObjPtr<PLP::ResultSetReaderI> indexReader,
         PagedFileViewWidget* fileViewer,
         ULLSpinBox* lineNavBox,
         QWidget* parent)

@@ -2,6 +2,7 @@
 #define PAGEDFILEVIEW_H
 
 #include "ullspinbox.h"
+#include "coreobjptr.h"
 
 #include <QPlainTextEdit>
 #include <QScrollBar>
@@ -17,9 +18,9 @@ class PagedFileViewWidget : public QPlainTextEdit
 {
     Q_OBJECT
 public:
-    PagedFileViewWidget(std::unique_ptr<PLP::FileReaderI> fileReader, ULLSpinBox* lineNavBox, QWidget *parent = nullptr);
+    PagedFileViewWidget(CoreObjPtr<PLP::FileReaderI> fileReader, ULLSpinBox* lineNavBox, QWidget *parent = nullptr);
     bool getLineFromIndex(
-        std::unique_ptr<PLP::ResultSetReaderI>& indexReader,
+        CoreObjPtr<PLP::ResultSetReaderI>& indexReader,
         QString& data
     );
 
@@ -52,7 +53,7 @@ private:
     unsigned long long _startLineNum = 0;
     unsigned long long _endLineNum = 0;
 
-    std::unique_ptr<PLP::FileReaderI> _fileReader;
+    CoreObjPtr<PLP::FileReaderI> _fileReader;
     unsigned int _numVisibleLines;
 
     QWidget* _lineNumberArea;

@@ -9,6 +9,7 @@
 #include <QTabWidget>
 #include <QLabel>
 
+#include "coreobjptr.h"
 #include "FileReaderI.h"
 #include "ResultSetReaderI.h"
 
@@ -18,11 +19,11 @@ class FileView : public QWidget
 {
     Q_OBJECT
 public:
-    explicit FileView(std::unique_ptr<PLP::FileReaderI> fileReader, QWidget *parent = nullptr);
+    explicit FileView(CoreObjPtr<PLP::FileReaderI> fileReader, QWidget *parent = nullptr);
     ~FileView();
 
     const QString& getFilePath();
-    void openIndex(std::unique_ptr<PLP::ResultSetReaderI> indexReader);
+    void openIndex(CoreObjPtr<PLP::ResultSetReaderI> indexReader);
 signals:
 
 private slots:

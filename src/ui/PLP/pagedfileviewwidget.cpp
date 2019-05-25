@@ -10,7 +10,7 @@
 #include "ReturnType.h"
 
 PagedFileViewWidget::PagedFileViewWidget(
-        std::unique_ptr<PLP::FileReaderI> fileReader,
+        CoreObjPtr<PLP::FileReaderI> fileReader,
         ULLSpinBox* lineNavBox,
         QWidget *parent) : QPlainTextEdit (parent) {
 
@@ -251,7 +251,7 @@ void PagedFileViewWidget::readBlockIfRequired() {
 }
 
 bool PagedFileViewWidget::getLineFromIndex(
-        std::unique_ptr<PLP::ResultSetReaderI>& indexReader,
+        CoreObjPtr<PLP::ResultSetReaderI>& indexReader,
         QString& data
 ) {
     char* lineStart = nullptr;

@@ -3,6 +3,7 @@
 
 #include <QWidget>
 
+#include "coreobjptr.h"
 #include "pagedfileviewwidget.h"
 #include "ullspinbox.h"
 #include "ResultSetReaderI.h"
@@ -14,7 +15,7 @@ class IndexView : public QWidget
     Q_OBJECT
 public:
     explicit IndexView(
-        std::unique_ptr<PLP::ResultSetReaderI> indexReader,
+        CoreObjPtr<PLP::ResultSetReaderI> indexReader,
         PagedFileViewWidget* fileViewer,
         QWidget *parent = nullptr
     );

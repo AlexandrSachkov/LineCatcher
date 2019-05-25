@@ -50,7 +50,8 @@ HEADERS += \
     scripteditor.h \
     luasyntaxhighlighter.h \
     common.h \
-    searchview.h
+    searchview.h \
+    coreobjptr.h
 
 FORMS +=
 

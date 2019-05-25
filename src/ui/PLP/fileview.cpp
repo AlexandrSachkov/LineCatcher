@@ -11,7 +11,7 @@
 #include <QApplication>
 #include <QDesktopWidget>
 
-FileView::FileView(std::unique_ptr<PLP::FileReaderI> fileReader, QWidget *parent) : QWidget(parent)
+FileView::FileView(CoreObjPtr<PLP::FileReaderI> fileReader, QWidget *parent) : QWidget(parent)
 {
     QVBoxLayout* mainLayout = new QVBoxLayout();
     this->setLayout(mainLayout);
@@ -77,7 +77,7 @@ const QString& FileView::getFilePath() {
     return _filePath;
 }
 
-void FileView::openIndex(std::unique_ptr<PLP::ResultSetReaderI> indexReader){
+void FileView::openIndex(CoreObjPtr<PLP::ResultSetReaderI> indexReader){
     std::wstring path(indexReader->getFilePath());
     QString qPath = QString::fromStdWString(path);
     QString fileName = qPath.split('/').last();

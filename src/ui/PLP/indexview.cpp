@@ -4,7 +4,7 @@
 #include <QLabel>
 
 IndexView::IndexView(
-    std::unique_ptr<PLP::ResultSetReaderI> indexReader,
+    CoreObjPtr<PLP::ResultSetReaderI> indexReader,
     PagedFileViewWidget* fileViewer,
     QWidget* parent
     ) : QWidget(parent) {

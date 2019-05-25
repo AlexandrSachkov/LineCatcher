@@ -6,6 +6,7 @@
 #include <QPaintEvent>
 #include <QMouseEvent>
 
+#include "coreobjptr.h"
 #include "pagedfileviewwidget.h"
 #include "ullspinbox.h"
 #include "ResultSetReaderI.h"
@@ -17,7 +18,7 @@ class IndexViewWidget : public QPlainTextEdit
     Q_OBJECT
 public:
     IndexViewWidget(
-        std::unique_ptr<PLP::ResultSetReaderI> indexReader,
+        CoreObjPtr<PLP::ResultSetReaderI> indexReader,
         PagedFileViewWidget* fileViewer,
         ULLSpinBox* lineNavBox,
         QWidget* parent = nullptr
@@ -45,7 +46,7 @@ private:
     static const unsigned int MAX_NUM_BLOCKS = 1000;
     static const unsigned int NUM_LINES_PER_READ = 250;
 
-    std::unique_ptr<PLP::ResultSetReaderI> _indexReader;
+    CoreObjPtr<PLP::ResultSetReaderI> _indexReader;
     PagedFileViewWidget* _fileViewer;
     QWidget* _lineNumberArea;
     ULLSpinBox* _lineNavBox;
