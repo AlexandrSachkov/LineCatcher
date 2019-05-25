@@ -30,12 +30,19 @@ namespace PLP {
         char*& lineEnding
     );
 
+    static bool isTrimmableChar(char c) {
+        if (c == ' ' || c == '\t' || c == '\r' || c == '\n') {
+            return true;
+        }
+        return false;
+    }
+
     static void stringTrim(const char* str, unsigned int size, char*& strStartOut, unsigned int& sizeOut) {
         bool initialSeq = true;
         unsigned int numSpaces = 0;
         unsigned int startPos = 0;
         for (unsigned int i = 0; i < size; i++) {
-            if (str[i] == ' ') {
+            if (isTrimmableChar(str[i])) {
                 numSpaces++;
                 continue;
             }
@@ -62,7 +69,7 @@ namespace PLP {
         unsigned int numCharsInWord = 0;
         unsigned int wordStartPos = 0;
         for (unsigned int i = 0; i < size; i++) {
-            if (str[i] != ' ') {
+            if (!isTrimmableChar(str[i])) {
                 if (numCharsInWord == 0) {
                     wordStartPos = i;
                 }
