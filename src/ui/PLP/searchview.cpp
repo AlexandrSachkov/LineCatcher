@@ -468,7 +468,6 @@ void SearchView::openIndex(){
 }
 
 void SearchView::openDestinationDir(){
-    QFileDialog::getExistingDirectory(this, tr("Select directory"));
     QString path = QFileDialog::getExistingDirectory(this, tr("Select directory"));
     if(path.isEmpty()){
         return;
