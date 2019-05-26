@@ -17,9 +17,33 @@ namespace PLP {
         return converter.to_bytes(wstr);
     }
 
-    std::wstring getFileDirectory(const std::wstring& path);
-    std::wstring getFileName(const std::wstring& path);
-    std::wstring getFileNameNoExt(const std::wstring& path);
+    static std::wstring getFileDirectory(const std::wstring& path) {
+        size_t fileNamePos = path.find_last_of(L"/\\");
+        if (fileNamePos == std::wstring::npos) { //relative path, same directory
+            return L"";
+        } else {
+            return path.substr(0, fileNamePos + 1);
+        }
+    }
+
+    static std::wstring getFileName(const std::wstring& path) {
+        size_t fileNamePos = path.find_last_of(L"/\\");
+        if (fileNamePos == std::wstring::npos) { //relative path, same directory
+            return path;
+        } else {
+            return path.substr(fileNamePos + 1);
+        }
+    }
+
+    static std::wstring getFileNameNoExt(const std::wstring& path) {
+        std::wstring fileName = getFileName(path);
+        size_t fileExtPos = fileName.find_last_of(L".");
+        if (fileExtPos == std::wstring::npos) { //no file extension
+            return fileName;
+        } else {
+            return fileName.substr(0, fileExtPos);
+        }
+    }
 
     const char* findLastLineEnding(const char* buff, unsigned long long buffSize, const char* currPos);
     LineReaderResult findNextLineEnding(
@@ -86,4 +110,7 @@ namespace PLP {
     const unsigned long long OPTIMAL_BLOCK_SIZE_BYTES = 64 * 1024; //64 KBytes 
 
     static const unsigned int RESULT_SET_VERSION = 1; // increment if format changes
+
+    static const char* FILE_RANDOM_ACCESS_INDEX_EXTENSION = ".plpfraidx";
+    static const char* FILE_INDEX_EXTENSION = ".plpidx";
 }

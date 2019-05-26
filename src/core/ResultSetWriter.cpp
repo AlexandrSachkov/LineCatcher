@@ -13,19 +13,23 @@ namespace PLP {
     }
 
     bool ResultSetWriter::initialize(
-        std::wstring& path,
-        std::wstring& dataFilePath,
+        const std::wstring& path,
+        const std::wstring& dataFilePath,
         unsigned long long preferredBufferSizeBytes,
         bool overwriteIfExists,
         TaskRunner& asyncTaskRunner
     ) {
         release();
-        _path = path;
+
+        std::wstring directory = getFileDirectory(path);
+        std::wstring fileNameNoExt = getFileNameNoExt(path);
+        std::wstring indexPath = directory + fileNameNoExt + string_to_wstring(FILE_INDEX_EXTENSION);
+
         _dataFilePath = wstring_to_string(dataFilePath);
 
         FStreamPagedWriter* writer = new FStreamPagedWriter();
         _writer.reset(writer);
-        if (!writer->initialize(path, preferredBufferSizeBytes, overwriteIfExists, asyncTaskRunner)) {
+        if (!writer->initialize(indexPath, preferredBufferSizeBytes, overwriteIfExists, asyncTaskRunner)) {
             return false;
         }
 
@@ -54,7 +58,6 @@ namespace PLP {
             flush();
         }
         _writer = nullptr;
-        _path = L"";
         _dataFilePath = "";
         _prevLineNum = 0;
         _resultCount = 0;

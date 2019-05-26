@@ -17,8 +17,8 @@ namespace PLP {
         ~ResultSetWriter();
 
         bool initialize(
-            std::wstring& path,
-            std::wstring& dataFilePath,
+            const std::wstring& path,
+            const std::wstring& dataFilePath,
             unsigned long long preferredBufferSizeBytes,
             bool overwriteIfExists,
             TaskRunner& asyncTaskRunner
@@ -40,7 +40,6 @@ namespace PLP {
         bool updateResultCount();
 
         std::unique_ptr<PagedWriter> _writer = nullptr;
-        std::wstring _path;
         std::string _dataFilePath;
         
         unsigned long long _prevLineNum = 0;

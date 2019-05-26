@@ -185,7 +185,9 @@ bool MainWindow::openFile(const QString& path)
 }
 
 void MainWindow::openIndex() {
-    QStringList paths = QFileDialog::getOpenFileNames(this, tr("Select indices to open")/*, "", tr("Index (*.plpidx)")*/);
+    std::string fileFilter = "Index (*" + std::string(PLP::FILE_INDEX_EXTENSION) +")";
+    QStringList paths = QFileDialog::getOpenFileNames(this, tr("Select indices to open"), "",
+        tr(fileFilter.c_str()));
     for(QString path : paths){
         openIndex(path);
     }

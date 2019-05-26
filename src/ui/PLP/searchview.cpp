@@ -16,6 +16,7 @@
 #include <QSpinBox>
 #include <QGridLayout>
 
+#include "Utils.h"
 #include <unordered_map>
 
 SearchView::SearchView(PLP::CoreI* plpCore, bool multiline, QWidget *parent) : QWidget(parent)
@@ -492,7 +493,9 @@ void SearchView::onSearchCompletion(bool success){
         return;
     }
 
-    QString indexPath = _destDir->text() + "/" + _destName->text();
+    std::wstring fileNameWithExt =
+            PLP::getFileNameNoExt(_destName->text().toStdWString()) + PLP::string_to_wstring(PLP::FILE_INDEX_EXTENSION);
+    QString indexPath = _destDir->text() + "/" + QString::fromStdWString(fileNameWithExt);
     static_cast<MainWindow*>(parent())->openIndex(indexPath);
     this->hide();
 }

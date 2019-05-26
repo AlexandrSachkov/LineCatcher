@@ -39,7 +39,7 @@ namespace PLP {
     std::wstring IndexedLineReader::getIndexFilePath(const std::wstring& dataFilePath) {
         std::wstring directory = getFileDirectory(dataFilePath);
         std::wstring fileNameNoExt = getFileNameNoExt(dataFilePath);
-        return directory + fileNameNoExt + L".plpidx";
+        return directory + fileNameNoExt + string_to_wstring(FILE_RANDOM_ACCESS_INDEX_EXTENSION);
     }
 
     bool IndexedLineReader::loadIndex(const std::wstring& indexPath) {
