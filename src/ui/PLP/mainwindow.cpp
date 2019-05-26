@@ -84,8 +84,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
 MainWindow::~MainWindow() {
     delete _fileViewer;
-    delete _resultSetViewer;
-
     delete _standardSearchView;
     delete _advancedSearchView;
     delete _scriptView;

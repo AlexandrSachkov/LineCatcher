@@ -43,7 +43,6 @@ private:
     QAction* _exit;
 
     QTabWidget* _fileViewer;
-    QTabWidget* _resultSetViewer;
 
     SearchView* _standardSearchView;
     SearchView* _advancedSearchView;
