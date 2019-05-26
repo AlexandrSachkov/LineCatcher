@@ -117,7 +117,7 @@ void MainWindow::openFile() {
         return;
     }
 
-    if(!openFile(path)){
+    if(!openFile(path) && !_plpCore->isCancelled()){
         QMessageBox::critical(this,"PLP","Failed to open file: " + path,QMessageBox::Ok);
     }
 }
