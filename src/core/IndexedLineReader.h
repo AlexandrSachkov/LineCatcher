@@ -3,7 +3,7 @@
 #include "PagedReader.h"
 #include "ReturnType.h"
 
-#include <unordered_map>
+#include <vector>
 #include <atomic>
 #include <functional>
 
@@ -45,8 +45,9 @@ namespace PLP {
 
         static const unsigned int INDEX_VERSION = 1; // increment if format changes
         static const unsigned int LINE_INDEX_FREQUENCY = 1000;
+        static const unsigned long long ESTIMATED_NUM_CHARS_PER_LINE = 100;
 
-        std::unordered_map<unsigned long long, unsigned long long> _fileIndex;
+        std::vector<unsigned long long> _fileIndex;
         IndexHeader _indexHeader;
     };
 }

@@ -3,7 +3,7 @@
 #include "Core.h"
 #include "Logger.h"
 
-#include "cereal/types/unordered_map.hpp"
+#include "cereal/types/vector.hpp"
 #include "cereal/types/string.hpp"
 #include "cereal/archives/binary.hpp"
 
@@ -49,15 +49,21 @@ namespace PLP {
             return false;
         }
 
-        cereal::BinaryInputArchive iarchive(fs);
+        try {
+            cereal::BinaryInputArchive iarchive(fs);
 
-        unsigned int indexVersion = 0;
-        iarchive(indexVersion);
-        if (indexVersion != INDEX_VERSION) { // might have a different format. TODO: can we handle legacy formats?
+            unsigned int indexVersion = 0;
+            iarchive(indexVersion);
+            if (indexVersion != INDEX_VERSION) { // might have a different format. TODO: can we handle legacy formats?
+                return false;
+            }
+
+            iarchive(_indexHeader, _fileIndex);
+        } catch (const cereal::Exception& e) {
+            Logger::send(ERR, "Failed to load file random access index: " + std::string(e.what()));
             return false;
         }
-
-        iarchive(_indexHeader, _fileIndex);
+        
         return true;
     }
 
@@ -81,24 +87,31 @@ namespace PLP {
         int progressPercent = 0;
 
         LineReaderResult result;
-        while ((result = nextLine(lineStart, length)) == LineReaderResult::SUCCESS) {
-            if (getLineNumber() % 10000000 == 0 && cancelled) {
-                return false;
-            }
+        try {
+            _fileIndex.reserve(fileSize / ESTIMATED_NUM_CHARS_PER_LINE);
+            while ((result = nextLine(lineStart, length)) == LineReaderResult::SUCCESS) {
+                if (getLineNumber() % 10000000 == 0 && cancelled) {
+                    return false;
+                }
 
-            if (getLineNumber() > 0 && getLineNumber() % LINE_INDEX_FREQUENCY == 0) {
-                _fileIndex.insert({ getLineNumber(), lineStartFileOffset });
-            }
+                if (getLineNumber() % LINE_INDEX_FREQUENCY == 0) {
+                    _fileIndex.push_back(lineStartFileOffset);
+                }
 
-            lineStartFileOffset = getCurrentFileOffset();
-            numLines++;
+                lineStartFileOffset = getCurrentFileOffset();
+                numLines++;
 
-            if (lineStartFileOffset > numBytesTillProgressUpdate) {
-                progressPercent += percentPerProgressUpdate;
-                numBytesTillProgressUpdate += numBytesPerProgressUpdate;
-                (*progressUpdate)(progressPercent);
+                if (lineStartFileOffset > numBytesTillProgressUpdate) {
+                    progressPercent += percentPerProgressUpdate;
+                    numBytesTillProgressUpdate += numBytesPerProgressUpdate;
+                    (*progressUpdate)(progressPercent);
+                }
             }
+        } catch (std::bad_alloc&) {
+            Logger::send(ERR, "Failed to allocate enough space for index buffer");
+            return false;
         }
+
         if (result == LineReaderResult::ERROR) {
             return false;
         }
@@ -108,6 +121,7 @@ namespace PLP {
         std::ofstream fs;
         fs.open(indexPath, std::fstream::out | std::fstream::binary);
         if (!fs.good()) {
+            Logger::send(ERR, "Failed to create index file: " + wstring_to_string(indexPath));
             return false;
         }
 
@@ -115,9 +129,13 @@ namespace PLP {
         _indexHeader.lineIndexFreq = LINE_INDEX_FREQUENCY;
         _indexHeader.numLines = numLines;
 
-        cereal::BinaryOutputArchive oarchive(fs);
-        oarchive(INDEX_VERSION, _indexHeader, _fileIndex);
-        fs.close();
+        try {
+            cereal::BinaryOutputArchive oarchive(fs);
+            oarchive(INDEX_VERSION, _indexHeader, _fileIndex);
+        } catch (const cereal::Exception& e) {
+            Logger::send(ERR, "Failed to write index file " + wstring_to_string(indexPath) + ": " + std::string(e.what()));
+            return false;
+        }
 
         return true;
     }
@@ -130,18 +148,21 @@ namespace PLP {
         char* lineData = nullptr;
         unsigned int length = 0;
 
-        unsigned long long prevIndexedLineNum = lineNumber / _indexHeader.lineIndexFreq * _indexHeader.lineIndexFreq;
-        if (lineNumber <= getLineNumber() || prevIndexedLineNum > getLineNumber()) {
+        const unsigned long long prevIndexedLineNumIndex = lineNumber / _indexHeader.lineIndexFreq;
+        const unsigned long long prevIndexedLineNum = prevIndexedLineNumIndex * _indexHeader.lineIndexFreq;
+
+        if (lineNumber <= getLineNumber() // desired line is behind current
+            || prevIndexedLineNum > getLineNumber() // random access will get us there faster than iterating
+            ) {
             unsigned long long prevIndexedLineFileOffset;
             if (prevIndexedLineNum == 0) {
                 prevIndexedLineFileOffset = 0;
             } else {
-                auto it = _fileIndex.find(prevIndexedLineNum);
-                if (it == _fileIndex.end()) {
+                if (prevIndexedLineNumIndex >= _fileIndex.size()) {
                     Logger::send(ERR, "Failed to find nearest known file location");
                     return LineReaderResult::ERROR;
                 }
-                prevIndexedLineFileOffset = it->second;
+                prevIndexedLineFileOffset = _fileIndex[prevIndexedLineNumIndex];
             }
 
             LineReaderResult result = getLineUnverified(prevIndexedLineNum, prevIndexedLineFileOffset, lineData, length);
