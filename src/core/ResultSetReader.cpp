@@ -15,7 +15,7 @@ namespace PLP {
     }
 
     bool ResultSetReader::initialize(
-        std::wstring& path,
+        const std::wstring& path,
         unsigned long long preferredBufferSizeBytes
     ) {
         release();

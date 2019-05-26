@@ -14,7 +14,7 @@ namespace PLP {
 
         //C++ interface
         bool initialize(
-            std::wstring& path, 
+            const std::wstring& path, 
             unsigned long long preferredBufferSizeBytes
         );
         unsigned long long getLineFileOffset() const override;

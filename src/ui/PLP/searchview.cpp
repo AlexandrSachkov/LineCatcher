@@ -493,9 +493,12 @@ void SearchView::onSearchCompletion(bool success){
         return;
     }
 
-    std::wstring fileNameWithExt =
-            PLP::getFileNameNoExt(_destName->text().toStdWString()) + PLP::string_to_wstring(PLP::FILE_INDEX_EXTENSION);
-    QString indexPath = _destDir->text() + "/" + QString::fromStdWString(fileNameWithExt);
+    std::wstring fileName = _destName->text().toStdWString();
+    if (std::wstring::npos == fileName.find(PLP::string_to_wstring(PLP::FILE_INDEX_EXTENSION))) {
+        fileName += PLP::string_to_wstring(PLP::FILE_INDEX_EXTENSION);
+    }
+
+    QString indexPath = _destDir->text() + "/" + QString::fromStdWString(fileName);
     static_cast<MainWindow*>(parent())->openIndex(indexPath);
     this->hide();
 }
