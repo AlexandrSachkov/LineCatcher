@@ -136,7 +136,7 @@ bool MainWindow::openFile(const QString& path)
     }
 
     CoreObjPtr<PLP::FileReaderI> fileReader(
-            _plpCore->createFileReader(path.toStdString(), PLP::OPTIMAL_BLOCK_SIZE_BYTES * 2, true),
+            _plpCore->createFileReader(path.toStdString(), PLP::OPTIMAL_BLOCK_SIZE_BYTES * 2, true, nullptr),
             [&](PLP::FileReaderI* p){
                 _plpCore->release(p);
             }

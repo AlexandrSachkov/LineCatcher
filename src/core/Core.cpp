@@ -124,12 +124,19 @@ namespace PLP {
     FileReaderI* Core::createFileReader(
         const std::string& path,
         unsigned long long preferredBuffSizeBytes,
-        bool requireRandomAccess
+        bool requireRandomAccess,
+        const std::function<void(int percent)>* progressUpdate
     ) {
         _cancelled = false;
 
+        std::function<void(int percent)>* progressUpdateInt = const_cast<std::function<void(int percent)>*>(progressUpdate);
+        std::function<void(int percent)> defaultProgressUpdate = [](int percent) {};
+        if (!progressUpdate) {
+            progressUpdateInt = &defaultProgressUpdate;
+        }
+
         std::unique_ptr<FileReader> fReader(new FileReader());
-        if (!fReader->initialize(string_to_wstring(path), preferredBuffSizeBytes, requireRandomAccess, _cancelled)) {
+        if (!fReader->initialize(string_to_wstring(path), preferredBuffSizeBytes, requireRandomAccess, _cancelled, progressUpdateInt)) {
             Logger::send(ERR, "Failed to create file reader");
             return nullptr;
         }
@@ -218,8 +225,12 @@ namespace PLP {
         unsigned long long preferredBuffSizeBytes,
         bool requireRandomAccess
     ) {
+        std::function<void(int)> progressUpdate = [&](int percent) {
+            printConsoleL("Opening file: " + std::to_string(percent) + "%");
+        };
+
         return std::shared_ptr<FileReader>(
-            static_cast<FileReader*>(createFileReader(path, preferredBuffSizeBytes, requireRandomAccess))
+            static_cast<FileReader*>(createFileReader(path, preferredBuffSizeBytes, requireRandomAccess, &progressUpdate))
         );
     }
 

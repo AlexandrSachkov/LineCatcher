@@ -13,16 +13,24 @@ namespace PLP {
     IndexedLineReader::IndexedLineReader() {}
     IndexedLineReader::~IndexedLineReader() {}
 
-    bool IndexedLineReader::initialize(PagedReader& pagedReader, unsigned int maxLineSize, const std::atomic<bool>& cancelled) {
+    bool IndexedLineReader::initialize(
+        PagedReader& pagedReader, 
+        unsigned int maxLineSize, 
+        const std::atomic<bool>& cancelled, 
+        const std::function<void(int percent)>* progressUpdate
+    ) {
         if (!LineReader::initialize(pagedReader, maxLineSize)) {
             return false;
         }
 
         std::wstring indexPath = getIndexFilePath(pagedReader.getFilePath());
+        (*progressUpdate)(0);
         if (!loadIndex(indexPath)) {
-            if (!generateIndex(pagedReader.getFilePath(), indexPath, cancelled)) {
+            if (!generateIndex(pagedReader.getFilePath(), indexPath, cancelled, pagedReader.getFileSize(), progressUpdate)) {
                 return false;
             }
+        } else {
+            (*progressUpdate)(100);
         }
 
         return true;
@@ -56,24 +64,38 @@ namespace PLP {
     bool IndexedLineReader::generateIndex(
         const std::wstring& dataFilePath, 
         const std::wstring& indexPath, 
-        const std::atomic<bool>& cancelled
+        const std::atomic<bool>& cancelled,
+        const unsigned long long fileSize,
+        const std::function<void(int percent)>* progressUpdate
     ) {
         char* lineStart;
         unsigned int length;
         unsigned long long lineStartFileOffset = 0;
         unsigned long long numLines = 0;
 
+        const long double dBytesPerPercent = (fileSize) / 100.0;
+        const unsigned long long numBytesTillProgressUpdate = dBytesPerPercent > 1.0 ? (unsigned long long)dBytesPerPercent : 1;
+        const int percentPerProgressUpdate = dBytesPerPercent > 1.0 ? 1 : (int)(1.0 / dBytesPerPercent);
+
+        int progressPercent = 0;
+
         LineReaderResult result;
         while ((result = nextLine(lineStart, length)) == LineReaderResult::SUCCESS) {
-            if (getLineNumber() % 1000000 == 0 && cancelled) {
+            if (getLineNumber() % 10000000 == 0 && cancelled) {
                 return false;
             }
 
             if (getLineNumber() > 0 && getLineNumber() % LINE_INDEX_FREQUENCY == 0) {
                 _fileIndex.insert({ getLineNumber(), lineStartFileOffset });
             }
+
             lineStartFileOffset = getCurrentFileOffset();
             numLines++;
+
+            if (lineStartFileOffset % numBytesTillProgressUpdate == 0) {
+                progressPercent += percentPerProgressUpdate;
+                (*progressUpdate)(progressPercent);
+            }
         }
         if (result == LineReaderResult::ERROR) {
             return false;

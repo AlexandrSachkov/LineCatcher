@@ -19,16 +19,11 @@ namespace PLP {
         const std::wstring& path, 
         unsigned long long preferredBuffSizeBytes, 
         bool requireRandomAccess,
-        const std::atomic<bool>& cancelled
+        const std::atomic<bool>& cancelled,
+        const std::function<void(int percent)>* progressUpdate
     ) {
         release();
         _enableRandomAccess = requireRandomAccess;
-
-        /*MemMappedPagedReader* pagedReader = new MemMappedPagedReader();
-        _pager.reset(pagedReader);
-        if (!pagedReader->initialize(path, preferredBuffSizeBytes)) {
-            return false;
-        }*/
 
         FStreamPagedReader* pagedReader = new FStreamPagedReader();
         _pager.reset(pagedReader);
@@ -36,17 +31,10 @@ namespace PLP {
             return false;
         }
 
-        if (requireRandomAccess) {
-            IndexedLineReader* idxLineReader = new IndexedLineReader();
-            _lineReader.reset(idxLineReader);
-            if (!idxLineReader->initialize(*_pager, 100000, cancelled)) {
-                return false;
-            }
-        } else {
-            _lineReader.reset(new LineReader());
-            if (!_lineReader->initialize(*_pager, 100000)) {
-                return false;
-            }
+        IndexedLineReader* idxLineReader = new IndexedLineReader();
+        _lineReader.reset(idxLineReader);
+        if (!idxLineReader->initialize(*_pager, 100000, cancelled, progressUpdate)) {
+            return false;
         }
 
         return true;

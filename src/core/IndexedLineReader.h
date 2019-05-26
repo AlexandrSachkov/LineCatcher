@@ -5,6 +5,7 @@
 
 #include <unordered_map>
 #include <atomic>
+#include <functional>
 
 namespace PLP {
     class IndexedLineReader : public LineReader {
@@ -12,7 +13,12 @@ namespace PLP {
         IndexedLineReader();
         ~IndexedLineReader();
 
-        bool initialize(PagedReader& pagedReader, unsigned int maxLineSize, const std::atomic<bool>& cancelled);
+        bool initialize(
+            PagedReader& pagedReader, 
+            unsigned int maxLineSize, 
+            const std::atomic<bool>& cancelled,
+            const std::function<void(int percent)>* progressUpdate
+        );
         LineReaderResult getLine(unsigned long long lineNumber, char*& data, unsigned int& size);
         unsigned long long getNumberOfLines();
     private:
@@ -21,7 +27,9 @@ namespace PLP {
         bool generateIndex(
             const std::wstring& dataFilePath, 
             const std::wstring& indexPath,
-            const std::atomic<bool>& cancelled
+            const std::atomic<bool>& cancelled,
+            const unsigned long long fileSize,
+            const std::function<void(int percent)>* progressUpdate
         );
 
         struct IndexHeader {

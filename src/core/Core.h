@@ -44,7 +44,8 @@ namespace PLP {
         FileReaderI* createFileReader(
             const std::string& path,
             unsigned long long preferredBuffSizeBytes,
-            bool requireRandomAccess
+            bool requireRandomAccess,
+            const std::function<void(int percent)>* progressUpdate
         ) override;
 
         FileWriterI* createFileWriter(

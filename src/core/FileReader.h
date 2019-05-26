@@ -5,6 +5,7 @@
 #include <string>
 #include <tuple>
 #include <atomic>
+#include <functional>
 
 namespace PLP {
     class PagedReader;
@@ -20,7 +21,8 @@ namespace PLP {
             const std::wstring& path, 
             unsigned long long preferredBuffSizeBytes,
             bool requireRandomAccess,
-            const std::atomic<bool>& cancelled
+            const std::atomic<bool>& cancelled,
+            const std::function<void(int percent)>* progressUpdate
         );
         
         //C++ interface
