@@ -246,7 +246,7 @@ void SearchView::startSearch() {
     }
 
     // Create required objects
-    PLP::FileReaderI* fileReader = _plpCore->createFileReader(dataPath.toStdString(), 0, true, nullptr);
+    PLP::FileReaderI* fileReader = _plpCore->createFileReader(dataPath.toStdString(), 0, nullptr);
     if(!fileReader){
         QMessageBox::information(this,"PLP","File reader failed to initialize",QMessageBox::Ok);
         return;

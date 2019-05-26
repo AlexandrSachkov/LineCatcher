@@ -18,12 +18,10 @@ namespace PLP {
     bool FileReader::initialize(
         const std::wstring& path, 
         unsigned long long preferredBuffSizeBytes, 
-        bool requireRandomAccess,
         const std::atomic<bool>& cancelled,
         const std::function<void(int percent)>* progressUpdate
     ) {
         release();
-        _enableRandomAccess = requireRandomAccess;
 
         FStreamPagedReader* pagedReader = new FStreamPagedReader();
         _pager.reset(pagedReader);
@@ -43,7 +41,6 @@ namespace PLP {
     void FileReader::release() {
         _lineReader = nullptr;
         _pager = nullptr;
-        _enableRandomAccess = false;
     }
 
     LineReaderResult FileReader::nextLine(char*& lineStart, unsigned int& length) {
@@ -62,10 +59,7 @@ namespace PLP {
     }
 
     LineReaderResult FileReader::getLine(unsigned long long lineNumber, char*& data, unsigned int& size) {
-        if (!_enableRandomAccess) {
-            return LineReaderResult::ERROR;
-        }
-        return static_cast<IndexedLineReader*>(_lineReader.get())->getLine(lineNumber, data, size);
+        return _lineReader->getLine(lineNumber, data, size);
     }
 
     LineReaderResult FileReader::getLineFromResult(const ResultSetReaderI* rsReader, char*& data, unsigned int& size) {
@@ -114,9 +108,6 @@ namespace PLP {
     }
 
     unsigned long long FileReader::getNumberOfLines() const {
-        if (!_enableRandomAccess) {
-            return 0;
-        }
-        return static_cast<IndexedLineReader*>(_lineReader.get())->getNumberOfLines();
+        return _lineReader->getNumberOfLines();
     }
 }

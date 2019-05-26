@@ -44,7 +44,6 @@ namespace PLP {
         FileReaderI* createFileReader(
             const std::string& path,
             unsigned long long preferredBuffSizeBytes,
-            bool requireRandomAccess,
             const std::function<void(int percent)>* progressUpdate
         ) override;
 
@@ -74,8 +73,7 @@ namespace PLP {
         //Lua interface
         std::shared_ptr<FileReader> createFileReaderL(
             const std::string& path,
-            unsigned long long preferredBuffSizeBytes,
-            bool requireRandomAccess
+            unsigned long long preferredBuffSizeBytes
         );
 
         std::shared_ptr<FileWriter> createFileWriterL(

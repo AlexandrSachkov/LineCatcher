@@ -26,7 +26,6 @@ namespace PLP {
         virtual FileReaderI* createFileReader(
             const std::string& path,
             unsigned long long preferredBuffSizeBytes,
-            bool requireRandomAccess,
             const std::function<void(int percent)>* progressUpdate
         ) = 0;
 

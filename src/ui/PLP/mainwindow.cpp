@@ -152,7 +152,7 @@ bool MainWindow::openFile(const QString& path)
                 dialog.setValue(percent);
             });
         };
-        return core->createFileReader(path.toStdString(), PLP::OPTIMAL_BLOCK_SIZE_BYTES * 2, true, &update);
+        return core->createFileReader(path.toStdString(), PLP::OPTIMAL_BLOCK_SIZE_BYTES * 2, &update);
     }));
 
     dialog.exec();
