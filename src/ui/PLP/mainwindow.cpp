@@ -9,6 +9,7 @@
 #include <QPushButton>
 #include <QSplitter>
 #include <QMessageBox>
+#include <QFutureWatcher>
 
 #include "Utils.h"
 #include "ResultSetReaderI.h"
@@ -119,7 +120,7 @@ void MainWindow::openFile() {
     }
 
     if(!openFile(path)){
-        QMessageBox::critical(this,"PLP","Failed to open file.",QMessageBox::Ok);
+        QMessageBox::critical(this,"PLP","Failed to open file: " + path,QMessageBox::Ok);
     }
 }
 
@@ -135,17 +136,45 @@ bool MainWindow::openFile(const QString& path)
         }
     }
 
-    CoreObjPtr<PLP::FileReaderI> fileReader(
-            _plpCore->createFileReader(path.toStdString(), PLP::OPTIMAL_BLOCK_SIZE_BYTES * 2, true, nullptr),
-            [&](PLP::FileReaderI* p){
-                _plpCore->release(p);
-            }
-        );
+    QProgressDialog dialog;
+    dialog.setWindowTitle("Opening file...");
+    dialog.setWindowModality(Qt::WindowModal);
+    dialog.setMinimumWidth(400);
+
+    QFutureWatcher<PLP::FileReaderI*> futureWatcher;
+    QObject::connect(&futureWatcher, &QFutureWatcher<PLP::FileReaderI*>::finished, &dialog, &QProgressDialog::reset);
+    QObject::connect(&dialog, &QProgressDialog::canceled, this, &MainWindow::onDialogCancel);
+
+    PLP::CoreI* core = _plpCore;
+    futureWatcher.setFuture(QtConcurrent::run([&, this, core, path]() -> PLP::FileReaderI* {
+        std::function<void(int)> update = [&](int percent){
+            QMetaObject::invokeMethod(&dialog, [&, percent](){
+                dialog.setValue(percent);
+            });
+        };
+        return core->createFileReader(path.toStdString(), PLP::OPTIMAL_BLOCK_SIZE_BYTES * 2, true, &update);
+    }));
+
+    dialog.exec();
+    futureWatcher.waitForFinished();
+
+    if(_plpCore->isCancelled()){
+        return false;
+    }
+
+    PLP::FileReaderI* fileReader = futureWatcher.result();
     if(!fileReader){
         return false;
     }
 
-    FileView* fileView = new FileView(std::move(fileReader), this);
+    CoreObjPtr<PLP::FileReaderI> fileReaderCP(
+        fileReader,
+        [&](PLP::FileReaderI* p){
+            _plpCore->release(p);
+        }
+    );
+
+    FileView* fileView = new FileView(std::move(fileReaderCP), this);
     QString fileName = path.split('/').last();
     _fileViewer->addTab(fileView, fileName);
     _fileViewer->setTabToolTip(_fileViewer->count() - 1, path);
@@ -211,4 +240,8 @@ void MainWindow::showStandardSearch() {
 
 void MainWindow::showAdvancedSearch() {
     _advancedSearchView->show();
+}
+
+void MainWindow::onDialogCancel(){
+    _plpCore->cancelOperation();
 }

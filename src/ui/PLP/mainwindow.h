@@ -22,6 +22,8 @@ public:
     ~MainWindow();
     void openIndex(const QString& path);
 
+signals:
+
 public slots:
     void closeTab(int index);
     void openFile();
@@ -29,6 +31,7 @@ public slots:
     void showScriptView();
     void showStandardSearch();
     void showAdvancedSearch();
+    void onDialogCancel();
 
 private:
     bool openFile(const std::vector<QString>& candidates);

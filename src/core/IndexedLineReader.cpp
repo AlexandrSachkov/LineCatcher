@@ -74,9 +74,10 @@ namespace PLP {
         unsigned long long numLines = 0;
 
         const long double dBytesPerPercent = (fileSize) / 100.0;
-        const unsigned long long numBytesTillProgressUpdate = dBytesPerPercent > 1.0 ? (unsigned long long)dBytesPerPercent : 1;
+        const unsigned long long numBytesPerProgressUpdate = dBytesPerPercent > 1.0 ? (unsigned long long)dBytesPerPercent : 1;
         const int percentPerProgressUpdate = dBytesPerPercent > 1.0 ? 1 : (int)(1.0 / dBytesPerPercent);
 
+        unsigned long long numBytesTillProgressUpdate = numBytesPerProgressUpdate;
         int progressPercent = 0;
 
         LineReaderResult result;
@@ -92,8 +93,9 @@ namespace PLP {
             lineStartFileOffset = getCurrentFileOffset();
             numLines++;
 
-            if (lineStartFileOffset % numBytesTillProgressUpdate == 0) {
+            if (lineStartFileOffset > numBytesTillProgressUpdate) {
                 progressPercent += percentPerProgressUpdate;
+                numBytesTillProgressUpdate += numBytesPerProgressUpdate;
                 (*progressUpdate)(progressPercent);
             }
         }
