@@ -1,6 +1,6 @@
 local startTime = os.time();
 
-local fileReader = PLP:core():createFileReader("D:/Repositories/LogParser/resources/largeGeneratedFile.txt", 0, true);
+local fileReader = PLP:core():createFileReader("D:/Repositories/LogParser/resources/largeGeneratedFile.txt", 0);
 local indexWriter = PLP:core():createResultSetWriter("D:/Repositories/LogParser/resources/largeGeneratedFileResults1", 1000000, fileReader, true);
 
 PLP:core():searchMultiline(fileReader,indexWriter,0,0,0,
