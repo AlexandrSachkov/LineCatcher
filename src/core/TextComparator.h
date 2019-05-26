@@ -19,9 +19,9 @@ namespace PLP {
         virtual bool match(const std::string& str) = 0;
     };
 
-    class MatchMultiple : public TextComparator {
+    class MatchAll : public TextComparator {
     public:
-        MatchMultiple(const std::vector<std::shared_ptr<TextComparator>>& comparators) {
+        MatchAll(const std::vector<std::shared_ptr<TextComparator>>& comparators) {
             _comparators = comparators;
         }
 

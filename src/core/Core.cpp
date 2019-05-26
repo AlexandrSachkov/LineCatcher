@@ -722,49 +722,76 @@ namespace PLP {
         //Text compare
         auto tcTextComparator = module.beginClass<TextComparator>("TextComparator");
         bool(TextComparator::*match)(const std::string&) = &TextComparator::match;
-        tcTextComparator.addFunction("initialize", &TextComparator::initialize);
         tcTextComparator.addFunction("match", match);
         tcTextComparator.endClass();
 
         auto tcMatchString = module.beginClass<MatchString>("MatchString");
-        tcMatchString.addFactory([](const std::string& text, bool exact, bool ignoreCase) {
-            return std::shared_ptr<TextComparator>(new MatchString(text, exact, ignoreCase));
+        tcMatchString.addFactory([](const std::string& text, bool exact, bool ignoreCase) -> std::shared_ptr<TextComparator> {
+            std::shared_ptr<TextComparator> comparator(new MatchString(text, exact, ignoreCase));
+            if (!comparator->initialize()) {
+                return nullptr;
+            }
+            return comparator;
         });
         tcMatchString.endClass();
 
-        auto tcMatchMultiple = module.beginClass<MatchMultiple>("MatchMultiple");
-        tcMatchMultiple.addFactory([](const std::vector<std::shared_ptr<TextComparator>>& comparators) {
-            return std::shared_ptr<TextComparator>(new MatchMultiple(comparators));
+        auto tcMatchMultiple = module.beginClass<MatchAll>("MatchAll");
+        tcMatchMultiple.addFactory([](const std::vector<std::shared_ptr<TextComparator>>& comparators) -> std::shared_ptr<TextComparator> {
+            std::shared_ptr<TextComparator> comparator(new MatchAll(comparators));
+            if (!comparator->initialize()) {
+                return nullptr;
+            }
+            return comparator;
         });
         tcMatchMultiple.endClass();
 
         auto tcMatchAny = module.beginClass<MatchAny>("MatchAny");
-        tcMatchAny.addFactory([](const std::vector<std::shared_ptr<TextComparator>>& comparators) {
-            return std::shared_ptr<TextComparator>(new MatchAny(comparators));
+        tcMatchAny.addFactory([](const std::vector<std::shared_ptr<TextComparator>>& comparators) -> std::shared_ptr<TextComparator> {
+            std::shared_ptr<TextComparator> comparator(new MatchAny(comparators));
+            if (!comparator->initialize()) {
+                return nullptr;
+            }
+            return comparator;
         });
         tcMatchAny.endClass();
 
         auto tcMatchRegex = module.beginClass<MatchRegex>("MatchRegex");
-        tcMatchRegex.addFactory([](const std::string& regexPattern, bool ignoreCase) {
-            return std::shared_ptr<TextComparator>(new MatchRegex(regexPattern, ignoreCase));
+        tcMatchRegex.addFactory([](const std::string& regexPattern, bool ignoreCase)  -> std::shared_ptr<TextComparator> {
+            std::shared_ptr<TextComparator> comparator(new MatchRegex(regexPattern, ignoreCase));
+            if (!comparator->initialize()) {
+                return nullptr;
+            }
+            return comparator;
         });
         tcMatchRegex.endClass();
 
         auto tcMatchSubstrings = module.beginClass<MatchSubstrings>("MatchSubstrings");
-        tcMatchSubstrings.addFactory([](const std::string& splitText, bool trimLine, const std::unordered_map<int, std::shared_ptr<TextComparator>>& sliceComparators) {
-            return std::shared_ptr<TextComparator>(new MatchSubstrings(splitText, trimLine, sliceComparators));
+        tcMatchSubstrings.addFactory([](const std::string& splitText, bool trimLine, const std::unordered_map<int, std::shared_ptr<TextComparator>>& sliceComparators)  -> std::shared_ptr<TextComparator> {
+            std::shared_ptr<TextComparator> comparator(new MatchSubstrings(splitText, trimLine, sliceComparators));
+            if (!comparator->initialize()) {
+                return nullptr;
+            }
+            return comparator;
         });
         tcMatchSubstrings.endClass();
 
         auto tcMatchWords = module.beginClass<MatchWords>("MatchWords");
-        tcMatchWords.addFactory([](const std::unordered_map<int, std::shared_ptr<TextComparator>>& sliceComparators) {
-            return std::shared_ptr<TextComparator>(new MatchWords(sliceComparators));
+        tcMatchWords.addFactory([](const std::unordered_map<int, std::shared_ptr<TextComparator>>& sliceComparators)  -> std::shared_ptr<TextComparator> {
+            std::shared_ptr<TextComparator> comparator(new MatchWords(sliceComparators));
+            if (!comparator->initialize()) {
+                return nullptr;
+            }
+            return comparator;
         });
         tcMatchWords.endClass();
 
         auto tcMatchCustom = module.beginClass<MatchCustom>("MatchCustom");
-        tcMatchCustom.addFactory([](const std::function<bool(const std::string&)> func) {
-            return std::shared_ptr<TextComparator>(new MatchCustom(func));
+        tcMatchCustom.addFactory([](const std::function<bool(const std::string&)> func)  -> std::shared_ptr<TextComparator> {
+            std::shared_ptr<TextComparator> comparator(new MatchCustom(func));
+            if (!comparator->initialize()) {
+                return nullptr;
+            }
+            return comparator;
         });
         tcMatchCustom.endClass();
 
