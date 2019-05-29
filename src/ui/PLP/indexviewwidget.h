@@ -9,7 +9,7 @@
 #include "coreobjptr.h"
 #include "pagedfileviewwidget.h"
 #include "ullspinbox.h"
-#include "ResultSetReaderI.h"
+#include "IndexReaderI.h"
 #include "FileReaderI.h"
 #include <memory>
 
@@ -18,7 +18,7 @@ class IndexViewWidget : public QPlainTextEdit
     Q_OBJECT
 public:
     IndexViewWidget(
-        CoreObjPtr<PLP::ResultSetReaderI> indexReader,
+        CoreObjPtr<PLP::IndexReaderI> indexReader,
         PagedFileViewWidget* fileViewer,
         ULLSpinBox* lineNavBox,
         QWidget* parent = nullptr
@@ -46,7 +46,7 @@ private:
     static const unsigned int MAX_NUM_BLOCKS = 1000;
     static const unsigned int NUM_LINES_PER_READ = 250;
 
-    CoreObjPtr<PLP::ResultSetReaderI> _indexReader;
+    CoreObjPtr<PLP::IndexReaderI> _indexReader;
     PagedFileViewWidget* _fileViewer;
     QWidget* _lineNumberArea;
     ULLSpinBox* _lineNavBox;

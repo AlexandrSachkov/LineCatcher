@@ -9,7 +9,7 @@ PLP:core():releaseFileReader(fileReader);
 local fileReader2 = PLP:core():createFileReader("D:/Repositories/LogParser/resources/test.txt", 0);
 local indexWriter = PLP:core():createResultSetWriter("D:/Repositories/LogParser/resources/testIndex.plpidx", 0, fileReader2, true);
 PLP:core():releaseIndexWriter(indexWriter);
-local indexReader = PLP:core():createResultSetReader("D:/Repositories/LogParser/resources/testIndex.plpidx", 0);
+local indexReader = PLP:core():createIndexReader("D:/Repositories/LogParser/resources/testIndex.plpidx", 0);
 
 
 

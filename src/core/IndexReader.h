@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ResultSetReaderI.h"
+#include "IndexReaderI.h"
 #include "FileLock.h"
 
 #include <string>
@@ -9,10 +9,10 @@
 
 namespace PLP {
     class PagedReader;
-    class ResultSetReader : public ResultSetReaderI {
+    class IndexReader : public IndexReaderI {
     public:
-        ResultSetReader();
-        ~ResultSetReader();
+        IndexReader();
+        ~IndexReader();
 
         //C++ interface
         bool initialize(

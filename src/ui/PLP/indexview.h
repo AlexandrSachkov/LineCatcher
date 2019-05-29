@@ -6,7 +6,7 @@
 #include "coreobjptr.h"
 #include "pagedfileviewwidget.h"
 #include "ullspinbox.h"
-#include "ResultSetReaderI.h"
+#include "IndexReaderI.h"
 #include "FileReaderI.h"
 #include <memory>
 
@@ -15,7 +15,7 @@ class IndexView : public QWidget
     Q_OBJECT
 public:
     explicit IndexView(
-        CoreObjPtr<PLP::ResultSetReaderI> indexReader,
+        CoreObjPtr<PLP::IndexReaderI> indexReader,
         PagedFileViewWidget* fileViewer,
         QWidget *parent = nullptr
     );

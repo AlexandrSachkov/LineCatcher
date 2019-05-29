@@ -4,7 +4,7 @@
 #include "LineReader.h"
 #include "IndexedLineReader.h"
 #include "Utils.h"
-#include "ResultSetReader.h"
+#include "IndexReader.h"
 #include "FStreamPagedReader.h"
 #include "Logger.h"
 
@@ -69,14 +69,14 @@ namespace PLP {
         return _lineReader->getLine(lineNumber, data, size);
     }
 
-    LineReaderResult FileReader::getLineFromResult(const ResultSetReaderI* rsReader, char*& data, unsigned int& size) {
+    LineReaderResult FileReader::getLineFromResult(const IndexReaderI* rsReader, char*& data, unsigned int& size) {
         if (!rsReader) {
             return LineReaderResult::ERROR;
         }
         return _lineReader->getLineUnverified(rsReader->getLineNumber(), rsReader->getLineFileOffset(), data, size);
     }
 
-    std::tuple<int, std::string> FileReader::getLineFromResult(const std::shared_ptr<ResultSetReader> rsReader) {
+    std::tuple<int, std::string> FileReader::getLineFromResult(const std::shared_ptr<IndexReader> rsReader) {
         char* lineStart = nullptr;
         unsigned int length = 0;
 

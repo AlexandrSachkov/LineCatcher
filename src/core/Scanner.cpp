@@ -3,7 +3,7 @@
 #include <cstdlib>
 
 namespace PLP {
-    LineScanner::LineScanner(FileReaderI* fileReader, ResultSetReaderI* indexReader, unsigned long long startLine, unsigned long long endLine)
+    LineScanner::LineScanner(FileReaderI* fileReader, IndexReaderI* indexReader, unsigned long long startLine, unsigned long long endLine)
         : _fileReader(fileReader), _indexReader(indexReader), _startLine(startLine), _endLine(endLine) {
     }
 
@@ -109,7 +109,7 @@ namespace PLP {
 
     MultilineScanner::MultilineScanner(
         FileReaderI* fileReader,
-        ResultSetReaderI* indexReader,
+        IndexReaderI* indexReader,
         int startLineOffset,
         int endLineOffset,
         unsigned long long startLine,

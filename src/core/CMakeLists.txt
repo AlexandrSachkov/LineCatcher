@@ -41,8 +41,8 @@ SET(HEADERS
     MemMappedPagedReader.h
     PagedReader.h
     PagedWriter.h
-    ResultSetReader.h
-    ResultSetReaderI.h
+    IndexReader.h
+    IndexReaderI.h
     ResultSetWriter.h
     ResultSetWriterI.h
     ReturnType.h
@@ -68,7 +68,7 @@ SET(SOURCES
     LineReader.cpp
     Logger.cpp
     MemMappedPagedReader.cpp
-    ResultSetReader.cpp
+    IndexReader.cpp
     ResultSetWriter.cpp
     Scanner.cpp
     Thread.cpp

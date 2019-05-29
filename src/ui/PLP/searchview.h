@@ -36,7 +36,7 @@ private slots:
 private:
     void startRegularSearch(
             PLP::FileReaderI* fileReader,
-            PLP::ResultSetReaderI* indexReader,
+            PLP::IndexReaderI* indexReader,
             PLP::ResultSetWriterI* indexWriter,
             unsigned long long startLine,
             unsigned long long endLine,
@@ -45,7 +45,7 @@ private:
 
     void startMultilineSearch(
             PLP::FileReaderI* fileReader,
-            PLP::ResultSetReaderI* indexReader,
+            PLP::IndexReaderI* indexReader,
             PLP::ResultSetWriterI* indexWriter,
             unsigned long long startLine,
             unsigned long long endLine,

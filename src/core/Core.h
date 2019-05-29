@@ -24,7 +24,7 @@ namespace PLP {
     class Thread;
     class FileReader;
     class FileWriter;
-    class ResultSetReader;
+    class IndexReader;
     class ResultSetWriter;
 
     class Core : public CoreI {
@@ -53,7 +53,7 @@ namespace PLP {
             bool overwriteIfExists
         ) override;
 
-        ResultSetReaderI* createResultSetReader(
+        IndexReaderI* createIndexReader(
             const std::string& path,
             unsigned long long preferredBuffSizeBytes
         ) override;
@@ -67,7 +67,7 @@ namespace PLP {
 
         void release(FileReaderI*) override;
         void release(FileWriterI*) override;
-        void release(ResultSetReaderI*) override;
+        void release(IndexReaderI*) override;
         void release(ResultSetWriterI*) override;
 
         //Lua interface
@@ -82,7 +82,7 @@ namespace PLP {
             bool overwriteIfExists
         );
 
-        std::shared_ptr<ResultSetReader> createResultSetReaderL(
+        std::shared_ptr<IndexReader> createIndexReaderL(
             const std::string& path,
             unsigned long long preferredBuffSizeBytes
         );
@@ -96,12 +96,12 @@ namespace PLP {
 
         void releaseFileReaderL(std::shared_ptr<FileReader>& p);
         void releaseFileWriterL(std::shared_ptr<FileWriter>& p);
-        void releaseIndexReaderL(std::shared_ptr<ResultSetReader>& p);
+        void releaseIndexReaderL(std::shared_ptr<IndexReader>& p);
         void releaseIndexWriterL(std::shared_ptr<ResultSetWriter>& p);
 
         bool searchGeneral(
             FileReaderI* fileReader,
-            ResultSetReaderI* indexReader,
+            IndexReaderI* indexReader,
             unsigned long long start,
             unsigned long long end, //0 for end of file, inclusive
             TextComparator* comparator,
@@ -111,7 +111,7 @@ namespace PLP {
 
         bool searchMultilineGeneral(
             FileReaderI* fileReader,
-            ResultSetReaderI* indexReader,
+            IndexReaderI* indexReader,
             unsigned long long start,
             unsigned long long end, //0 for end of file, inclusive
             const std::unordered_map<int, TextComparator*>& lineComparators,
@@ -121,7 +121,7 @@ namespace PLP {
 
         bool search(
             FileReaderI* fileReader,
-            ResultSetReaderI* indexReader,
+            IndexReaderI* indexReader,
             ResultSetWriterI* indexWriter,
             unsigned long long start,
             unsigned long long end, //0 for end of file, inclusive
@@ -132,7 +132,7 @@ namespace PLP {
 
         bool Core::searchMultiline(
             FileReaderI* fileReader,
-            ResultSetReaderI* indexReader,
+            IndexReaderI* indexReader,
             ResultSetWriterI* indexWriter,
             unsigned long long start,
             unsigned long long end, //0 for end of file, inclusive
@@ -152,7 +152,7 @@ namespace PLP {
 
         bool searchIL(
             std::shared_ptr<FileReader> fileReader,
-            std::shared_ptr<ResultSetReader> indexReader,
+            std::shared_ptr<IndexReader> indexReader,
             std::shared_ptr<ResultSetWriter> indexWriter,
             unsigned long long start,
             unsigned long long end, //0 for end of file, inclusive
@@ -171,7 +171,7 @@ namespace PLP {
 
         bool searchMultilineIL(
             std::shared_ptr<FileReader> fileReader,
-            std::shared_ptr<ResultSetReader> indexReader,
+            std::shared_ptr<IndexReader> indexReader,
             std::shared_ptr<ResultSetWriter> indexWriter,
             unsigned long long start,
             unsigned long long end, //0 for end of file, inclusive

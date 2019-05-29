@@ -252,9 +252,9 @@ void SearchView::startSearch() {
         return;
     }
 
-    PLP::ResultSetReaderI* indexReader = nullptr;
+    PLP::IndexReaderI* indexReader = nullptr;
     if(!indexPath.simplified().isEmpty()){
-        indexReader = _plpCore->createResultSetReader(indexPath.toStdString(), 0);
+        indexReader = _plpCore->createIndexReader(indexPath.toStdString(), 0);
         if(!indexReader){
             QMessageBox::information(this,"PLP","Index reader failed to initialize",QMessageBox::Ok);
             _plpCore->release(fileReader);
@@ -280,7 +280,7 @@ void SearchView::startSearch() {
 
 void SearchView::startRegularSearch(
         PLP::FileReaderI* fileReader,
-        PLP::ResultSetReaderI* indexReader,
+        PLP::IndexReaderI* indexReader,
         PLP::ResultSetWriterI* indexWriter,
         unsigned long long startLine,
         unsigned long long endLine,
@@ -343,7 +343,7 @@ void SearchView::startRegularSearch(
 
 void SearchView::startMultilineSearch(
         PLP::FileReaderI* fileReader,
-        PLP::ResultSetReaderI* indexReader,
+        PLP::IndexReaderI* indexReader,
         PLP::ResultSetWriterI* indexWriter,
         unsigned long long startLine,
         unsigned long long endLine,

@@ -9,7 +9,7 @@
 namespace PLP {
     class FileReaderI;
     class FileWriterI;
-    class ResultSetReaderI;
+    class IndexReaderI;
     class ResultSetWriterI;
 
     class CoreI {
@@ -35,7 +35,7 @@ namespace PLP {
             bool overwriteIfExists
         ) = 0;
 
-        virtual ResultSetReaderI* createResultSetReader(
+        virtual IndexReaderI* createIndexReader(
             const std::string& path,
             unsigned long long preferredBuffSizeBytes
         ) = 0;
@@ -49,12 +49,12 @@ namespace PLP {
 
         virtual void release(FileReaderI*) = 0;
         virtual void release(FileWriterI*) = 0;
-        virtual void release(ResultSetReaderI*) = 0;
+        virtual void release(IndexReaderI*) = 0;
         virtual void release(ResultSetWriterI*) = 0;
 
         virtual bool search(
             FileReaderI* fileReader,
-            ResultSetReaderI* indexReader,
+            IndexReaderI* indexReader,
             ResultSetWriterI* indexWriter,
             unsigned long long start,
             unsigned long long end, //0 for end of file, inclusive
@@ -65,7 +65,7 @@ namespace PLP {
 
         virtual bool searchMultiline(
             FileReaderI* fileReader,
-            ResultSetReaderI* indexReader,
+            IndexReaderI* indexReader,
             ResultSetWriterI* indexWriter,
             unsigned long long start,
             unsigned long long end, //0 for end of file, inclusive

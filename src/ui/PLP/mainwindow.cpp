@@ -12,7 +12,7 @@
 #include <QFutureWatcher>
 
 #include "Utils.h"
-#include "ResultSetReaderI.h"
+#include "IndexReaderI.h"
 #include <memory>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
@@ -192,9 +192,9 @@ void MainWindow::openIndex() {
 }
 
 void MainWindow::openIndex(const QString& path){
-    CoreObjPtr<PLP::ResultSetReaderI> indexReader(
-        _plpCore->createResultSetReader(path.toStdString(), PLP::OPTIMAL_BLOCK_SIZE_BYTES * 2),
-        [&](PLP::ResultSetReaderI* p){
+    CoreObjPtr<PLP::IndexReaderI> indexReader(
+        _plpCore->createIndexReader(path.toStdString(), PLP::OPTIMAL_BLOCK_SIZE_BYTES * 2),
+        [&](PLP::IndexReaderI* p){
             _plpCore->release(p);
         }
     );

@@ -10,7 +10,7 @@
 #include <QSpinBox>
 
 #include "FileReaderI.h"
-#include "ResultSetReaderI.h"
+#include "IndexReaderI.h"
 #include <memory>
 #include <vector>
 
@@ -20,7 +20,7 @@ class PagedFileViewWidget : public QPlainTextEdit
 public:
     PagedFileViewWidget(CoreObjPtr<PLP::FileReaderI> fileReader, ULLSpinBox* lineNavBox, QWidget *parent = nullptr);
     bool getLineFromIndex(
-        CoreObjPtr<PLP::ResultSetReaderI>& indexReader,
+        CoreObjPtr<PLP::IndexReaderI>& indexReader,
         QString& data
     );
 

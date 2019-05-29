@@ -1,4 +1,4 @@
-#include "ResultSetReader.h"
+#include "IndexReader.h"
 #include "MemMappedPagedReader.h"
 #include "FStreamPagedReader.h"
 #include "Utils.h"
@@ -7,14 +7,14 @@
 #include <fstream>
 
 namespace PLP {
-    ResultSetReader::ResultSetReader() {}
+    IndexReader::IndexReader() {}
 
-    ResultSetReader::~ResultSetReader() {
+    IndexReader::~IndexReader() {
         Logger::send(INFO, "Releasing index reader");
         release();
     }
 
-    bool ResultSetReader::initialize(
+    bool IndexReader::initialize(
         const std::wstring& path,
         unsigned long long preferredBufferSizeBytes
     ) {
@@ -62,7 +62,7 @@ namespace PLP {
         return true;
     }
 
-    void ResultSetReader::release() {
+    void IndexReader::release() {
         _reader = nullptr;
         _path;
         _dataFilePath;
@@ -76,7 +76,7 @@ namespace PLP {
         _fileOffset = 0;
     }
 
-    bool ResultSetReader::getResult(unsigned long long number, unsigned long long& lineNumber) {
+    bool IndexReader::getResult(unsigned long long number, unsigned long long& lineNumber) {
         if (number >= _numResults) {
             return false;
         }
@@ -95,7 +95,7 @@ namespace PLP {
         return nextResult(lineNumber);
     }
 
-    std::tuple<bool, unsigned long long> ResultSetReader::getResult(unsigned long long number) {
+    std::tuple<bool, unsigned long long> IndexReader::getResult(unsigned long long number) {
         unsigned long long lineNum = 0;
         if (!getResult(number, lineNum)) {
             return { false, 0 };
@@ -103,7 +103,7 @@ namespace PLP {
         return { true, lineNum };
     }
 
-    bool ResultSetReader::nextResult(unsigned long long& lineNumber) {
+    bool IndexReader::nextResult(unsigned long long& lineNumber) {
         if (_resultCount >= _numResults) {
             return false;
         }
@@ -130,7 +130,7 @@ namespace PLP {
         return true;
     }
 
-    std::tuple<bool, unsigned long long> ResultSetReader::nextResult() {
+    std::tuple<bool, unsigned long long> IndexReader::nextResult() {
         unsigned long long lineNum = 0;
         if (!nextResult(lineNum)) {
             return { false, 0 };
@@ -138,19 +138,19 @@ namespace PLP {
         return { true, lineNum };
     }
 
-    unsigned long long ResultSetReader::getNumResults() const {
+    unsigned long long IndexReader::getNumResults() const {
         return _numResults;
     }
 
-    const wchar_t* ResultSetReader::getFilePath() const {
+    const wchar_t* IndexReader::getFilePath() const {
         return _path.c_str();
     }
 
-    const char* ResultSetReader::getDataFilePath() const {
+    const char* IndexReader::getDataFilePath() const {
         return _dataFilePath.c_str();
     }
 
-    void ResultSetReader::restart() {
+    void IndexReader::restart() {
         _currPageOffset = 0;
         _resultCount = 0;
         _pageData = nullptr;
@@ -160,15 +160,15 @@ namespace PLP {
         _fileOffset = 0;
     }
 
-    unsigned long long ResultSetReader::getLineNumber() const {
+    unsigned long long IndexReader::getLineNumber() const {
         return _currLineNum;
     }
 
-    unsigned long long ResultSetReader::getLineFileOffset() const {
+    unsigned long long IndexReader::getLineFileOffset() const {
         return _currLineFileOffset;
     }
 
-    unsigned long long ResultSetReader::getResultNumber() const {
+    unsigned long long IndexReader::getResultNumber() const {
         if (_resultCount == 0) {
             return 0;
         }

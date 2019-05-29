@@ -251,7 +251,7 @@ void PagedFileViewWidget::readBlockIfRequired() {
 }
 
 bool PagedFileViewWidget::getLineFromIndex(
-        CoreObjPtr<PLP::ResultSetReaderI>& indexReader,
+        CoreObjPtr<PLP::IndexReaderI>& indexReader,
         QString& data
 ) {
     char* lineStart = nullptr;

@@ -77,7 +77,7 @@ const QString& FileView::getFilePath() {
     return _filePath;
 }
 
-void FileView::openIndex(CoreObjPtr<PLP::ResultSetReaderI> indexReader){
+void FileView::openIndex(CoreObjPtr<PLP::IndexReaderI> indexReader){
     std::wstring path(indexReader->getFilePath());
     QString qPath = QString::fromStdWString(path);
 

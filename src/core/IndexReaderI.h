@@ -3,9 +3,9 @@
 #include <string>
 
 namespace PLP {
-    class ResultSetReaderI {
+    class IndexReaderI {
     public:
-        virtual ~ResultSetReaderI() {}
+        virtual ~IndexReaderI() {}
         virtual unsigned long long getLineFileOffset() const = 0;
         virtual bool getResult(unsigned long long number, unsigned long long& lineNumber) = 0;
         virtual bool nextResult(unsigned long long& lineNumber) = 0;

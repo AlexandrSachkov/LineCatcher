@@ -11,7 +11,7 @@
 
 #include "coreobjptr.h"
 #include "FileReaderI.h"
-#include "ResultSetReaderI.h"
+#include "IndexReaderI.h"
 
 #include <memory>
 
@@ -23,7 +23,7 @@ public:
     ~FileView();
 
     const QString& getFilePath();
-    void openIndex(CoreObjPtr<PLP::ResultSetReaderI> indexReader);
+    void openIndex(CoreObjPtr<PLP::IndexReaderI> indexReader);
 signals:
 
 private slots:
