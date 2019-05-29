@@ -1,6 +1,7 @@
 #pragma once
 
 #include "FileWriterI.h"
+#include "FileLock.h"
 
 #include <string>
 #include <vector>
@@ -33,5 +34,6 @@ namespace PLP {
 
     private:
         std::unique_ptr<PagedWriter> _writer;
+        FileScopedLock _writingLock;
     };
 }

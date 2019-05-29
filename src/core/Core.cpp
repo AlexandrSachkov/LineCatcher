@@ -219,6 +219,22 @@ namespace PLP {
         }
     }
 
+    void Core::releaseFileReaderL(std::shared_ptr<FileReader>& p) {
+        p.reset();
+    }
+
+    void Core::releaseFileWriterL(std::shared_ptr<FileWriter>& p) {
+        p.reset();
+    }
+
+    void Core::releaseIndexReaderL(std::shared_ptr<ResultSetReader>& p) {
+        p.reset();
+    }
+
+    void Core::releaseIndexWriterL(std::shared_ptr<ResultSetWriter>& p) {
+        p.reset();
+    }
+
     std::shared_ptr<FileReader> Core::createFileReaderL(
         const std::string& path,
         unsigned long long preferredBuffSizeBytes
@@ -638,6 +654,10 @@ namespace PLP {
         plpClass.addFunction("createFileWriter", &Core::createFileWriterL);
         plpClass.addFunction("createResultSetReader", &Core::createResultSetReaderL);
         plpClass.addFunction("createResultSetWriter", &Core::createResultSetWriterL);
+        plpClass.addFunction("releaseFileReader", &Core::releaseFileReaderL);
+        plpClass.addFunction("releaseFileWriter", &Core::releaseFileWriterL);
+        plpClass.addFunction("releaseIndexReader", &Core::releaseIndexReaderL);
+        plpClass.addFunction("releaseIndexWriter", &Core::releaseIndexWriterL);
         plpClass.addFunction("search", &Core::searchL);
         plpClass.addFunction("searchI", &Core::searchIL);
         plpClass.addFunction("searchMultiline", &Core::searchMultilineL);
@@ -659,7 +679,6 @@ namespace PLP {
             fileReaderClass.addFunction("getLineNumber", &FileReader::getLineNumber);
             fileReaderClass.addFunction("getNumberOfLines", &FileReader::getNumberOfLines);
             fileReaderClass.addFunction("restart", &FileReader::restart);
-            fileReaderClass.addFunction("release", &FileReader::release);
             fileReaderClass.endClass();
         }
 
@@ -668,7 +687,6 @@ namespace PLP {
         bool(FileWriter::*appendLine)(const std::string&) = &FileWriter::appendLine;
         fileWriterClass.addFunction("append", append);
         fileWriterClass.addFunction("appendLine", appendLine);
-        fileWriterClass.addFunction("release", &FileWriter::release);
         fileWriterClass.endClass();
 
         auto resultReaderClass = module.beginClass<ResultSetReader>("ResultSetReader");
@@ -679,14 +697,12 @@ namespace PLP {
         resultReaderClass.addFunction("getFilePath", &ResultSetReader::getFilePath);
         resultReaderClass.addFunction("getDataFilePath", &ResultSetReader::getDataFilePath);
         resultReaderClass.addFunction("restart", &ResultSetReader::restart);
-        resultReaderClass.addFunction("release", &ResultSetReader::release);
         resultReaderClass.endClass();
 
         auto resultWriterClass = module.beginClass<ResultSetWriter>("ResultSetWriter");
         bool(ResultSetWriter::*appendCurrLine)(std::shared_ptr<FileReader>) = &ResultSetWriter::appendCurrLine;
         resultWriterClass.addFunction("appendCurrLine", appendCurrLine);
         resultWriterClass.addFunction("getNumResults", &ResultSetWriter::getNumResults);
-        resultWriterClass.addFunction("release", &ResultSetWriter::release);
         resultWriterClass.endClass();
 
         {

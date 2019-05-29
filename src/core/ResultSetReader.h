@@ -1,6 +1,8 @@
 #pragma once
 
 #include "ResultSetReaderI.h"
+#include "FileLock.h"
+
 #include <string>
 #include <memory>
 #include <tuple>
@@ -47,5 +49,6 @@ namespace PLP {
 
         char* _pageData = nullptr;
         unsigned long long _pageSize = 0;
+        FileScopedLock _readingLock;
     };
 }

@@ -28,6 +28,12 @@ namespace PLP {
         }
         std::wstring indexPath = directory + fileName;
 
+        FileScopedLock writingLock = FileScopedLock::lockForWriting(indexPath);
+        if (!writingLock.isLocked()) {
+            Logger::send(ERR, "Unable to acquare a write lock on file " + wstring_to_string(indexPath) + ". File is in use");
+            return false;
+        }
+
         _dataFilePath = wstring_to_string(dataFilePath);
 
         FStreamPagedWriter* writer = new FStreamPagedWriter();
@@ -53,6 +59,7 @@ namespace PLP {
             return false;
         }
 
+        _writingLock = std::move(writingLock);
         return true;
     }
 

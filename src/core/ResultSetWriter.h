@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ResultSetWriterI.h"
+#include "FileLock.h"
 
 #include <string>
 #include <memory>
@@ -44,5 +45,7 @@ namespace PLP {
         
         unsigned long long _prevLineNum = 0;
         unsigned long long _resultCount = 0;
+
+        FileScopedLock _writingLock;
     };
 }

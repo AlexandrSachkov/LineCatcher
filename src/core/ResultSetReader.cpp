@@ -21,7 +21,12 @@ namespace PLP {
         release();
         _path = path;
 
-        //MemMappedPagedReader* reader = new MemMappedPagedReader();
+        FileScopedLock readingLock = FileScopedLock::lockForReading(path);
+        if (!readingLock.isLocked()) {
+            Logger::send(ERR, "Unable to acquare a read lock on file " + wstring_to_string(path) + ". Release writers using the file");
+            return false;
+        }
+
         FStreamPagedReader* reader = new FStreamPagedReader();
         _reader.reset(reader);
         if (!reader->initialize(path, preferredBufferSizeBytes)) {
@@ -52,6 +57,8 @@ namespace PLP {
 
         _currPageOffset += sizeof(unsigned long long);
         _fileOffset = _currPageOffset;
+
+        _readingLock = std::move(readingLock);
         return true;
     }
 

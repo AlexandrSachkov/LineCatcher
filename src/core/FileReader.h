@@ -1,6 +1,7 @@
 #pragma once
 
 #include "FileReaderI.h"
+#include "FileLock.h"
 
 #include <string>
 #include <tuple>
@@ -45,5 +46,6 @@ namespace PLP {
     private:
         std::unique_ptr<PagedReader> _pager = nullptr;
         std::unique_ptr<IndexedLineReader> _lineReader = nullptr;
+        FileScopedLock _readingLock;
     };
 }

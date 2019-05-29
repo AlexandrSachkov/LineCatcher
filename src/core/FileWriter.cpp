@@ -20,12 +20,19 @@ namespace PLP {
     ) {
         release();
 
+        FileScopedLock writingLock = FileScopedLock::lockForWriting(path);
+        if (!writingLock.isLocked()) {
+            Logger::send(ERR, "Unable to acquare a write lock on file " + wstring_to_string(path) + ". File is in use");
+            return false;
+        }
+
         FStreamPagedWriter* writer = new FStreamPagedWriter();
         _writer.reset(writer);
         if (!writer->initialize(path, preferredBuffSizeBytes, overwriteIfExists, asyncTaskRunner)) {
             return false;
         }
 
+        _writingLock = std::move(writingLock);
         return true;
     }
 

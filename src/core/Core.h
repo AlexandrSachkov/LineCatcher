@@ -94,6 +94,11 @@ namespace PLP {
             bool overwriteIfExists
         );
 
+        void releaseFileReaderL(std::shared_ptr<FileReader>& p);
+        void releaseFileWriterL(std::shared_ptr<FileWriter>& p);
+        void releaseIndexReaderL(std::shared_ptr<ResultSetReader>& p);
+        void releaseIndexWriterL(std::shared_ptr<ResultSetWriter>& p);
+
         bool searchGeneral(
             FileReaderI* fileReader,
             ResultSetReaderI* indexReader,
