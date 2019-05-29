@@ -26,22 +26,22 @@ LuaSyntaxHighlighter::LuaSyntaxHighlighter(QTextDocument *parent) : QSyntaxHighl
     rule.format = classFormat;
     highlightingRules.append(rule);
 
-    singleLineCommentFormat.setForeground(Qt::red);
-    rule.pattern = QRegularExpression("--[^\n]*");
-    rule.format = singleLineCommentFormat;
-    highlightingRules.append(rule);
-
     multiLineCommentFormat.setForeground(Qt::red);
+
+    functionFormat.setFontItalic(true);
+    functionFormat.setForeground(Qt::blue);
+    rule.pattern = QRegularExpression("\\b[A-Za-z0-9_]+(?=\\()");
+    rule.format = functionFormat;
+    highlightingRules.append(rule);
 
     quotationFormat.setForeground(Qt::darkGreen);
     rule.pattern = QRegularExpression("\".*\"");
     rule.format = quotationFormat;
     highlightingRules.append(rule);
 
-    functionFormat.setFontItalic(true);
-    functionFormat.setForeground(Qt::blue);
-    rule.pattern = QRegularExpression("\\b[A-Za-z0-9_]+(?=\\()");
-    rule.format = functionFormat;
+    singleLineCommentFormat.setForeground(Qt::red);
+    rule.pattern = QRegularExpression("--[^\n]*");
+    rule.format = singleLineCommentFormat;
     highlightingRules.append(rule);
 
     commentStartExpression = QRegularExpression("--\\[\\[");
