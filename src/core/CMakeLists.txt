@@ -23,16 +23,21 @@ ENDIF(MSVC)
 # =====================================================================================
 
 SET(HEADERS
+    CircularLineBuffer.h
     Core.h
     CoreI.h
+    FileLock.h
     FileReader.h
     FileReaderI.h
     FileWriter.h
     FileWriterI.h
+    FrameBuffer.h
     FStreamPagedReader.h
     FStreamPagedWriter.h
     IndexedLineReader.h
+    LineBuffer.h
     LineReader.h
+    Logger.h
     MemMappedPagedReader.h
     PagedReader.h
     PagedWriter.h
@@ -40,23 +45,32 @@ SET(HEADERS
     ResultSetReaderI.h
     ResultSetWriter.h
     ResultSetWriterI.h
+    ReturnType.h
+    Scanner.h
     TaskRunner.h
+    TextComparator.h
     Thread.h
     Timer.h
     Utils.h
     )
 
 SET(SOURCES 
+    CircularLineBuffer.cpp
     Core.cpp
+    FileLock.cpp
     FileReader.cpp
     FileWriter.cpp
+    FrameBuffer.cpp
     FStreamPagedReader.cpp
     FStreamPagedWriter.cpp
     IndexedLineReader.cpp
+    LineBuffer.cpp
     LineReader.cpp
+    Logger.cpp
     MemMappedPagedReader.cpp
     ResultSetReader.cpp
     ResultSetWriter.cpp
+    Scanner.cpp
     Thread.cpp
     Utils.cpp
     )
