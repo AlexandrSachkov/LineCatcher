@@ -263,7 +263,7 @@ void SearchView::startSearch() {
     }
 
     QString destPath = destDir + "/" + destName;
-    PLP::ResultSetWriterI* indexWriter = _plpCore->createResultSetWriter(destPath.toStdString(), 0, fileReader, true);
+    PLP::IndexWriterI* indexWriter = _plpCore->createIndexWriter(destPath.toStdString(), 0, fileReader, true);
     if(!indexWriter){
         QMessageBox::information(this,"PLP","Index writer failed to initialize",QMessageBox::Ok);
         _plpCore->release(fileReader);
@@ -281,7 +281,7 @@ void SearchView::startSearch() {
 void SearchView::startRegularSearch(
         PLP::FileReaderI* fileReader,
         PLP::IndexReaderI* indexReader,
-        PLP::ResultSetWriterI* indexWriter,
+        PLP::IndexWriterI* indexWriter,
         unsigned long long startLine,
         unsigned long long endLine,
         unsigned long long maxNumResults
@@ -344,7 +344,7 @@ void SearchView::startRegularSearch(
 void SearchView::startMultilineSearch(
         PLP::FileReaderI* fileReader,
         PLP::IndexReaderI* indexReader,
-        PLP::ResultSetWriterI* indexWriter,
+        PLP::IndexWriterI* indexWriter,
         unsigned long long startLine,
         unsigned long long endLine,
         unsigned long long maxNumResults

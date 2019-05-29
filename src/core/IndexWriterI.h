@@ -2,9 +2,9 @@
 
 namespace PLP {
     class FileReaderI;
-    class ResultSetWriterI {
+    class IndexWriterI {
     public:
-        virtual ~ResultSetWriterI() {}
+        virtual ~IndexWriterI() {}
         virtual bool appendCurrLine(const FileReaderI* fReader) = 0;
         virtual bool appendCurrLine(unsigned long long lineNumber, unsigned long long fileOffset) = 0;
         virtual unsigned long long getNumResults() const = 0;

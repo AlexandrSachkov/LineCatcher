@@ -4,7 +4,7 @@
 #include "FileReader.h"
 #include "FileWriter.h"
 #include "IndexReader.h"
-#include "ResultSetWriter.h"
+#include "IndexWriter.h"
 #include "Utils.h"
 #include "Timer.h"
 #include "PagedReader.h"
@@ -170,7 +170,7 @@ namespace PLP {
         return resSet.release();
     }
 
-    ResultSetWriterI* Core::createResultSetWriter(
+    IndexWriterI* Core::createIndexWriter(
         const std::string& path,
         unsigned long long preferredBuffSizeBytes,
         const FileReaderI* fReader,
@@ -181,7 +181,7 @@ namespace PLP {
             return false;
         }
 
-        std::unique_ptr<ResultSetWriter> resSet(new ResultSetWriter());
+        std::unique_ptr<IndexWriter> resSet(new IndexWriter());
         std::wstring dataPath(fReader->getFilePath());
 
         if (!resSet->initialize(
@@ -213,7 +213,7 @@ namespace PLP {
         }
     }
 
-    void Core::release(ResultSetWriterI* obj) {
+    void Core::release(IndexWriterI* obj) {
         if (obj) {
             delete obj;
         }
@@ -231,7 +231,7 @@ namespace PLP {
         p.reset();
     }
 
-    void Core::releaseIndexWriterL(std::shared_ptr<ResultSetWriter>& p) {
+    void Core::releaseIndexWriterL(std::shared_ptr<IndexWriter>& p) {
         p.reset();
     }
 
@@ -267,14 +267,14 @@ namespace PLP {
         );
     }
 
-    std::shared_ptr<ResultSetWriter> Core::createResultSetWriterL(
+    std::shared_ptr<IndexWriter> Core::createIndexWriterL(
         const std::string& path,
         unsigned long long preferredBuffSizeBytes,
         const std::shared_ptr<FileReader> fReader,
         bool overwriteIfExists
     ) {
-        return std::shared_ptr<ResultSetWriter>(
-            static_cast<ResultSetWriter*>(createResultSetWriter(path, preferredBuffSizeBytes, fReader.get(), overwriteIfExists))
+        return std::shared_ptr<IndexWriter>(
+            static_cast<IndexWriter*>(createIndexWriter(path, preferredBuffSizeBytes, fReader.get(), overwriteIfExists))
         );
     }
 
@@ -462,7 +462,7 @@ namespace PLP {
     bool Core::search(
         FileReaderI* fileReader,
         IndexReaderI* indexReader,
-        ResultSetWriterI* indexWriter,
+        IndexWriterI* indexWriter,
         unsigned long long start,
         unsigned long long end, //0 for end of file, inclusive
         unsigned long long maxNumResults,
@@ -494,7 +494,7 @@ namespace PLP {
     bool Core::searchMultiline(
         FileReaderI* fileReader,
         IndexReaderI* indexReader,
-        ResultSetWriterI* indexWriter,
+        IndexWriterI* indexWriter,
         unsigned long long start,
         unsigned long long end, //0 for end of file, inclusive
         unsigned long long maxNumResults,
@@ -525,7 +525,7 @@ namespace PLP {
 
     bool Core::searchL(
         std::shared_ptr<FileReader> fileReader,
-        std::shared_ptr<ResultSetWriter> indexWriter,
+        std::shared_ptr<IndexWriter> indexWriter,
         unsigned long long start,
         unsigned long long end, //0 for end of file, inclusive
         unsigned long long maxNumResults,
@@ -550,7 +550,7 @@ namespace PLP {
     bool Core::searchIL(
         std::shared_ptr<FileReader> fileReader,
         std::shared_ptr<IndexReader> indexReader,
-        std::shared_ptr<ResultSetWriter> indexWriter,
+        std::shared_ptr<IndexWriter> indexWriter,
         unsigned long long start,
         unsigned long long end, //0 for end of file, inclusive
         unsigned long long maxNumResults,
@@ -574,7 +574,7 @@ namespace PLP {
 
     bool Core::searchMultilineL(
         std::shared_ptr<FileReader> fileReader,
-        std::shared_ptr<ResultSetWriter> indexWriter,
+        std::shared_ptr<IndexWriter> indexWriter,
         unsigned long long start,
         unsigned long long end, //0 for end of file, inclusive
         unsigned long long maxNumResults,
@@ -604,7 +604,7 @@ namespace PLP {
     bool Core::searchMultilineIL(
         std::shared_ptr<FileReader> fileReader,
         std::shared_ptr<IndexReader> indexReader,
-        std::shared_ptr<ResultSetWriter> indexWriter,
+        std::shared_ptr<IndexWriter> indexWriter,
         unsigned long long start,
         unsigned long long end, //0 for end of file, inclusive
         unsigned long long maxNumResults,
@@ -653,7 +653,7 @@ namespace PLP {
         plpClass.addFunction("createFileReader", &Core::createFileReaderL);
         plpClass.addFunction("createFileWriter", &Core::createFileWriterL);
         plpClass.addFunction("createIndexReader", &Core::createIndexReaderL);
-        plpClass.addFunction("createResultSetWriter", &Core::createResultSetWriterL);
+        plpClass.addFunction("createIndexWriter", &Core::createIndexWriterL);
         plpClass.addFunction("releaseFileReader", &Core::releaseFileReaderL);
         plpClass.addFunction("releaseFileWriter", &Core::releaseFileWriterL);
         plpClass.addFunction("releaseIndexReader", &Core::releaseIndexReaderL);
@@ -699,10 +699,10 @@ namespace PLP {
         resultReaderClass.addFunction("restart", &IndexReader::restart);
         resultReaderClass.endClass();
 
-        auto resultWriterClass = module.beginClass<ResultSetWriter>("ResultSetWriter");
-        bool(ResultSetWriter::*appendCurrLine)(std::shared_ptr<FileReader>) = &ResultSetWriter::appendCurrLine;
+        auto resultWriterClass = module.beginClass<IndexWriter>("IndexWriter");
+        bool(IndexWriter::*appendCurrLine)(std::shared_ptr<FileReader>) = &IndexWriter::appendCurrLine;
         resultWriterClass.addFunction("appendCurrLine", appendCurrLine);
-        resultWriterClass.addFunction("getNumResults", &ResultSetWriter::getNumResults);
+        resultWriterClass.addFunction("getNumResults", &IndexWriter::getNumResults);
         resultWriterClass.endClass();
 
         {

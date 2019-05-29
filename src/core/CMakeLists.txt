@@ -43,8 +43,8 @@ SET(HEADERS
     PagedWriter.h
     IndexReader.h
     IndexReaderI.h
-    ResultSetWriter.h
-    ResultSetWriterI.h
+    IndexWriter.h
+    IndexWriterI.h
     ReturnType.h
     Scanner.h
     TaskRunner.h
@@ -69,7 +69,7 @@ SET(SOURCES
     Logger.cpp
     MemMappedPagedReader.cpp
     IndexReader.cpp
-    ResultSetWriter.cpp
+    IndexWriter.cpp
     Scanner.cpp
     Thread.cpp
     Utils.cpp

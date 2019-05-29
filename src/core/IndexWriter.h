@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ResultSetWriterI.h"
+#include "IndexWriterI.h"
 #include "FileLock.h"
 
 #include <string>
@@ -12,10 +12,10 @@ namespace PLP {
     class TaskRunner;
     class FileReader;
 
-    class ResultSetWriter : public ResultSetWriterI {
+    class IndexWriter : public IndexWriterI {
     public:
-        ResultSetWriter();
-        ~ResultSetWriter();
+        IndexWriter();
+        ~IndexWriter();
 
         bool initialize(
             const std::wstring& path,

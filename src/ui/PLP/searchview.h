@@ -37,7 +37,7 @@ private:
     void startRegularSearch(
             PLP::FileReaderI* fileReader,
             PLP::IndexReaderI* indexReader,
-            PLP::ResultSetWriterI* indexWriter,
+            PLP::IndexWriterI* indexWriter,
             unsigned long long startLine,
             unsigned long long endLine,
             unsigned long long maxNumResults
@@ -46,7 +46,7 @@ private:
     void startMultilineSearch(
             PLP::FileReaderI* fileReader,
             PLP::IndexReaderI* indexReader,
-            PLP::ResultSetWriterI* indexWriter,
+            PLP::IndexWriterI* indexWriter,
             unsigned long long startLine,
             unsigned long long endLine,
             unsigned long long maxNumResults

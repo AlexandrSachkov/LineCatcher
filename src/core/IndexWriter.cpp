@@ -1,4 +1,4 @@
-#include "ResultSetWriter.h"
+#include "IndexWriter.h"
 #include "FStreamPagedWriter.h"
 #include "Utils.h"
 #include "FileReader.h"
@@ -6,13 +6,13 @@
 #include "Logger.h"
 
 namespace PLP {
-    ResultSetWriter::ResultSetWriter() {}
-    ResultSetWriter::~ResultSetWriter() {
+    IndexWriter::IndexWriter() {}
+    IndexWriter::~IndexWriter() {
         Logger::send(INFO, "Releasing index writer");
         release();
     }
 
-    bool ResultSetWriter::initialize(
+    bool IndexWriter::initialize(
         const std::wstring& path,
         const std::wstring& dataFilePath,
         unsigned long long preferredBufferSizeBytes,
@@ -63,7 +63,7 @@ namespace PLP {
         return true;
     }
 
-    void ResultSetWriter::release() {
+    void IndexWriter::release() {
         if (_writer) {
             flush();
         }
@@ -73,7 +73,7 @@ namespace PLP {
         _resultCount = 0;
     }
 
-    bool ResultSetWriter::appendCurrLine(const FileReaderI* fReader) {
+    bool IndexWriter::appendCurrLine(const FileReaderI* fReader) {
         if (!fReader) {
             return false;
         }
@@ -81,11 +81,11 @@ namespace PLP {
         return appendCurrLine(fReader->getLineNumber(), fReader->getLineFileOffset());
     }
 
-    bool ResultSetWriter::appendCurrLine(const std::shared_ptr<FileReader> fReader) {
+    bool IndexWriter::appendCurrLine(const std::shared_ptr<FileReader> fReader) {
         return appendCurrLine(fReader.get());
     }
 
-    bool ResultSetWriter::appendCurrLine(unsigned long long lineNumber, unsigned long long fileOffset) {
+    bool IndexWriter::appendCurrLine(unsigned long long lineNumber, unsigned long long fileOffset) {
         if (lineNumber == _prevLineNum && _resultCount > 0) {
             Logger::send(ERR, "Indexes must be consecutive");
             return false;
@@ -103,18 +103,18 @@ namespace PLP {
         return true;
     }
 
-    bool ResultSetWriter::flush() {
+    bool IndexWriter::flush() {
         if (!_writer->flush()) {
             return false;
         }
         return updateResultCount();
     }
 
-    unsigned long long ResultSetWriter::getNumResults() const {
+    unsigned long long IndexWriter::getNumResults() const {
         return _resultCount;
     }
 
-    bool ResultSetWriter::updateResultCount() {
+    bool IndexWriter::updateResultCount() {
         unsigned long long resultCountFileOffset =
             sizeof(RESULT_SET_VERSION) +
             sizeof(unsigned int) + //length of data file path

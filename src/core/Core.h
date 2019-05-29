@@ -25,7 +25,7 @@ namespace PLP {
     class FileReader;
     class FileWriter;
     class IndexReader;
-    class ResultSetWriter;
+    class IndexWriter;
 
     class Core : public CoreI {
     public:
@@ -58,7 +58,7 @@ namespace PLP {
             unsigned long long preferredBuffSizeBytes
         ) override;
 
-        ResultSetWriterI* createResultSetWriter(
+        IndexWriterI* createIndexWriter(
             const std::string& path,
             unsigned long long preferredBuffSizeBytes,
             const FileReaderI* fReader,
@@ -68,7 +68,7 @@ namespace PLP {
         void release(FileReaderI*) override;
         void release(FileWriterI*) override;
         void release(IndexReaderI*) override;
-        void release(ResultSetWriterI*) override;
+        void release(IndexWriterI*) override;
 
         //Lua interface
         std::shared_ptr<FileReader> createFileReaderL(
@@ -87,7 +87,7 @@ namespace PLP {
             unsigned long long preferredBuffSizeBytes
         );
 
-        std::shared_ptr<ResultSetWriter> createResultSetWriterL(
+        std::shared_ptr<IndexWriter> createIndexWriterL(
             const std::string& path,
             unsigned long long preferredBuffSizeBytes,
             const std::shared_ptr<FileReader> fReader,
@@ -97,7 +97,7 @@ namespace PLP {
         void releaseFileReaderL(std::shared_ptr<FileReader>& p);
         void releaseFileWriterL(std::shared_ptr<FileWriter>& p);
         void releaseIndexReaderL(std::shared_ptr<IndexReader>& p);
-        void releaseIndexWriterL(std::shared_ptr<ResultSetWriter>& p);
+        void releaseIndexWriterL(std::shared_ptr<IndexWriter>& p);
 
         bool searchGeneral(
             FileReaderI* fileReader,
@@ -122,7 +122,7 @@ namespace PLP {
         bool search(
             FileReaderI* fileReader,
             IndexReaderI* indexReader,
-            ResultSetWriterI* indexWriter,
+            IndexWriterI* indexWriter,
             unsigned long long start,
             unsigned long long end, //0 for end of file, inclusive
             unsigned long long maxNumResults,
@@ -133,7 +133,7 @@ namespace PLP {
         bool Core::searchMultiline(
             FileReaderI* fileReader,
             IndexReaderI* indexReader,
-            ResultSetWriterI* indexWriter,
+            IndexWriterI* indexWriter,
             unsigned long long start,
             unsigned long long end, //0 for end of file, inclusive
             unsigned long long maxNumResults,
@@ -143,7 +143,7 @@ namespace PLP {
 
         bool searchL(
             std::shared_ptr<FileReader> fileReader,
-            std::shared_ptr<ResultSetWriter> indexWriter,
+            std::shared_ptr<IndexWriter> indexWriter,
             unsigned long long start,
             unsigned long long end, //0 for end of file, inclusive
             unsigned long long maxNumResults,
@@ -153,7 +153,7 @@ namespace PLP {
         bool searchIL(
             std::shared_ptr<FileReader> fileReader,
             std::shared_ptr<IndexReader> indexReader,
-            std::shared_ptr<ResultSetWriter> indexWriter,
+            std::shared_ptr<IndexWriter> indexWriter,
             unsigned long long start,
             unsigned long long end, //0 for end of file, inclusive
             unsigned long long maxNumResults,
@@ -162,7 +162,7 @@ namespace PLP {
 
         bool searchMultilineL(
             std::shared_ptr<FileReader> fileReader,
-            std::shared_ptr<ResultSetWriter> indexWriter,
+            std::shared_ptr<IndexWriter> indexWriter,
             unsigned long long start,
             unsigned long long end, //0 for end of file, inclusive
             unsigned long long maxNumResults,
@@ -172,7 +172,7 @@ namespace PLP {
         bool searchMultilineIL(
             std::shared_ptr<FileReader> fileReader,
             std::shared_ptr<IndexReader> indexReader,
-            std::shared_ptr<ResultSetWriter> indexWriter,
+            std::shared_ptr<IndexWriter> indexWriter,
             unsigned long long start,
             unsigned long long end, //0 for end of file, inclusive
             unsigned long long maxNumResults,
