@@ -9,10 +9,10 @@ LuaSyntaxHighlighter::LuaSyntaxHighlighter(QTextDocument *parent) : QSyntaxHighl
     QStringList keywordPatterns;
     keywordPatterns << "\\blocal\\b" //variable prefix
                     << "\\bnil\\b" << "\\btrue\\b" << "\\bfalse\\b" //predefined values
-                    << "\\band\\b" << "\\bor\\b" << "\\bnot\\b" << "\\b..\\b" << "\\b#\\b" //operators
-                    << "\\bwhile\\b" << "\\bdo\\b" << "\\bend\\b" << "\\bfor\\b" << "\\in\\b" << "\\brepeat\\b"  //loop control
+                    << "\\band\\b" << "\\bor\\b" << "\\bnot\\b" //operators
+                    << "\\bwhile\\b" << "\\bdo\\b" << "\\bend\\b" << "\\bfor\\b" << "\\bin\\b" << "\\brepeat\\b"  //loop control
                     << "\\buntil\\b" << "\\bbreak\\b" << "\\breturn\\b" //loop control continued
-                    << "\\if\\b" << "\\bthen\\b" << "\\belse\\b" << "\\belseif\\b" //if statement
+                    << "\\bif\\b" << "\\bthen\\b" << "\\belse\\b" << "\\belseif\\b" //if statement
                     ;
     foreach (const QString &pattern, keywordPatterns) {
         rule.pattern = QRegularExpression(pattern);
