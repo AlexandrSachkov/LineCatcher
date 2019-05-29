@@ -207,10 +207,12 @@ void MainWindow::openIndex(const QString& path){
     QString qDataFileLocalPath = Common::getDirFromPath(path) + path.split('/').last();
     std::vector<QString> possibleFileLocations({qDataFileOriginalPath, qDataFileLocalPath});
     if(!openFile(possibleFileLocations)){
-        QMessageBox::critical(this,
-          "PLP","Failed to open file: " + qDataFileOriginalPath + ", " + qDataFileLocalPath,
-          QMessageBox::Ok
-        );
+        if(!_plpCore->isCancelled()){
+            QMessageBox::critical(this,
+                "PLP","Failed to open file at " + qDataFileOriginalPath + " or " + qDataFileLocalPath,
+                QMessageBox::Ok
+            );
+        }
         return;
     }
 

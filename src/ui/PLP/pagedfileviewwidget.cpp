@@ -6,6 +6,7 @@
 #include <QTextBlock>
 #include <QtMath>
 #include <QScrollBar>
+#include <QMessageBox>
 
 #include "ReturnType.h"
 
@@ -163,7 +164,8 @@ void PagedFileViewWidget::readNextBlock() {
     }
 
     if(result == PLP::LineReaderResult::ERROR){
-        //TODO error message
+        QMessageBox::critical(this,"PLP","Failed to read block.",QMessageBox::Ok);
+        return;
     }
 
     if(_endLineNum - _startLineNum > MAX_NUM_BLOCKS){
@@ -228,7 +230,8 @@ void PagedFileViewWidget::readPreviousBlock() {
     }
 
     if(result == PLP::LineReaderResult::ERROR){
-        //TODO error message
+        QMessageBox::critical(this,"PLP","Failed to read block.",QMessageBox::Ok);
+        return;
     }
 
     //insert last empty block
@@ -308,7 +311,8 @@ void PagedFileViewWidget::gotoLine(unsigned long long lineNum){
     }
 
     if(result == PLP::LineReaderResult::ERROR){
-        //TODO show error message
+        QMessageBox::critical(this,"PLP","Failed to read block.",QMessageBox::Ok);
+        return;
     }
 
     if(_endLineNum - _startLineNum > MAX_NUM_BLOCKS){
