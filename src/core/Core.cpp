@@ -691,9 +691,9 @@ namespace PLP {
 
         auto resultReaderClass = module.beginClass<IndexReader>("IndexReader");
         std::tuple<bool, unsigned long long>(IndexReader::*nextResult)() = &IndexReader::nextResult;
-        resultReaderClass.addFunction("nextResult", nextResult);
+        resultReaderClass.addFunction("nextIndex", nextResult);
         resultReaderClass.addFunction("getLineNumber", &IndexReader::getLineNumber);
-        resultReaderClass.addFunction("getNumResults", &IndexReader::getNumResults);
+        resultReaderClass.addFunction("getNumIndexes", &IndexReader::getNumResults);
         resultReaderClass.addFunction("getFilePath", &IndexReader::getFilePath);
         resultReaderClass.addFunction("getDataFilePath", &IndexReader::getDataFilePath);
         resultReaderClass.addFunction("restart", &IndexReader::restart);
@@ -701,8 +701,8 @@ namespace PLP {
 
         auto resultWriterClass = module.beginClass<IndexWriter>("IndexWriter");
         bool(IndexWriter::*appendCurrLine)(std::shared_ptr<FileReader>) = &IndexWriter::appendCurrLine;
-        resultWriterClass.addFunction("appendCurrLine", appendCurrLine);
-        resultWriterClass.addFunction("getNumResults", &IndexWriter::getNumResults);
+        resultWriterClass.addFunction("appendCurrentLine", appendCurrLine);
+        resultWriterClass.addFunction("getNumIndexes", &IndexWriter::getNumResults);
         resultWriterClass.endClass();
 
         {

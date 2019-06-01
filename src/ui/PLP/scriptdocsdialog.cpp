@@ -1,4 +1,4 @@
-#include "aboutdialog.h"
+#include "scriptdocsdialog.h"
 #include "common.h"
 
 #include <QBoxLayout>
@@ -9,7 +9,7 @@
 #include <QFile>
 #include <QMessageBox>
 
-AboutDialog::AboutDialog(QWidget *parent) : QWidget(parent)
+ScriptDocsDialog::ScriptDocsDialog(QWidget *parent) : QWidget(parent)
 {
     QVBoxLayout* mainLayout = new QVBoxLayout();
     this->setLayout(mainLayout);
@@ -17,15 +17,14 @@ AboutDialog::AboutDialog(QWidget *parent) : QWidget(parent)
     mainLayout->setSpacing(0);
 
     setWindowFlags(Qt::Window);
-    setWindowTitle("About");
-    setWindowModality(Qt::WindowModal);
-    setMinimumWidth(400);
-    setMinimumHeight(300);
+    setWindowTitle("Lua API Documentation");
+    setMinimumWidth(800);
+    setMinimumHeight(900);
 
-    QString path(QString::fromStdString(Common::RESOURCE_PATH) + "/about.html");
+    QString path(QString::fromStdString(Common::RESOURCE_PATH) + "/scriptdocs.html");
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QMessageBox::critical(this,"PLP","Failed to open about.html",QMessageBox::Ok);
+        QMessageBox::critical(this,"PLP","Failed to open scriptdocs.html",QMessageBox::Ok);
         return;
     }
 
@@ -33,7 +32,4 @@ AboutDialog::AboutDialog(QWidget *parent) : QWidget(parent)
     mainLayout->addWidget(browser);
     browser->setOpenExternalLinks(true);
     browser->setHtml(file.readAll());
-
-    QPushButton* ok = new QPushButton("Ok", this);
-    mainLayout->addWidget(ok, 1, Qt::AlignRight);
 }

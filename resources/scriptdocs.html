@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+h1 {
+    text-align: center;
+}
+
+p, li {
+    font-size: 16px;
+}
+
+p.sectionHeader {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+p.desc {
+    font-size: 14px;
+}
+
+p.objClass {
+    color: #3d86ff;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+code {
+    background-color: #ddeaff;
+}
+
+
+
+span.type {
+    color: blue;
+    font-style: normal;
+    font-size: 16px;
+}
+
+</style>
+</head>
+<body>
+
+<h1>Lua API Documentation</h1>
+<p>
+    <p class="sectionHeader">Table of Contents:</p>
+    <ol>
+        <li><b>File operations</b></li>
+            <ol type="a">
+                <li><a href="#readingFileTag">Reading file</a></li>
+                <li><a href="#writingFileTag">Writing file</a></li>
+                <li><a href="#readingIndexTag">Reading index</a></li>
+                <li><a href="#writingIndexTag">Writing index</a></li>
+            </ol>
+        <li><b>Searching</b></li>
+            <ol type="a">
+                <li>Search methods</li>
+                <li>Comparators</li>
+            </ol>
+        <li><b>Utility</b></li>
+    </ol>
+</p>
+
+<hr>
+
+<p class="sectionHeader">File operations:</p>
+
+
+
+<!----------------------------------------------------- READING FILE --------------------------------------------------->
+<p id="readingFileTag"><b>Reading file</b></p>
+<p>
+    <code><span class="type">FileReader</span> PLP:core():createFileReader(<span class="type">string</span> path, <span class="type">number</span> buffSize)</code>
+</p>
+<p class="desc">Creates object for reading file</p>
+
+<p>
+    <dl>
+        <dt>path:</dt>
+        <dd>- full path to the file</dd>
+        <dt>buffSize:</dt>
+        <dd>- preferred buffer size in bytes (0 to use application default). Exact size may vary</dd>
+        <dt>returns:</dt>
+        <dd>- FileReader object if successful. Returns <span class="type">nil</span> on failure</dd>
+    </dl>
+</p>
+
+<p>
+    <code><span class="type">void</span> PLP:core():releaseFileReader(<span class="type">FileReader</span> fileReader)</code>
+</p>
+<p class="desc">Releases FileReader object</p>
+    
+<p>
+    <dl>
+        <dt>fileReader:</dt>
+        <dd>- FileReader object</dd>
+        <dt>returns:</dt>
+        <dd>- nothing</dd>
+    </dl>
+</p>
+
+<p class="objClass">FileReader</p>
+<p class="desc">Object that performs file reading</p>
+<p>
+    <code><span class="type">number</span> result, <span class="type">string</span> line &lt;FileReader object&gt;:nextLine()</code>
+</p>
+<p class="desc">Reads next line from file. Used in a loop to read file line-by-line)</p>
+
+<p>
+    <dl>
+        <dt>returns:</dt>
+        <dd>- result: PLP.ERROR (internal failure), PLP.NOT_FOUND (line not found), PLP.SUCCESS (line successfully read)
+        <dd>- line: line from file (valid if result is PLP.SUCCESS)</dd>
+    </dl>
+</p>
+
+<p>
+    <code><span class="type">number</span> result, <span class="type">string</span> line &lt;FileReader object&gt;:getLine(<span class="type">number</span> lineNumber)</code>
+</p>
+<p class="desc">Reads a line with specified number. Used for file random access</p>
+
+<p>
+    <dl>
+        <dt>lineNumber:</dt>
+        <dd>- number of a line to retrieve</dd>
+        <dt>returns:</dt>
+        <dd>- result: PLP.ERROR (internal failure), PLP.NOT_FOUND (line not found), PLP.SUCCESS (line successfully read)
+        <dd>- line: line from file (valid if result is PLP.SUCCESS)</dd>
+    </dl>
+</p>
+
+<p>
+    <code><span class="type">number</span> &lt;FileReader object&gt;:getLineNumber()</code>
+</p>
+<p class="desc">Returns the number of current line</p>
+
+<p>
+    <dl>
+        <dt>returns:</dt>
+        <dd>- current line number
+    </dl>
+</p>
+
+<p>
+    <code><span class="type">number</span> &lt;FileReader object&gt;:getNumberOfLines()</code>
+</p>
+<p class="desc">Returns the total number of lines in the file</p>
+
+<p>
+    <dl>
+        <dt>returns:</dt>
+        <dd>- total number of lines
+    </dl>
+</p>
+
+<p>
+    <code><span class="type">number</span> result, <span class="type">string</span> line &lt;FileReader object&gt;:getLineFromResult(<span class="type">IndexReader</span> indexReader)</code>
+</p>
+<p class="desc">Returns the line in the given file pointed by the given IndexReader object (see "Reading index" section)</p>
+
+<p>
+    <dl>
+        <dt>indexReader:</dt>
+        <dd>- IndexReader object
+        <dt>returns:</dt>
+        <dd>- result: PLP.ERROR (internal failure), PLP.NOT_FOUND (line not found), PLP.SUCCESS (line successfully read)
+        <dd>- line: line from file (valid if result is PLP.SUCCESS)</dd>
+    </dl>
+</p>
+
+<p>
+    <code><span class="type">void</span> &lt;FileReader object&gt;:restart()</code>
+</p>
+<p class="desc">Resets the reader to the beginning of file. Next call to nextLine() will return line# 0</p>
+
+<p>
+    <dl>
+        <dt>returns:</dt>
+        <dd>- nothing
+    </dl>
+</p>
+
+
+
+<!----------------------------------------------------- WRITING FILE --------------------------------------------------->
+<br>
+<p id="writingFileTag"><b>Writing file</b></p>
+
+<p>
+    <code><span class="type">FileWriter</span> PLP:core():createFileWriter(<span class="type">string</span> path, <span class="type">number</span> buffSize,
+        <span class="type">boolean</span> overwriteIfExists)</code>
+</p>
+<p class="desc">Creates object for writing file</p>
+
+<p>
+    <dl>
+        <dt>path:</dt>
+        <dd>- full path to the file</dd>
+        <dt>buffSize:</dt>
+        <dd>- preferred buffer size in bytes (0 to use application default). Exact size may vary</dd>
+        <dt>overwriteIfExists:</dt>
+        <dd>- if true, the existing file will be overwritten. If false, the method will fail in case the file exists</dd>
+        <dt>returns:</dt>
+        <dd>- FileWriter object if successful. Returns <span class="type">nil</span> on failure</dd>
+    </dl>
+</p>
+
+<p>
+    <code><span class="type">void</span> PLP:core():releaseFileWriter(<span class="type">FileWriter</span> fileWriter)</code>
+</p>
+<p class="desc">Releases FileWriter object</p>
+    
+<p>
+    <dl>
+        <dt>fileWriter:</dt>
+        <dd>- FileWriter object</dd>
+        <dt>returns:</dt>
+        <dd>- nothing</dd>
+    </dl>
+</p>
+
+<p>
+    <code><span class="type">boolean</span> &lt;FileWriter object&gt;:append(<span class="type">string</span> text)</code>
+</p>
+<p class="desc">Writes the provided text to file. No line ending is added</p>
+
+<p>
+    <dl>
+        <dt>text:</dt>
+        <dd>- text to be written</dd>
+        <dt>returns:</dt>
+        <dd>- true on success. false on failure</dd>
+    </dl>
+</p>
+
+<p>
+    <code><span class="type">boolean</span> &lt;FileWriter object&gt;:appendLine(<span class="type">string</span> text)</code>
+</p>
+<p class="desc">Writes the provided text to file. Line ending is appended to the end</p>
+
+<p>
+    <dl>
+        <dt>text:</dt>
+        <dd>- text to be written</dd>
+        <dt>returns:</dt>
+        <dd>- true on success. false on failure</dd>
+    </dl>
+</p>
+
+
+
+<!----------------------------------------------------- READING INDEX --------------------------------------------------->
+<br>
+<p id="readingIndexTag"><b>Reading index</b></p>
+
+<p>
+    <code><span class="type">IndexReader</span> PLP:core():createIndexReader(<span class="type">string</span> path, <span class="type">number</span> buffSize)</code>
+</p>
+<p class="desc">Creates object for reading index</p>
+
+<p>
+    <dl>
+        <dt>path:</dt>
+        <dd>- full path to the file</dd>
+        <dt>buffSize:</dt>
+        <dd>- preferred buffer size in bytes (0 to use application default). Exact size may vary</dd>
+        <dt>returns:</dt>
+        <dd>- IndexReader object if successful. Returns <span class="type">nil</span> on failure</dd>
+    </dl>
+</p>
+
+<p>
+    <code><span class="type">void</span> PLP:core():releaseIndexReader(<span class="type">IndexReader</span> indexReader)</code>
+</p>
+<p class="desc">Releases IndexReader object</p>
+    
+<p>
+    <dl>
+        <dt>indexReader:</dt>
+        <dd>- IndexReader object</dd>
+        <dt>returns:</dt>
+        <dd>- nothing</dd>
+    </dl>
+</p>
+
+<p class="objClass">IndexReader</p>
+<p class="desc">Object that performs index reading</p>
+
+<p>
+    <code><span class="type">boolean</span> result, <span class="type">number</span> lineNumber &lt;IndexReader object&gt;:nextIndex()</code>
+</p>
+<p class="desc">Reads next index from file. Used in a loop to read indexes one at a time</p>
+
+<p>
+    <dl>
+        <dt>returns:</dt>
+        <dd>- result: true on success. false if not found
+        <dd>- lineNumber: lineNumber of the current index</dd>
+    </dl>
+</p>
+
+<p>
+    <code><span class="type">number</span> &lt;IndexReader object&gt;:getLineNumber()</code>
+</p>
+<p class="desc">Returns the current line number</p>
+
+<p>
+    <dl>
+        <dt>returns:</dt>
+        <dd>- current line number
+    </dl>
+</p>
+
+<p>
+    <code><span class="type">number</span> &lt;IndexReader object&gt;:getNumIndexes()</code>
+</p>
+<p class="desc">Returns total number of indexes</p>
+
+<p>
+    <dl>
+        <dt>returns:</dt>
+        <dd>- total number of indexes
+    </dl>
+</p>
+
+<p>
+    <code><span class="type">string</span> &lt;IndexReader object&gt;:getFilePath()</code>
+</p>
+<p class="desc">Returns the file path of the index file</p>
+
+<p>
+    <dl>
+        <dt>returns:</dt>
+        <dd>- index file path
+    </dl>
+</p>
+
+<p>
+    <code><span class="type">string</span> &lt;IndexReader object&gt;:getDataFilePath()</code>
+</p>
+<p class="desc">Returns the file path of the original data file that this index was constructed from</p>
+
+<p>
+    <dl>
+        <dt>returns:</dt>
+        <dd>- data file path
+    </dl>
+</p>
+
+<p>
+    <code><span class="type">void</span> &lt;IndexReader object&gt;:restart()</code>
+</p>
+<p class="desc">Resets IndexReader to the beginning of file. Next call to nextIndex() will return the first index in file</p>
+
+<p>
+    <dl>
+        <dt>returns:</dt>
+        <dd>- nothing
+    </dl>
+</p>
+
+
+
+<!----------------------------------------------------- WRITING INDEX --------------------------------------------------->
+<br>
+<p id="writingIndexTag"><b>Writing index</b></p>
+
+<p>
+    <code><span class="type">IndexWriter</span> PLP:core():createIndexWriter(<span class="type">string</span> path, <span class="type">number</span> buffSize, 
+        <span class="type">FileReader</span> fileReader, <span class="type">boolean</span> overwriteIfExists)</code>
+</p>
+<p class="desc">Creates object for writing index</p>
+
+<p>
+    <dl>
+        <dt>path:</dt>
+        <dd>- full path to the file. File extension must be ".plpidx". If extension is incorrect, correct extension will be appended to the end of provided path</dd>
+        <dt>buffSize:</dt>
+        <dd>- preferred buffer size in bytes (0 to use application default). Exact size may vary</dd>
+        <dt>fileReader:</dt>
+        <dd>- FileReader object that this index will be created for</dd>
+        <dt>overwriteIfExists:</dt>
+        <dd>- if true, the existing file will be overwritten. If false, the method will fail in case the file exists</dd>
+        <dt>returns:</dt>
+        <dd>- IndexWriter object if successful. Returns <span class="type">nil</span> on failure</dd>
+    </dl>
+</p>
+
+<p>
+    <code><span class="type">void</span> PLP:core():releaseIndexWriter(<span class="type">IndexWriter</span> indexWriter)</code>
+</p>
+<p class="desc">Releases IndexWriter object</p>
+    
+<p>
+    <dl>
+        <dt>indexWriter:</dt>
+        <dd>- IndexWriter object</dd>
+        <dt>returns:</dt>
+        <dd>- nothing</dd>
+    </dl>
+</p>
+
+<p>
+    <code><span class="type">boolean</span> &lt;IndexWriter object&gt;:appendCurrentLine(<span class="type">FileReader</span> fileReader)</code>
+</p>
+<p class="desc">Appends index of the line currently pointed to by FileReader object</p>
+
+<p>
+    <dl>
+        <dt>fileReader:</dt>
+        <dd>- FileReader object that this index is built for.
+        <dt>returns:</dt>
+        <dd>- true on success. false on failure</dd>
+    </dl>
+</p>
+
+<p>
+    <code><span class="type">number</span> &lt;IndexWriter object&gt;:getNumIndexes()</code>
+</p>
+<p class="desc">Return the total number of indexes</p>
+
+<p>
+    <dl>
+        <dt>returns:</dt>
+        <dd>- total number of indexes</dd>
+    </dl>
+</p>
+
+</body>
+</html>
