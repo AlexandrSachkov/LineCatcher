@@ -35,7 +35,8 @@ SOURCES += \
     indexview.cpp \
     scripteditor.cpp \
     luasyntaxhighlighter.cpp \
-    searchview.cpp
+    searchview.cpp \
+    aboutdialog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -51,7 +52,8 @@ HEADERS += \
     luasyntaxhighlighter.h \
     common.h \
     searchview.h \
-    coreobjptr.h
+    coreobjptr.h \
+    aboutdialog.h
 
 FORMS +=
 

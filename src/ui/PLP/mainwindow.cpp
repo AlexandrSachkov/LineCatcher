@@ -67,6 +67,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     QMenu* helpMenu = new QMenu("Help");
     menuBar()->addMenu(helpMenu);
 
+    QAction* about = new QAction("About", helpMenu);
+    helpMenu->addAction(about);
+    connect(about, SIGNAL(triggered(void)), this, SLOT(showAboutDialog(void)));
+
     _fileViewer = new QTabWidget(_centralWidget);
     _mainLayout->addWidget(_fileViewer);
     _fileViewer->setTabsClosable(true);
@@ -80,6 +84,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
     _scriptView = new ScriptView(_plpCore, this);
     _scriptView->hide();
+
+    _aboutDialog = new AboutDialog(this);
+    _aboutDialog->hide();
 }
 
 MainWindow::~MainWindow() {
@@ -246,4 +253,8 @@ void MainWindow::showAdvancedSearch() {
 
 void MainWindow::onDialogCancel(){
     _plpCore->cancelOperation();
+}
+
+void MainWindow::showAboutDialog(){
+    _aboutDialog->show();
 }

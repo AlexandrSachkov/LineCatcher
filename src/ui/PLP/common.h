@@ -26,6 +26,8 @@ namespace Common {
 
         return path.left(pos);
     }
+
+    static const char* RESOURCE_PATH = "D:/Repositories/LogParser/resources"; //TODO change before release
 }
 
 #endif // COMMON_H
