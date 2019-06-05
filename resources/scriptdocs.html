@@ -54,15 +54,14 @@ span.type {
             </ol>
         <li><b>Searching</b></li>
             <ol type="a">
-                <li>Search methods</li>
-                <li>Comparators</li>
+                <li><a href="#searchMethodsTag">Search methods</a></li>
+                <li><a href="#comparatorsTag">Text comparators</a></li>
             </ol>
         <li><b>Utility</b></li>
     </ol>
 </p>
 
 <hr>
-
 <p class="sectionHeader">File operations:</p>
 
 
@@ -430,6 +429,262 @@ span.type {
     <dl>
         <dt>returns:</dt>
         <dd>- total number of indexes</dd>
+    </dl>
+</p>
+
+
+<hr>
+<p class="sectionHeader">Searching:</p>
+
+
+<!----------------------------------------------------- SEARCH METHODS --------------------------------------------------->
+<p id="searchMethodsTag"><b>Search methods</b></p>
+<p>
+    <code><span class="type">boolean</span> PLP:core():search(
+        <span class="type">FileReader</span> fileReader, 
+        <span class="type">IndexWriter</span> indexWriter, 
+        <span class="type">number</span> startLine, 
+        <span class="type">number</span> endLine, 
+        <span class="type">number</span> maxNumResults, 
+        <span class="type">TextComparator</span> textComparator
+        )</code>
+</p>
+<p class="desc">Runs single line file search</p>
+
+<p>
+    <dl>
+        <dt>fileReader:</dt>
+        <dd>- FileReader object of the file being searched</dd>
+        <dt>indexWriter:</dt>
+        <dd>- IndexWriter object that will contain search results</dd>
+        <dt>startLine:</dt>
+        <dd>- line number to start search at</dd>
+        <dt>endLine:</dt>
+        <dd>- line number to end search at (inclusive)</dd>
+        <dt>maxNumResults:</dt>
+        <dd>- maximum number of results to search for. E.x. if 1 is specified, the search will stop after finding the first result</dd>
+        <dt>textComparator:</dt>
+        <dd>- TextComparator object that defines search criteria (see "Text comparators" section)</dd>
+        <dt>returns:</dt>
+        <dd>- true on success. false on failure
+    </dl>
+</p>
+
+<p>
+    <code><span class="type">boolean</span> PLP:core():searchI(
+        <span class="type">FileReader</span> fileReader, 
+        <span class="type">IndexReader</span> indexReader, 
+        <span class="type">IndexWriter</span> indexWriter, 
+        <span class="type">number</span> startLine, 
+        <span class="type">number</span> endLine, 
+        <span class="type">number</span> maxNumResults, 
+        <span class="type">TextComparator</span> textComparator
+        )</code>
+</p>
+<p class="desc">Runs single line file search on lines specified by the given index</p>
+
+<p>
+    <dl>
+        <dt>fileReader:</dt>
+        <dd>- FileReader object of the file being searched</dd>
+        <dt>indexReader:</dt>
+        <dd>- IndexReader object of the index that contains lines to search</dd>
+        <dt>indexWriter:</dt>
+        <dd>- IndexWriter object that will contain search results</dd>
+        <dt>startLine:</dt>
+        <dd>- line number to start search at</dd>
+        <dt>endLine:</dt>
+        <dd>- line number to end search at (inclusive)</dd>
+        <dt>maxNumResults:</dt>
+        <dd>- maximum number of results to search for. E.x. if 1 is specified, the search will stop after finding the first result</dd>
+        <dt>textComparator:</dt>
+        <dd>- TextComparator object that defines search criteria (see "Text comparators" section)</dd>
+        <dt>returns:</dt>
+        <dd>- true on success. false on failure
+    </dl>
+</p>
+
+<p>
+    <code><span class="type">boolean</span> PLP:core():searchMultiline(
+        <span class="type">FileReader</span> fileReader, 
+        <span class="type">IndexWriter</span> indexWriter, 
+        <span class="type">number</span> startLine, 
+        <span class="type">number</span> endLine, 
+        <span class="type">number</span> maxNumResults, 
+        <span class="type">dictionary&lt;TextComparator&gt;</span> textComparators
+        )</code>
+</p>
+<p class="desc">Runs multi-line file search</p>
+
+<p>
+    <dl>
+        <dt>fileReader:</dt>
+        <dd>- FileReader object of the file being searched</dd>
+        <dt>indexWriter:</dt>
+        <dd>- IndexWriter object that will contain search results. It contains reference line indexes for matching blocks</dd>
+        <dt>startLine:</dt>
+        <dd>- line number to start search at</dd>
+        <dt>endLine:</dt>
+        <dd>- line number to end search at (inclusive)</dd>
+        <dt>maxNumResults:</dt>
+        <dd>- maximum number of results to search for. E.x. if 1 is specified, the search will stop after finding the first result</dd>
+        <dt>textComparators:</dt>
+        <dd>- a dictionary of TextComparator objects that define search criteria (see "Text comparators" section). Key is the line number relative to the reference line. 
+            Value is the comparator applied to that line. 
+            E.x. {[-1]=PLP.MatchString("test1",false,false), [1]=PLP.MatchString("test2",false,false)} will search for a block where the line before the reference 
+            contains string "test1", and the line after reference contains string "test2". The index written to file will then be the address of the reference line.
+            Think of it in terms of this imperative: "Give me all lines where the preceding line contains the word "test1" and the following line the word "test2".
+            See "Help -> Getting Started" for more details"</dd>
+        <dt>returns:</dt>
+        <dd>- true on success. false on failure
+    </dl>
+</p>
+
+<p>
+    <code><span class="type">boolean</span> PLP:core():searchMultilineI(
+        <span class="type">FileReader</span> fileReader, 
+        <span class="type">IndexReader</span> indexReader, 
+        <span class="type">IndexWriter</span> indexWriter, 
+        <span class="type">number</span> startLine, 
+        <span class="type">number</span> endLine, 
+        <span class="type">number</span> maxNumResults, 
+        <span class="type">dictionary&lt;TextComparator&gt;</span> textComparators
+        )</code>
+</p>
+<p class="desc">Runs multi-line file search on the blocks specified by the prodived index</p>
+
+<p>
+    <dl>
+        <dt>fileReader:</dt>
+        <dd>- FileReader object of the file being searched</dd>
+        <dt>indexReader:</dt>
+        <dd>- IndexReader object of the index that contains reference lines to search</dd>
+        <dt>indexWriter:</dt>
+        <dd>- IndexWriter object that will contain search results. It contains reference line indexes for matching blocks</dd>
+        <dt>startLine:</dt>
+        <dd>- line number to start search at</dd>
+        <dt>endLine:</dt>
+        <dd>- line number to end search at (inclusive)</dd>
+        <dt>maxNumResults:</dt>
+        <dd>- maximum number of results to search for. E.x. if 1 is specified, the search will stop after finding the first result</dd>
+        <dt>textComparators:</dt>
+        <dd>- a dictionary of TextComparator objects that define search criteria (see "Text comparators" section). Key is the line number relative to the reference line. 
+            Value is the comparator applied to that line. 
+            E.x. {[-1]=PLP.MatchString("test1",false,false), [1]=PLP.MatchString("test2",false,false)} will search for a block where the line before the reference 
+            contains string "test1", and the line after reference contains string "test2". The index written to file will then be the address of the reference line.
+            Think of it in terms of this imperative: "Give me all lines where the preceding line contains the word "test1" and the following line the word "test2".
+            See "Help -> Getting Started" for more details"</dd>
+        <dt>returns:</dt>
+        <dd>- true on success. false on failure
+    </dl>
+</p>
+
+
+<!----------------------------------------------------- COMPARATORS --------------------------------------------------->
+<br>
+<p id="comparatorsTag"><b>Text comparators</b></p>
+<p class="objClass">TextComparator</p>
+<p class="desc">The base object for all the following comparator types. Contains functionality for performing various string comparisons.</p>
+
+<p>
+    <code><span class="type">boolean</span> &lt;TextComparator object&gt;:match(<span class="type">string</span> text)</code>
+</p>
+<p class="desc">Matches the gives string agains the comparator functionality. Matching functionality depends on the type of comparator (keep reading to learn about the comparator types)</p>
+
+<p>
+    <dl>
+        <dt>text:</dt>
+        <dd>- string to match agains the given comparator</dd>
+        <dt>returns:</dt>
+        <dd>- true on successful match. false if no match</dd>
+    </dl>
+</p>
+
+
+<p>
+    <code><span class="type">TextComparator</span> PLP.MatchString(
+        <span class="type">string</span> text, 
+        <span class="type">boolean</span> exact, 
+        <span class="type">boolean</span> ignoreCase, 
+    )</code>
+</p>
+<p class="desc">Creates a TextComparator object. This comparator will match the source string agains the provided string pattern</p>
+
+<p>
+    <dl>
+        <dt>text:</dt>
+        <dd>- string pattern to match against the source</dd>
+        <dt>exact:</dt>
+        <dd>- if true, source string must match the provided pattern exactly. If false, source string must contain the provided pattern</dd>
+        <dt>ignoreCase:</dt>
+        <dd>- if true, ingores case of the source string. If false, case must match</dd>
+        <dt>returns:</dt>
+        <dd>- TextComparator object on success. nil on failure</dd>
+    </dl>
+</p>
+
+<p>
+    <code><span class="type">TextComparator</span> PLP.MatchAll(<span class="type">array&lt;TextComparator&gt;</span> textComparators)</code>
+</p>
+<p class="desc">Creates a TextComparator object. This comparator will succeed when the source string matches all of the provided comparators</p>
+
+<p>
+    <dl>
+        <dt>textComparators:</dt>
+        <dd>- an array of TextComparator objects</dd>
+        <dt>returns:</dt>
+        <dd>- TextComparator object on success. nil on failure</dd>
+    </dl>
+</p>
+
+<p>
+    <code><span class="type">TextComparator</span> PLP.MatchAny(<span class="type">array&lt;TextComparator&gt;</span> textComparators)</code>
+</p>
+<p class="desc">Creates a TextComparator object. This comparator will succeed when the source string matches any of the provided comparators</p>
+
+<p>
+    <dl>
+        <dt>textComparators:</dt>
+        <dd>- an array of TextComparator objects</dd>
+        <dt>returns:</dt>
+        <dd>- TextComparator object on success. nil on failure</dd>
+    </dl>
+</p>
+
+<p>
+    <code><span class="type">TextComparator</span> PLP.MatchRegex(<span class="type">string</span> regexPattern, <span class="type">boolean</span> ignoreCase)</code>
+</p>
+<p class="desc">Creates a TextComparator object. This comparator will succeed when the source string matches the provided regular expression</p>
+
+<p>
+    <dl>
+        <dt>regexPattern:</dt>
+        <dd>- regular expression string</dd>
+        <dt>ignoreCase:</dt>
+        <dd>- if true, ingores case of the source string. If false, case must match</dd>
+        <dt>returns:</dt>
+        <dd>- TextComparator object on success. nil on failure</dd>
+    </dl>
+</p>
+
+<p>
+    <code><span class="type">TextComparator</span> PLP.MatchSubstrings(
+        <span class="type">string</span> delimiter, 
+        <span class="type">boolean</span> trimLine,
+        <span class="type">dictionary&lt;TextComparator&gt;</span> textComparators
+    )</code>
+</p>
+<p class="desc">Creates a TextComparator object. This comparator first splits the source string into substrings using the provided delimiter. 
+    It succeeds when substrings match the provided comparators. Substring indexes are specified using dictionary keys.</p>
+
+<p>
+    <dl>
+        <dt>delimiter:</dt>
+        <dd>- string pattern used to split the source string. E.x. "this is a test" can be split by space into 4 substrings by providing " " delimiter</dd>
+        <dt>trimLine:</dt>
+        <dd>- if true, space is trimmed from the beginning and end of the source string. If false, spaces are kept</dd>
+        <dt>returns:</dt>
+        <dd>- TextComparator object on success. nil on failure</dd>
     </dl>
 </p>
 
