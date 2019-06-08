@@ -664,7 +664,7 @@ namespace PLP {
         plpClass.addFunction("searchMultilineI", &Core::searchMultilineIL);
         plpClass.addFunction("printConsole", &Core::printConsoleL);
         plpClass.addFunction("printConsoleEx", &Core::printConsoleExL);
-        plpClass.addFunction("isCancelled", &Core::isCancelled);
+        plpClass.addFunction("isCanceled", &Core::isCancelled);
         plpClass.endClass();
 
         {

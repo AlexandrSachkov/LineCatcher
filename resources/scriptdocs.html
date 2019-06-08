@@ -45,24 +45,24 @@ span.type {
 <p>
     <p class="sectionHeader">Table of Contents:</p>
     <ol>
-        <li><b>File operations</b></li>
+        <li><b><a href="#fileOperationsTag">File operations</a></b></li>
             <ol type="a">
                 <li><a href="#readingFileTag">Reading file</a></li>
                 <li><a href="#writingFileTag">Writing file</a></li>
                 <li><a href="#readingIndexTag">Reading index</a></li>
                 <li><a href="#writingIndexTag">Writing index</a></li>
             </ol>
-        <li><b>Searching</b></li>
+        <li><b><a href="#searchingTag">Searching</a></b></li>
             <ol type="a">
                 <li><a href="#searchMethodsTag">Search methods</a></li>
                 <li><a href="#comparatorsTag">Text comparators</a></li>
             </ol>
-        <li><b>Utility</b></li>
+        <li><b><a href="#otherTag">Other</a></b></li>
     </ol>
 </p>
 
 <hr>
-<p class="sectionHeader">File operations:</p>
+<p id="fileOperationsTag" class="sectionHeader">File operations:</p>
 
 
 
@@ -434,7 +434,7 @@ span.type {
 
 
 <hr>
-<p class="sectionHeader">Searching:</p>
+<p id="searchingTag" class="sectionHeader">Searching:</p>
 
 
 <!----------------------------------------------------- SEARCH METHODS --------------------------------------------------->
@@ -722,6 +722,55 @@ span.type {
         <dd>- function with a string parameter and boolean return type</dd>
         <dt>returns:</dt>
         <dd>- TextComparator object on success. nil on failure</dd>
+    </dl>
+</p>
+
+
+<!----------------------------------------------------- OTHER --------------------------------------------------->
+<br>
+<p id="otherTag"><b>Other</b></p>
+
+<p>
+    <code><span class="type">void</span> PLP:core():printConsole(<span class="type">string</span> text)</code>
+</p>
+<p class="desc">Prints text to console</p>
+
+<p>
+    <dl>
+        <dt>text:</dt>
+        <dd>- string to be printed</dd>
+        <dt>returns:</dt>
+        <dd>- nothing</dd>
+    </dl>
+</p>
+
+<p>
+    <code><span class="type">void</span> PLP:core():printConsoleEx(<span class="type">string</span> text, <span class="type">number</span> level)</code>
+</p>
+<p class="desc">Prints text to console with the given severity level</p>
+
+<p>
+    <dl>
+        <dt>text:</dt>
+        <dd>- string to be printed</dd>
+        <dt>level:</dt>
+        <dd>- number indicating severity level. Severity less than 1 indicates a regular severity level (equivalent to printConsole function).
+            Severity equal to 1 indicates a warning (text will be prepended with "Warning: " and appear orange). 
+            Severity of 2 or greater indicates error (text will be prepended with "Error: " and appear red)</dd>
+        <dt>returns:</dt>
+        <dd>- nothing</dd>
+    </dl>
+</p>
+
+<p>
+    <code><span class="type">boolean</span> PLP:core():isCanceled()</code>
+</p>
+<p class="desc">Returns true if any current operation has been canceled. E.x. when user presses "Cancel" button in scripting console. Used when a long-running operation needs to be cancellable</p>
+
+<p>
+    <dl>
+        <dt>returns:</dt>
+        <dd>- true if operation has been canceled. false if not canceled</dd>
     </dl>
 </p>
 
