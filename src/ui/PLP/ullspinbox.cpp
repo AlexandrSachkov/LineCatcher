@@ -40,10 +40,6 @@ unsigned long long ULLSpinBox::value(){
 }
 
 void ULLSpinBox::setValue(unsigned long long val){
-    if(val == _val){
-        return;
-    }
-
     if (val < _min || val > _max) {
         return;
     }
@@ -72,11 +68,6 @@ QValidator::State ULLSpinBox::validate(QString &input, int &pos) const {
         return QValidator::Acceptable;
     }
 
-    bool result;
-    unsigned long long val = input.toLongLong(&result);
-    if (!result){
-        return QValidator::Invalid;
-    }
     if(pos > _numDigits){
         return QValidator::Invalid;
     }
