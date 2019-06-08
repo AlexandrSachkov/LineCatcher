@@ -10,6 +10,7 @@
 #include <QSplitter>
 #include <QMessageBox>
 #include <QFutureWatcher>
+#include <QApplication>
 
 #include "Utils.h"
 #include "IndexReaderI.h"
@@ -24,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     if(!_plpCore || !_plpCore->initialize()){
         QMessageBox::critical(this,"PLP","Application failed to initialize and needs to exit.",QMessageBox::Ok);
         PLP::release(_plpCore);
-        exit(1);
+        QApplication::quit();
     }
 
     _mainLayout = new QVBoxLayout(_centralWidget);
@@ -37,6 +38,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
     QMenu* openMenu = new QMenu("Open");
     fileMenu->addMenu(openMenu);
+
+    QAction* closeAll = new QAction("Close All", fileMenu);
+    fileMenu->addAction(closeAll);
+    connect(closeAll, SIGNAL(triggered(void)), this, SLOT(closeAllTabs(void)));
+
+    QAction* exit = new QAction("Exit", fileMenu);
+    fileMenu->addAction(exit);
+    connect(exit, SIGNAL(triggered(void)), this, SLOT(exit(void)));
 
     _openFile = new QAction("Data", openMenu);
     openMenu->addAction(_openFile);
@@ -279,4 +288,17 @@ void MainWindow::showScriptingDocsDialog() {
 
 void MainWindow::showGettingStartedDialog() {
     _gettingStartedDialog->show();
+}
+
+void MainWindow::closeAllTabs(){
+    for(int i = _fileViewer->count(); i >=0; i--){
+        QWidget* tab = _fileViewer->widget(i);
+        if(tab){
+            delete tab;
+        }
+    }
+}
+
+void MainWindow::exit(){
+    QApplication::quit();
 }

@@ -29,6 +29,7 @@ signals:
 
 public slots:
     void closeTab(int index);
+    void closeAllTabs();
     void openFile();
     void openIndex();
     void showScriptView();
@@ -38,6 +39,7 @@ public slots:
     void showScriptingDocsDialog();
     void showGettingStartedDialog();
     void onDialogCancel();
+    void exit();
 
 private:
     bool openFile(const std::vector<QString>& candidates);
