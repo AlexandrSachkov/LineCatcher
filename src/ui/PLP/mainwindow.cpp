@@ -225,7 +225,7 @@ void MainWindow::openIndex(const QString& path){
     }
 
     QString qDataFileOriginalPath = QString::fromStdString(indexReader->getDataFilePath());
-    QString qDataFileLocalPath = Common::getDirFromPath(path) + path.split('/').last();
+    QString qDataFileLocalPath = Common::getDirFromPath(path) + "/" + qDataFileOriginalPath.split('/').last();
     std::vector<QString> possibleFileLocations({qDataFileOriginalPath, qDataFileLocalPath});
     if(!openFile(possibleFileLocations)){
         if(!_plpCore->isCancelled()){
