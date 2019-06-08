@@ -89,6 +89,7 @@ namespace PLP {
             std::wstring wText = string_to_wstring(text);
             if (exact) {
                 if (ignoreCase) {
+                    std::transform(wText.begin(), wText.end(), wText.begin(), ::towlower);
                     _match = [wText](const char* data, unsigned int size) {
                         std::wstring wData(string_to_wstring(std::string(data, size))); //TODO refactor for better performance
                         std::transform(wData.begin(), wData.end(), wData.begin(), ::towlower);
@@ -101,6 +102,7 @@ namespace PLP {
                 }
             } else {
                 if (ignoreCase) {
+                    std::transform(wText.begin(), wText.end(), wText.begin(), ::towlower);
                     _match = [wText](const char* data, unsigned int size) {
                         std::wstring wData(string_to_wstring(std::string(data, size))); //TODO refactor for better performance
                         std::transform(wData.begin(), wData.end(), wData.begin(), ::towlower);

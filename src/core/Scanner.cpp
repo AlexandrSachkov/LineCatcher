@@ -70,9 +70,8 @@ namespace PLP {
 
                     lineNum = _startLine;
                     fileOffset = _fileReader->getLineFileOffset();
-                    _firstLine = false;
                 } else {
-                    if (_fileReader->getLineNumber() >= _endLine) {
+                    if (!_firstLine && _fileReader->getLineNumber() >= _endLine) {
                         return LineReaderResult::NOT_FOUND;
                     }
 
@@ -83,6 +82,7 @@ namespace PLP {
                     lineNum = _fileReader->getLineNumber();
                     fileOffset = _fileReader->getLineFileOffset();
                 }
+                _firstLine = false;
                 return LineReaderResult::SUCCESS;
             };
         }
