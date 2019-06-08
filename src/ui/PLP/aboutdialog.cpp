@@ -16,7 +16,7 @@ AboutDialog::AboutDialog(QWidget *parent) : QWidget(parent)
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
 
-    setWindowFlags(Qt::Window);
+    setWindowFlags(Qt::Dialog);
     setWindowTitle("About");
     setWindowModality(Qt::WindowModal);
     setMinimumWidth(400);
@@ -36,4 +36,9 @@ AboutDialog::AboutDialog(QWidget *parent) : QWidget(parent)
 
     QPushButton* ok = new QPushButton("Ok", this);
     mainLayout->addWidget(ok, 1, Qt::AlignRight);
+    connect(ok, SIGNAL(clicked(void)), this, SLOT(onOk(void)));
+}
+
+void AboutDialog::onOk(){
+    this->close();
 }

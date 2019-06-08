@@ -30,7 +30,8 @@ SearchView::SearchView(PLP::CoreI* plpCore, bool multiline, QWidget *parent) : Q
     mainLayout->setContentsMargins(5, 5, 5, 5);
     mainLayout->setSpacing(5);
 
-    setWindowFlags(Qt::Window);
+    setWindowFlags(Qt::Dialog);
+    setWindowModality(Qt::WindowModal);
     setWindowTitle("Search");
 
     createSourceContent(mainLayout);

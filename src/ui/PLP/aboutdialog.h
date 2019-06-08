@@ -10,7 +10,8 @@ class AboutDialog : public QWidget
 public:
     explicit AboutDialog(QWidget *parent = nullptr);
 
-private:
+private slots:
+    void onOk();
 
 };
 
