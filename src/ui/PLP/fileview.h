@@ -8,6 +8,7 @@
 #include <QPlainTextEdit>
 #include <QTabWidget>
 #include <QLabel>
+#include <QSplitter>
 
 #include "coreobjptr.h"
 #include "FileReaderI.h"
@@ -33,6 +34,7 @@ private:
     PagedFileViewWidget* _dataView;
     QTabWidget* _indexViewer;
     ULLSpinBox* _currLineNumBox;
+    QSplitter* _splitter;
 
     QString _filePath;
 };

@@ -3,7 +3,6 @@
 #include "indexviewwidget.h"
 #include "ullspinbox.h"
 #include <QtWidgets/QVBoxLayout>
-#include <QSplitter>
 #include <QFile>
 #include <QFileInfo>
 #include <QDateTime>
@@ -37,22 +36,22 @@ FileView::FileView(CoreObjPtr<PLP::FileReaderI> fileReader, QWidget *parent) : Q
     numLinesLabel->setContentsMargins(0, 0, 5, 0);
     lineSelectionLayout->addWidget(numLinesLabel, 0);
 
-    QSplitter* splitter = new QSplitter(this);
-    mainLayout->addWidget(splitter);
-    splitter->setOrientation(Qt::Orientation::Vertical);
-    splitter->setHandleWidth(5);
-    splitter->setChildrenCollapsible(false);
+    _splitter = new QSplitter(this);
+    mainLayout->addWidget(_splitter);
+    _splitter->setOrientation(Qt::Orientation::Vertical);
+    _splitter->setHandleWidth(5);
+    _splitter->setChildrenCollapsible(false);
 
-    _dataView = new PagedFileViewWidget(std::move(fileReader), _currLineNumBox, splitter);
+    _dataView = new PagedFileViewWidget(std::move(fileReader), _currLineNumBox, _splitter);
     _dataView->setReadOnly(true);
-    splitter->addWidget(_dataView);
+    _splitter->addWidget(_dataView);
 
-    _indexViewer = new QTabWidget(splitter);
+    _indexViewer = new QTabWidget(_splitter);
     _indexViewer->setTabsClosable(true);
-    splitter->addWidget(_indexViewer);
+    _splitter->addWidget(_indexViewer);
 
     QRect screenGeometry = QApplication::desktop()->screenGeometry();
-    splitter->setSizes(QList<int>({screenGeometry.height() / 4 * 3, screenGeometry.height() / 4}));
+    _splitter->setSizes(QList<int>({screenGeometry.height(), 0}));
 
     connect(_indexViewer, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
 }
@@ -70,6 +69,11 @@ void FileView::closeTab(int index) {
     QWidget* tab = _indexViewer->widget(index);
     if(tab){
         delete tab;
+    }
+
+    if(_indexViewer->count() == 0){
+        QRect screenGeometry = QApplication::desktop()->screenGeometry();
+        _splitter->setSizes(QList<int>({screenGeometry.height(), 0}));
     }
 }
 
@@ -96,4 +100,9 @@ void FileView::openIndex(CoreObjPtr<PLP::IndexReaderI> indexReader){
     _indexViewer->addTab(indexView, fileName);
     _indexViewer->setTabToolTip(_indexViewer->count() - 1, qPath);
     _indexViewer->setCurrentIndex(_indexViewer->count() - 1);
+
+    if(_indexViewer->count() == 1){
+        QRect screenGeometry = QApplication::desktop()->screenGeometry();
+        _splitter->setSizes(QList<int>({screenGeometry.height() / 4 * 3, screenGeometry.height() / 4}));
+    }
 }
