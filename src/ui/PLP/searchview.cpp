@@ -15,6 +15,8 @@
 #include <QFileDialog>
 #include <QSpinBox>
 #include <QGridLayout>
+#include <QApplication>
+#include <QDesktopWidget>
 
 #include "Utils.h"
 #include <unordered_map>
@@ -25,7 +27,6 @@ SearchView::SearchView(PLP::CoreI* plpCore, bool multiline, QWidget *parent) : Q
     _multiline = multiline;
 
     QVBoxLayout* mainLayout = new QVBoxLayout();
-    mainLayout->setSizeConstraint(QLayout::SetFixedSize);
     this->setLayout(mainLayout);
     mainLayout->setContentsMargins(5, 5, 5, 5);
     mainLayout->setSpacing(5);
@@ -33,6 +34,7 @@ SearchView::SearchView(PLP::CoreI* plpCore, bool multiline, QWidget *parent) : Q
     setWindowFlags(Qt::Dialog);
     setWindowModality(Qt::WindowModal);
     setWindowTitle("Search");
+    setMinimumWidth(450);
 
     createSourceContent(mainLayout);
     createDestinationContent(mainLayout);
@@ -506,4 +508,12 @@ void SearchView::onSearchCompletion(bool success){
 
 void SearchView::onSearchCancelled(){
     _plpCore->cancelOperation();
+}
+
+void SearchView::showEvent(QShowEvent* event) {
+    QRect screenGeometry = QApplication::desktop()->screenGeometry();
+    int defaultPosX = (screenGeometry.width() - size().width()) / 2;
+    int defaultPosY = (screenGeometry.height() - size().height()) / 2;
+    move(defaultPosX, defaultPosY);
+
 }

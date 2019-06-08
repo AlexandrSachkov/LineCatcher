@@ -34,6 +34,8 @@ private slots:
     void onSearchCancelled();
     void onSearchCompletion(bool success);
 private:
+    void showEvent(QShowEvent* event);
+
     void startRegularSearch(
             PLP::FileReaderI* fileReader,
             PLP::IndexReaderI* indexReader,
