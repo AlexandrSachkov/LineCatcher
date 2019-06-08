@@ -671,7 +671,7 @@ span.type {
     <code><span class="type">TextComparator</span> PLP.MatchSubstrings(
         <span class="type">string</span> delimiter, 
         <span class="type">boolean</span> trimLine,
-        <span class="type">dictionary&lt;TextComparator&gt;</span> textComparators
+        <span class="type">dictionary&lt;TextComparator&gt;</span> substringComparators
     )</code>
 </p>
 <p class="desc">Creates a TextComparator object. This comparator first splits the source string into substrings using the provided delimiter. 
@@ -683,6 +683,43 @@ span.type {
         <dd>- string pattern used to split the source string. E.x. "this is a test" can be split by space into 4 substrings by providing " " delimiter</dd>
         <dt>trimLine:</dt>
         <dd>- if true, space is trimmed from the beginning and end of the source string. If false, spaces are kept</dd>
+        <dt>substringComparators:</dt>
+        <dd>- dictionary of TextComparator objects</dd>
+        <dt>returns:</dt>
+        <dd>- TextComparator object on success. nil on failure</dd>
+    </dl>
+</p>
+
+<p>
+    <code><span class="type">TextComparator</span> PLP.MatchWords(
+        <span class="type">dictionary&lt;TextComparator&gt;</span> wordComparators
+    )</code>
+</p>
+<p class="desc">Creates a TextComparator object. This comparator first splits the source string into words. Spaces are trimmed.
+    It succeeds when words match the provided comparators. Word indexes are specified using dictionary keys.</p>
+
+<p>
+    <dl>
+        <dt>wordComparators:</dt>
+        <dd>- dictionary of TextComparator objects</dd>
+        <dt>returns:</dt>
+        <dd>- TextComparator object on success. nil on failure</dd>
+    </dl>
+</p>
+
+<p>
+    <code><span class="type">TextComparator</span> PLP.MatchCustom(
+        <span class="type">function</span> comparatorFunction
+    )</code>
+</p>
+<p class="desc">Creates a TextComparator object. This comparator accepts a custom string comparison function. 
+    Function receives a string object, and must return true (if match successful) or false (if failed).
+    It succeeds when the function returns true</p>
+
+<p>
+    <dl>
+        <dt>comparatorFunction:</dt>
+        <dd>- function with a string parameter and boolean return type</dd>
         <dt>returns:</dt>
         <dd>- TextComparator object on success. nil on failure</dd>
     </dl>
