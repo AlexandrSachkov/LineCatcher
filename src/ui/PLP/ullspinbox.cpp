@@ -18,7 +18,7 @@ QAbstractSpinBox::StepEnabled ULLSpinBox::stepEnabled() const {
 }
 
 void ULLSpinBox::setRange(unsigned long long min, unsigned long long max){
-    if(max <= min){
+    if(max < min){
         return;
     }
 

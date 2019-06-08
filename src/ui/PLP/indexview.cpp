@@ -25,10 +25,11 @@ IndexView::IndexView(
 
     ULLSpinBox* lineNavBox = new ULLSpinBox(this);
     lineNavBox->setFont(lineNavFont);
-    lineNavBox->setRange(0, indexReader->getNumResults() - 1);
+    unsigned long long maxRange = indexReader->getNumResults() > 0 ? indexReader->getNumResults() - 1 : 0;
+    lineNavBox->setRange(0, maxRange);
     lineSelectionLayout->addWidget(lineNavBox, 1, Qt::AlignRight);
 
-    QLabel* numLinesLabel = new QLabel("/" + QString::number(indexReader->getNumResults() - 1), this);
+    QLabel* numLinesLabel = new QLabel("/" + QString::number(indexReader->getNumResults()), this);
     numLinesLabel->setFont(lineNavFont);
     numLinesLabel->setContentsMargins(0, 0, 5, 0);
     lineSelectionLayout->addWidget(numLinesLabel, 0);

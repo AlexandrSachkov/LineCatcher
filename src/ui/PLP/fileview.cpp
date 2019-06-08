@@ -28,10 +28,11 @@ FileView::FileView(CoreObjPtr<PLP::FileReaderI> fileReader, QWidget *parent) : Q
 
     _currLineNumBox = new ULLSpinBox(this);
     _currLineNumBox->setFont(lineNavFont);
-    _currLineNumBox->setRange(0, fileReader->getNumberOfLines() - 1);
+    unsigned long long maxRange = fileReader->getNumberOfLines() > 0 ? fileReader->getNumberOfLines() - 1 : 0;
+    _currLineNumBox->setRange(0, maxRange);
     lineSelectionLayout->addWidget(_currLineNumBox, 1, Qt::AlignRight);
 
-    QLabel* numLinesLabel = new QLabel("/" + QString::number(fileReader->getNumberOfLines() - 1), this);
+    QLabel* numLinesLabel = new QLabel("/" + QString::number(fileReader->getNumberOfLines()), this);
     numLinesLabel->setFont(lineNavFont);
     numLinesLabel->setContentsMargins(0, 0, 5, 0);
     lineSelectionLayout->addWidget(numLinesLabel, 0);
