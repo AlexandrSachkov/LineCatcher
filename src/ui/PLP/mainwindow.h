@@ -5,6 +5,7 @@
 #include "scriptview.h"
 #include "aboutdialog.h"
 #include "scriptdocsdialog.h"
+#include "gettingstarteddialog.h"
 
 #include <QMainWindow>
 #include <QTabWidget>
@@ -35,6 +36,7 @@ public slots:
     void showAdvancedSearch();
     void showAboutDialog();
     void showScriptingDocsDialog();
+    void showGettingStartedDialog();
     void onDialogCancel();
 
 private:
@@ -53,6 +55,7 @@ private:
     ScriptView* _scriptView;
     AboutDialog* _aboutDialog;
     ScriptDocsDialog* _scriptDocsDialog;
+    GettingStartedDialog* _gettingStartedDialog;
 
     PLP::CoreI* _plpCore;
 };

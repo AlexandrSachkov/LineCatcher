@@ -67,6 +67,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     QMenu* helpMenu = new QMenu("Help");
     menuBar()->addMenu(helpMenu);
 
+    QAction* gettingStarted = new QAction("Getting Started", helpMenu);
+    helpMenu->addAction(gettingStarted);
+    connect(gettingStarted, SIGNAL(triggered(void)), this, SLOT(showGettingStartedDialog(void)));
+
     QAction* scriptingDocs = new QAction("Lua API Docs", helpMenu);
     helpMenu->addAction(scriptingDocs);
     connect(scriptingDocs, SIGNAL(triggered(void)), this, SLOT(showScriptingDocsDialog(void)));
@@ -94,6 +98,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
     _scriptDocsDialog = new ScriptDocsDialog(this);
     _scriptDocsDialog->hide();
+
+    _gettingStartedDialog = new GettingStartedDialog(this);
+    _gettingStartedDialog->hide();
 }
 
 MainWindow::~MainWindow() {
@@ -267,5 +274,9 @@ void MainWindow::showAboutDialog(){
 }
 
 void MainWindow::showScriptingDocsDialog() {
-_scriptDocsDialog->show();
+    _scriptDocsDialog->show();
+}
+
+void MainWindow::showGettingStartedDialog() {
+    _gettingStartedDialog->show();
 }
