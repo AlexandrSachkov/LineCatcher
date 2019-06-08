@@ -142,7 +142,7 @@ namespace PLP {
 
     LineReaderResult IndexedLineReader::getLine(unsigned long long lineNumber, char*& data, unsigned int& size) {
         if (lineNumber < 0 || lineNumber > _indexHeader.numLines - 1) {
-            return LineReaderResult::ERROR;
+            return LineReaderResult::NOT_FOUND;
         }
 
         char* lineData = nullptr;
@@ -171,9 +171,11 @@ namespace PLP {
             }
         }
 
+        LineReaderResult result;
         while (getLineNumber() < lineNumber) {
-            if (LineReaderResult::SUCCESS != nextLine(lineData, length)) {
-                return LineReaderResult::ERROR;
+            result = nextLine(lineData, length);
+            if (result != LineReaderResult::SUCCESS) {
+                return result;
             }
         }
 
