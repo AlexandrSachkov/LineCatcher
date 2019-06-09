@@ -143,7 +143,19 @@ namespace PLP {
             }
 
             try {
-                _regex = std::regex(_regexPattern, flags);
+                if (_ignoreCase) {
+                    //ignore case flag does not work on multibyte strings, so need to convert to wstring first
+                    std::wregex regex(string_to_wstring(_regexPattern), flags);
+                    _match = [regex](const std::string& data) {
+                        std::wstring wData(string_to_wstring(data)); //TODO refactor for better performance
+                        return std::regex_match(wData, regex);
+                    };
+                } else {
+                    std::regex regex(_regexPattern, flags);
+                    _match = [regex](const std::string& data) {
+                        return std::regex_match(data, regex);
+                    };
+                }
             } catch (std::regex_error&) {
                 return false;
             }
@@ -152,17 +164,17 @@ namespace PLP {
         }
 
         bool match(const char* data, unsigned int size) override {
-            return std::regex_match(std::string(data, size), _regex);
+            return _match(std::string(data, size));
         }
 
         bool match(const std::string& str) {
-            return match(str.c_str(), (unsigned int)str.length());
+            return _match(str);
         }
 
     private:
+        std::function<bool(const std::string& data)> _match;
         std::string _regexPattern;
-        bool _ignoreCase;
-        std::regex _regex;
+        const bool _ignoreCase;
     };
 
     class MatchSubstrings : public TextComparator {
