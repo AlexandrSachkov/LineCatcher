@@ -186,23 +186,12 @@ bool MainWindow::openFile(const QString& path)
     dialog.exec();
     futureWatcher.waitForFinished();
 
-    if(_plpCore->isCancelled()){
+    CoreObjPtr<PLP::FileReaderI> fileReader = createCoreObjPtr(futureWatcher.result(), _plpCore);
+    if(_plpCore->isCancelled() || !fileReader){
         return false;
     }
 
-    PLP::FileReaderI* fileReader = futureWatcher.result();
-    if(!fileReader){
-        return false;
-    }
-
-    CoreObjPtr<PLP::FileReaderI> fileReaderCP(
-        fileReader,
-        [&](PLP::FileReaderI* p){
-            _plpCore->release(p);
-        }
-    );
-
-    FileView* fileView = new FileView(std::move(fileReaderCP), this);
+    FileView* fileView = new FileView(std::move(fileReader), this);
     QString fileName = path.split('/').last();
     _fileViewer->addTab(fileView, fileName);
     _fileViewer->setTabToolTip(_fileViewer->count() - 1, path);
@@ -222,12 +211,11 @@ void MainWindow::openIndex() {
 }
 
 void MainWindow::openIndex(const QString& path){
-    CoreObjPtr<PLP::IndexReaderI> indexReader(
+    CoreObjPtr<PLP::IndexReaderI> indexReader = createCoreObjPtr(
         _plpCore->createIndexReader(path.toStdString(), PLP::OPTIMAL_BLOCK_SIZE_BYTES * 2),
-        [&](PLP::IndexReaderI* p){
-            _plpCore->release(p);
-        }
+        _plpCore
     );
+
     if(!indexReader){
         QMessageBox::critical(this,"PLP","Failed to open index: " + path,QMessageBox::Ok);
         return;
