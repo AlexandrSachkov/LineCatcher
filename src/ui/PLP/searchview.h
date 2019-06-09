@@ -10,6 +10,7 @@
 
 #include "ullspinbox.h"
 #include "CoreI.h"
+#include "coreobjptr.h"
 
 class SearchView : public QWidget
 {
@@ -23,32 +24,30 @@ public:
     void createSearchOptionContent(QLayout* mainLayout);
     void createMultilineSearchOptionContent(QLayout* mainLayout);
 signals:
-    void progressUpdate(int percent, unsigned long long numResults);
-    void searchCompleted(bool success);
+
 private slots:
     void openFile();
     void openIndex();
     void openDestinationDir();
     void startSearch();
-    void onProgressUpdate(int percent, unsigned long long numResults);
     void onSearchCancelled();
     void onSearchCompletion(bool success);
 private:
     void showEvent(QShowEvent* event);
 
     void startRegularSearch(
-            PLP::FileReaderI* fileReader,
-            PLP::IndexReaderI* indexReader,
-            PLP::IndexWriterI* indexWriter,
+            CoreObjPtr<PLP::FileReaderI> fileReader,
+            CoreObjPtr<PLP::IndexReaderI> indexReader,
+            CoreObjPtr<PLP::IndexWriterI> indexWriter,
             unsigned long long startLine,
             unsigned long long endLine,
             unsigned long long maxNumResults
             );
 
     void startMultilineSearch(
-            PLP::FileReaderI* fileReader,
-            PLP::IndexReaderI* indexReader,
-            PLP::IndexWriterI* indexWriter,
+            CoreObjPtr<PLP::FileReaderI> fileReader,
+            CoreObjPtr<PLP::IndexReaderI> indexReader,
+            CoreObjPtr<PLP::IndexWriterI> indexWriter,
             unsigned long long startLine,
             unsigned long long endLine,
             unsigned long long maxNumResults
@@ -58,7 +57,6 @@ private:
     const int NUM_ROWS = 5;
 
     PLP::CoreI* _plpCore;
-    QProgressDialog* _progressDialog = nullptr;
     bool _multiline = false;
 
     QLineEdit* _filePath;

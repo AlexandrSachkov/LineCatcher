@@ -1,6 +1,7 @@
 #include "searchview.h"
 #include "common.h"
 #include "mainwindow.h"
+#include "coreobjptr.h"
 
 #include <QBoxLayout>
 #include <QFormLayout>
@@ -49,9 +50,6 @@ SearchView::SearchView(PLP::CoreI* plpCore, bool multiline, QWidget *parent) : Q
     QPushButton* runSearch = new QPushButton("Search", this);
     connect(runSearch, SIGNAL(clicked(void)), this, SLOT(startSearch(void)));
     mainLayout->addWidget(runSearch);
-
-    connect(this, SIGNAL(progressUpdate(int, unsigned long long)), this, SLOT(onProgressUpdate(int, unsigned long long)));
-    connect(this, SIGNAL(searchCompleted(bool)), this, SLOT(onSearchCompletion(bool)));
 
     QFont font = this->font();
     font.setPointSize(12);
@@ -248,43 +246,74 @@ void SearchView::startSearch() {
         return;
     }
 
+    QProgressDialog dialog(this);
+    dialog.setWindowTitle("Opening file...");
+    dialog.setWindowModality(Qt::WindowModal);
+    dialog.setMinimumWidth(400);
+
+    QFutureWatcher<PLP::FileReaderI*> futureWatcher;
+    QObject::connect(&futureWatcher, &QFutureWatcher<PLP::FileReaderI*>::finished, &dialog, &QProgressDialog::reset);
+    QObject::connect(&dialog, &QProgressDialog::canceled, this, &SearchView::onSearchCancelled);
+
+    futureWatcher.setFuture(QtConcurrent::run([&, dataPath]() -> PLP::FileReaderI* {
+        std::function<void(int)> update = [&](int percent){
+            QMetaObject::invokeMethod(&dialog, [&, percent](){
+                dialog.setValue(percent);
+            });
+        };
+        return _plpCore->createFileReader(dataPath.toStdString(), 0, nullptr);
+    }));
+
+    dialog.exec();
+    futureWatcher.waitForFinished();
+
     // Create required objects
-    PLP::FileReaderI* fileReader = _plpCore->createFileReader(dataPath.toStdString(), 0, nullptr);
+    CoreObjPtr<PLP::FileReaderI> fileReader = createCoreObjPtr(futureWatcher.result(), _plpCore);
     if(!fileReader){
         QMessageBox::information(this,"PLP","File reader failed to initialize",QMessageBox::Ok);
         return;
     }
 
-    PLP::IndexReaderI* indexReader = nullptr;
+
+    CoreObjPtr<PLP::IndexReaderI> indexReader = nullptr;
     if(!indexPath.simplified().isEmpty()){
-        indexReader = _plpCore->createIndexReader(indexPath.toStdString(), 0);
+        indexReader = createCoreObjPtr(_plpCore->createIndexReader(indexPath.toStdString(), 0), _plpCore);
         if(!indexReader){
             QMessageBox::information(this,"PLP","Index reader failed to initialize",QMessageBox::Ok);
-            _plpCore->release(fileReader);
             return;
         }
     }
 
     QString destPath = destDir + "/" + destName;
-    PLP::IndexWriterI* indexWriter = _plpCore->createIndexWriter(destPath.toStdString(), 0, fileReader, true);
+    CoreObjPtr<PLP::IndexWriterI> indexWriter = createCoreObjPtr(
+        _plpCore->createIndexWriter(destPath.toStdString(), 0, fileReader.get(), true),
+        _plpCore
+    );
     if(!indexWriter){
         QMessageBox::information(this,"PLP","Index writer failed to initialize",QMessageBox::Ok);
-        _plpCore->release(fileReader);
-        _plpCore->release(indexReader);
         return;
     }
 
     if(_multiline){
-        startMultilineSearch(fileReader, indexReader, indexWriter, startLine, endLine, maxNumResults);
+        startMultilineSearch(std::move(fileReader),
+             std::move(indexReader),
+             std::move(indexWriter),
+             startLine, endLine, maxNumResults
+        );
     }else{
-        startRegularSearch(fileReader, indexReader, indexWriter, startLine, endLine, maxNumResults);
+        startRegularSearch(
+            std::move(fileReader),
+            std::move(indexReader),
+            std::move(indexWriter),
+            startLine, endLine, maxNumResults
+        );
     }
 }
 
 void SearchView::startRegularSearch(
-        PLP::FileReaderI* fileReader,
-        PLP::IndexReaderI* indexReader,
-        PLP::IndexWriterI* indexWriter,
+        CoreObjPtr<PLP::FileReaderI> fileReader,
+        CoreObjPtr<PLP::IndexReaderI> indexReader,
+        CoreObjPtr<PLP::IndexWriterI> indexWriter,
         unsigned long long startLine,
         unsigned long long endLine,
         unsigned long long maxNumResults
@@ -298,64 +327,66 @@ void SearchView::startRegularSearch(
     bool regex = _regex->isChecked();
     bool ignoreCase = _ignoreCase->isChecked();
 
-    PLP::TextComparator* comparator = nullptr;
+    std::unique_ptr<PLP::TextComparator> comparator = nullptr;
     if(regex){
-        comparator = new PLP::MatchRegex(searchPattern.toStdString(), ignoreCase);
+        comparator.reset(new PLP::MatchRegex(searchPattern.toStdString(), ignoreCase));
     }else{
-        comparator = new PLP::MatchString(searchPattern.toStdString(), false, ignoreCase);
+        comparator.reset(new PLP::MatchString(searchPattern.toStdString(), false, ignoreCase));
     }
 
     if(!comparator || !comparator->initialize()){
         QMessageBox::information(this,"PLP","Comparator failed to initialize",QMessageBox::Ok);
-        _plpCore->release(fileReader);
-        _plpCore->release(indexReader);
-        _plpCore->release(indexWriter);
-        if(comparator){
-            delete comparator;
-        }
         return;
     }
 
-    std::function<void(int, unsigned long long)> update = [&](int percent, unsigned long long numResults){
-        emit progressUpdate(percent, numResults);
-    };
 
-    if(!_progressDialog){
-        _progressDialog = new QProgressDialog("", "Cancel", 0, 100, this);
-        _progressDialog->setWindowTitle("Searching...");
-        _progressDialog->setWindowModality(Qt::WindowModal);
-        _progressDialog->setMinimumWidth(400);
-        connect(_progressDialog, SIGNAL(canceled(void)), this, SLOT(onSearchCancelled(void)));
-    }
-    _progressDialog->show();
+    QProgressDialog dialog(this);
+    dialog.setWindowTitle("Searching...");
+    dialog.setWindowModality(Qt::WindowModal);
+    dialog.setMinimumWidth(400);
 
-    PLP::CoreI* core = _plpCore;
-    QtConcurrent::run([this, core, fileReader, indexReader, indexWriter,
-                      startLine, endLine, maxNumResults, comparator, update](){
-       bool result = core->search(fileReader, indexReader, indexWriter,
-                    startLine, endLine, maxNumResults,comparator,&update);
+    QFutureWatcher<bool> futureWatcher;
+    QObject::connect(&futureWatcher, &QFutureWatcher<PLP::FileReaderI*>::finished, &dialog, &QProgressDialog::reset);
+    QObject::connect(&dialog, &QProgressDialog::canceled, this, &SearchView::onSearchCancelled);
 
-       core->release(fileReader);
-       core->release(indexReader);
-       core->release(indexWriter);
-       delete comparator;
+    futureWatcher.setFuture(
+        QtConcurrent::run([&, startLine, endLine, maxNumResults]() -> bool {
+            std::function<void(int, unsigned long long)> update = [&](int percent, unsigned long long numResults){
+                QMetaObject::invokeMethod(&dialog, [&, percent, numResults](){
+                    dialog.setValue(percent);
+                    dialog.setLabelText("Results: " + QString::number(numResults));
+                });
+            };
+            return _plpCore->search(
+                fileReader.get(), indexReader.get(), indexWriter.get(),
+                startLine, endLine, maxNumResults,
+                comparator.get(),
+                &update
+            );
+        })
+    );
 
-       emit searchCompleted(result);
-    });
+    dialog.exec();
+    futureWatcher.waitForFinished();
+
+    fileReader.reset();
+    indexReader.reset();
+    indexWriter.reset();
+
+    onSearchCompletion(futureWatcher.result());
 }
 
 void SearchView::startMultilineSearch(
-        PLP::FileReaderI* fileReader,
-        PLP::IndexReaderI* indexReader,
-        PLP::IndexWriterI* indexWriter,
+        CoreObjPtr<PLP::FileReaderI> fileReader,
+        CoreObjPtr<PLP::IndexReaderI> indexReader,
+        CoreObjPtr<PLP::IndexWriterI> indexWriter,
         unsigned long long startLine,
         unsigned long long endLine,
         unsigned long long maxNumResults
         ){
 
-    bool error = false;
-    std::unordered_map<int, PLP::TextComparator*> lineComparators;
-    for(int i=0; i < NUM_ROWS; i++){
+    std::unordered_map<int, std::shared_ptr<PLP::TextComparator>> lineComparators;
+    for(size_t i=0; i < (size_t)NUM_ROWS; i++){
         if(_lineEnabledCheckBoxes[i]->isChecked()){
             if(_searchPatternBoxes[i]->text().isEmpty()){
                 QMessageBox::information(
@@ -364,40 +395,24 @@ void SearchView::startMultilineSearch(
                     "Line #" + QString::number(_lineOffsetBoxes[i]->value()) + " cannot be empty",
                     QMessageBox::Ok
                 );
-                error = true;
-                break;
+                return;
             }
 
             if(_regexCheckBoxes[i]->isChecked()){
-                PLP::TextComparator* comparator = new PLP::MatchRegex(
+                std::shared_ptr<PLP::TextComparator> comparator(new PLP::MatchRegex(
                     _searchPatternBoxes[i]->text().toStdString(),
                     _ignoreCaseCheckBoxes[i]->isChecked()
-                );
+                ));
                 lineComparators.emplace(_lineOffsetBoxes[i]->value(), comparator);
             }else{
-                PLP::TextComparator* comparator = new PLP::MatchString(
+                std::shared_ptr<PLP::TextComparator> comparator(new PLP::MatchString(
                     _searchPatternBoxes[i]->text().toStdString(),
                     false,
                     _ignoreCaseCheckBoxes[i]->isChecked()
-                );
+                ));
                 lineComparators.emplace(_lineOffsetBoxes[i]->value(), comparator);
             }
         }
-    }
-
-    std::function<void()> cleanup = [&](){
-        _plpCore->release(indexWriter);
-        _plpCore->release(indexReader);
-        _plpCore->release(fileReader);
-
-        for(auto& pair : lineComparators){
-            delete pair.second;
-        }
-    };
-
-    if(error){
-        cleanup();
-        return;
     }
 
     for(auto& pair : lineComparators){
@@ -408,44 +423,49 @@ void SearchView::startMultilineSearch(
                 "Failed to initialize comparator on Line #" + QString::number(pair.first),
                 QMessageBox::Ok
             );
-            error = true;
+            return;
         }
     }
 
-    if(error){
-        cleanup();
-        return;
-    }
+    QProgressDialog dialog(this);
+    dialog.setWindowTitle("Searching...");
+    dialog.setWindowModality(Qt::WindowModal);
+    dialog.setMinimumWidth(400);
 
-    std::function<void(int, unsigned long long)> update = [&](int percent, unsigned long long numResults){
-        emit progressUpdate(percent, numResults);
-    };
+    QFutureWatcher<bool> futureWatcher;
+    QObject::connect(&futureWatcher, &QFutureWatcher<PLP::FileReaderI*>::finished, &dialog, &QProgressDialog::reset);
+    QObject::connect(&dialog, &QProgressDialog::canceled, this, &SearchView::onSearchCancelled);
 
-    if(!_progressDialog){
-        _progressDialog = new QProgressDialog("", "Cancel", 0, 100, this);
-        _progressDialog->setWindowTitle("Searching...");
-        _progressDialog->setWindowModality(Qt::WindowModal);
-        _progressDialog->setMinimumWidth(400);
-        connect(_progressDialog, SIGNAL(canceled(void)), this, SLOT(onSearchCancelled(void)));
-    }
-    _progressDialog->show();
+    futureWatcher.setFuture(
+        QtConcurrent::run([&, startLine, endLine, maxNumResults, lineComparators]() -> bool {
+            std::function<void(int, unsigned long long)> update = [&](int percent, unsigned long long numResults){
+                QMetaObject::invokeMethod(&dialog, [&, percent, numResults](){
+                    dialog.setValue(percent);
+                    dialog.setLabelText("Results: " + QString::number(numResults));
+                });
+            };
 
-    PLP::CoreI* core = _plpCore;
-    QtConcurrent::run([this, core, fileReader, indexReader, indexWriter,
-                      startLine, endLine, maxNumResults, lineComparators, update, cleanup](){
-       bool result = core->searchMultiline(fileReader, indexReader, indexWriter,
-                    startLine, endLine, maxNumResults,lineComparators,&update);
+            std::unordered_map<int, PLP::TextComparator*> comparators;
+            for(auto& comp : lineComparators){
+                comparators.emplace(comp.first, comp.second.get());
+            }
+            return _plpCore->searchMultiline(
+                fileReader.get(), indexReader.get(), indexWriter.get(),
+                startLine, endLine, maxNumResults,
+                comparators,
+                &update
+            );
+        })
+    );
 
-       _plpCore->release(fileReader);
-       _plpCore->release(indexReader);
-       _plpCore->release(indexWriter);
+    dialog.exec();
+    futureWatcher.waitForFinished();
 
-       for(auto& pair : lineComparators){
-           delete pair.second;
-       }
+    fileReader.reset();
+    indexReader.reset();
+    indexWriter.reset();
 
-       emit searchCompleted(result);
-    });
+    onSearchCompletion(futureWatcher.result());
 }
 
 void SearchView::openFile() {
@@ -478,15 +498,7 @@ void SearchView::openDestinationDir(){
     _destDir->setText(path);
 }
 
-void SearchView::onProgressUpdate(int percent, unsigned long long numResults) {
-    _progressDialog->setValue(percent);
-    _progressDialog->setLabelText("Results: " + QString::number(numResults));
-}
-
 void SearchView::onSearchCompletion(bool success){
-    _progressDialog->reset();
-    _progressDialog->hide();
-
     if(_plpCore->isCancelled()){
         return;
     }
@@ -515,5 +527,4 @@ void SearchView::showEvent(QShowEvent* event) {
     int defaultPosX = (screenGeometry.width() - size().width()) / 2;
     int defaultPosY = (screenGeometry.height() - size().height()) / 2;
     move(defaultPosX, defaultPosY);
-
 }
