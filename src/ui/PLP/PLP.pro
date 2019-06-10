@@ -38,7 +38,8 @@ SOURCES += \
     searchview.cpp \
     aboutdialog.cpp \
     scriptdocsdialog.cpp \
-    gettingstarteddialog.cpp
+    gettingstarteddialog.cpp \
+    settingsdialog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -57,7 +58,8 @@ HEADERS += \
     coreobjptr.h \
     aboutdialog.h \
     scriptdocsdialog.h \
-    gettingstarteddialog.h
+    gettingstarteddialog.h \
+    settingsdialog.h
 
 FORMS +=
 

@@ -6,6 +6,7 @@
 #include "aboutdialog.h"
 #include "scriptdocsdialog.h"
 #include "gettingstarteddialog.h"
+#include "settingsdialog.h"
 
 #include <QMainWindow>
 #include <QTabWidget>
@@ -26,6 +27,10 @@ public:
     void openIndex(const QString& path);
 
 signals:
+    void fontChanged(const QFont&);
+
+protected:
+    void changeEvent(QEvent* event);
 
 public slots:
     void closeTab(int index);
@@ -38,6 +43,7 @@ public slots:
     void showAboutDialog();
     void showScriptingDocsDialog();
     void showGettingStartedDialog();
+    void showSettingsDialog();
     void onDialogCancel();
     void exit();
 
@@ -58,6 +64,7 @@ private:
     AboutDialog* _aboutDialog;
     ScriptDocsDialog* _scriptDocsDialog;
     GettingStartedDialog* _gettingStartedDialog;
+    SettingsDialog* _settingsDialog;
 
     PLP::CoreI* _plpCore;
 };
