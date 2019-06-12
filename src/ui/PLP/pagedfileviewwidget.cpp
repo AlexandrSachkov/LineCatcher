@@ -164,7 +164,7 @@ void PagedFileViewWidget::readNextBlock() {
     }
 
     if(result == PLP::LineReaderResult::ERROR){
-        QMessageBox::critical(this,"PLP","Failed to read block.",QMessageBox::Ok);
+        QMessageBox::critical(this,"Error","Failed to read block.",QMessageBox::Ok);
         return;
     }
 
@@ -230,7 +230,7 @@ void PagedFileViewWidget::readPreviousBlock() {
     }
 
     if(result == PLP::LineReaderResult::ERROR){
-        QMessageBox::critical(this,"PLP","Failed to read block.",QMessageBox::Ok);
+        QMessageBox::critical(this,"Error","Failed to read block.",QMessageBox::Ok);
         return;
     }
 
@@ -311,7 +311,7 @@ void PagedFileViewWidget::gotoLine(unsigned long long lineNum){
     }
 
     if(result == PLP::LineReaderResult::ERROR){
-        QMessageBox::critical(this,"PLP","Failed to read block.",QMessageBox::Ok);
+        QMessageBox::critical(this,"Error","Failed to read block.",QMessageBox::Ok);
         return;
     }
 

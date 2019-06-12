@@ -80,7 +80,7 @@ span.type {
 <!----------------------------------------------------- READING FILE --------------------------------------------------->
 <p id="readingFileTag"><b>Reading file</b></p>
 <p>
-    <code><span class="type">FileReader</span> PLP:core():createFileReader(<span class="type">string</span> path, <span class="type">number</span> buffSize)</code>
+    <code><span class="type">FileReader</span> LC:core():createFileReader(<span class="type">string</span> path, <span class="type">number</span> buffSize)</code>
 </p>
 <p class="desc">Creates object for reading file</p>
 
@@ -96,7 +96,7 @@ span.type {
 </p>
 
 <p>
-    <code><span class="type">void</span> PLP:core():releaseFileReader(<span class="type">FileReader</span> fileReader)</code>
+    <code><span class="type">void</span> LC:core():releaseFileReader(<span class="type">FileReader</span> fileReader)</code>
 </p>
 <p class="desc">Releases FileReader object</p>
     
@@ -120,8 +120,8 @@ span.type {
 <p>
     <dl>
         <dt>returns:</dt>
-        <dd>- result: PLP.ERROR (internal failure), PLP.NOT_FOUND (line not found), PLP.SUCCESS (line successfully read)
-        <dd>- line: line from file (valid if result is PLP.SUCCESS)</dd>
+        <dd>- result: LC.ERROR (internal failure), LC.NOT_FOUND (line not found), LC.SUCCESS (line successfully read)
+        <dd>- line: line from file (valid if result is LC.SUCCESS)</dd>
     </dl>
 </p>
 
@@ -135,8 +135,8 @@ span.type {
         <dt>lineNumber:</dt>
         <dd>- number of a line to retrieve</dd>
         <dt>returns:</dt>
-        <dd>- result: PLP.ERROR (internal failure), PLP.NOT_FOUND (line not found), PLP.SUCCESS (line successfully read)
-        <dd>- line: line from file (valid if result is PLP.SUCCESS)</dd>
+        <dd>- result: LC.ERROR (internal failure), LC.NOT_FOUND (line not found), LC.SUCCESS (line successfully read)
+        <dd>- line: line from file (valid if result is LC.SUCCESS)</dd>
     </dl>
 </p>
 
@@ -174,8 +174,8 @@ span.type {
         <dt>indexReader:</dt>
         <dd>- IndexReader object
         <dt>returns:</dt>
-        <dd>- result: PLP.ERROR (internal failure), PLP.NOT_FOUND (line not found), PLP.SUCCESS (line successfully read)
-        <dd>- line: line from file (valid if result is PLP.SUCCESS)</dd>
+        <dd>- result: LC.ERROR (internal failure), LC.NOT_FOUND (line not found), LC.SUCCESS (line successfully read)
+        <dd>- line: line from file (valid if result is LC.SUCCESS)</dd>
     </dl>
 </p>
 
@@ -198,7 +198,7 @@ span.type {
 <p id="writingFileTag"><b>Writing file</b></p>
 
 <p>
-    <code><span class="type">FileWriter</span> PLP:core():createFileWriter(<span class="type">string</span> path, <span class="type">number</span> buffSize,
+    <code><span class="type">FileWriter</span> LC:core():createFileWriter(<span class="type">string</span> path, <span class="type">number</span> buffSize,
         <span class="type">boolean</span> overwriteIfExists)</code>
 </p>
 <p class="desc">Creates object for writing file</p>
@@ -217,7 +217,7 @@ span.type {
 </p>
 
 <p>
-    <code><span class="type">void</span> PLP:core():releaseFileWriter(<span class="type">FileWriter</span> fileWriter)</code>
+    <code><span class="type">void</span> LC:core():releaseFileWriter(<span class="type">FileWriter</span> fileWriter)</code>
 </p>
 <p class="desc">Releases FileWriter object</p>
     
@@ -267,7 +267,7 @@ span.type {
 <p id="readingIndexTag"><b>Reading index</b></p>
 
 <p>
-    <code><span class="type">IndexReader</span> PLP:core():createIndexReader(<span class="type">string</span> path, <span class="type">number</span> buffSize)</code>
+    <code><span class="type">IndexReader</span> LC:core():createIndexReader(<span class="type">string</span> path, <span class="type">number</span> buffSize)</code>
 </p>
 <p class="desc">Creates object for reading index</p>
 
@@ -283,7 +283,7 @@ span.type {
 </p>
 
 <p>
-    <code><span class="type">void</span> PLP:core():releaseIndexReader(<span class="type">IndexReader</span> indexReader)</code>
+    <code><span class="type">void</span> LC:core():releaseIndexReader(<span class="type">IndexReader</span> indexReader)</code>
 </p>
 <p class="desc">Releases IndexReader object</p>
     
@@ -380,7 +380,7 @@ span.type {
 <p id="writingIndexTag"><b>Writing index</b></p>
 
 <p>
-    <code><span class="type">IndexWriter</span> PLP:core():createIndexWriter(<span class="type">string</span> path, <span class="type">number</span> buffSize, 
+    <code><span class="type">IndexWriter</span> LC:core():createIndexWriter(<span class="type">string</span> path, <span class="type">number</span> buffSize, 
         <span class="type">FileReader</span> fileReader, <span class="type">boolean</span> overwriteIfExists)</code>
 </p>
 <p class="desc">Creates object for writing index</p>
@@ -388,7 +388,7 @@ span.type {
 <p>
     <dl>
         <dt>path:</dt>
-        <dd>- full path to the file. File extension must be ".plpidx". If extension is incorrect, correct extension will be appended to the end of provided path</dd>
+        <dd>- full path to the file. File extension must be ".lcidx". If extension is incorrect, correct extension will be appended to the end of provided path</dd>
         <dt>buffSize:</dt>
         <dd>- preferred buffer size in bytes (0 to use application default). Exact size may vary</dd>
         <dt>fileReader:</dt>
@@ -401,7 +401,7 @@ span.type {
 </p>
 
 <p>
-    <code><span class="type">void</span> PLP:core():releaseIndexWriter(<span class="type">IndexWriter</span> indexWriter)</code>
+    <code><span class="type">void</span> LC:core():releaseIndexWriter(<span class="type">IndexWriter</span> indexWriter)</code>
 </p>
 <p class="desc">Releases IndexWriter object</p>
     
@@ -451,7 +451,7 @@ span.type {
 <!----------------------------------------------------- SEARCH METHODS --------------------------------------------------->
 <p id="searchMethodsTag"><b>Search methods</b></p>
 <p>
-    <code><span class="type">boolean</span> PLP:core():search(
+    <code><span class="type">boolean</span> LC:core():search(
         <span class="type">FileReader</span> fileReader, 
         <span class="type">IndexWriter</span> indexWriter, 
         <span class="type">number</span> startLine, 
@@ -482,7 +482,7 @@ span.type {
 </p>
 
 <p>
-    <code><span class="type">boolean</span> PLP:core():searchI(
+    <code><span class="type">boolean</span> LC:core():searchI(
         <span class="type">FileReader</span> fileReader, 
         <span class="type">IndexReader</span> indexReader, 
         <span class="type">IndexWriter</span> indexWriter, 
@@ -516,7 +516,7 @@ span.type {
 </p>
 
 <p>
-    <code><span class="type">boolean</span> PLP:core():searchMultiline(
+    <code><span class="type">boolean</span> LC:core():searchMultiline(
         <span class="type">FileReader</span> fileReader, 
         <span class="type">IndexWriter</span> indexWriter, 
         <span class="type">number</span> startLine, 
@@ -542,7 +542,7 @@ span.type {
         <dt>textComparators:</dt>
         <dd>- a dictionary of TextComparator objects that define search criteria (see "Text comparators" section). Key is the line number relative to the reference line. 
             Value is the comparator applied to that line. 
-            E.x. {[-1]=PLP.MatchString("test1",false,false), [1]=PLP.MatchString("test2",false,false)} will search for a block where the line before the reference 
+            E.x. {[-1]=LC.MatchString("test1",false,false), [1]=LC.MatchString("test2",false,false)} will search for a block where the line before the reference 
             contains string "test1", and the line after reference contains string "test2". The index written to file will then be the address of the reference line.
             Think of it in terms of this imperative: "Give me all lines where the preceding line contains the word "test1" and the following line the word "test2".
             See "Help -> Getting Started" for more details"</dd>
@@ -552,7 +552,7 @@ span.type {
 </p>
 
 <p>
-    <code><span class="type">boolean</span> PLP:core():searchMultilineI(
+    <code><span class="type">boolean</span> LC:core():searchMultilineI(
         <span class="type">FileReader</span> fileReader, 
         <span class="type">IndexReader</span> indexReader, 
         <span class="type">IndexWriter</span> indexWriter, 
@@ -581,7 +581,7 @@ span.type {
         <dt>textComparators:</dt>
         <dd>- a dictionary of TextComparator objects that define search criteria (see "Text comparators" section). Key is the line number relative to the reference line. 
             Value is the comparator applied to that line. 
-            E.x. {[-1]=PLP.MatchString("test1",false,false), [1]=PLP.MatchString("test2",false,false)} will search for a block where the line before the reference 
+            E.x. {[-1]=LC.MatchString("test1",false,false), [1]=LC.MatchString("test2",false,false)} will search for a block where the line before the reference 
             contains string "test1", and the line after reference contains string "test2". The index written to file will then be the address of the reference line.
             Think of it in terms of this imperative: "Give me all lines where the preceding line contains the word "test1" and the following line the word "test2".
             See "Help -> Getting Started" for more details"</dd>
@@ -613,7 +613,7 @@ span.type {
 
 
 <p>
-    <code><span class="type">TextComparator</span> PLP.MatchString(
+    <code><span class="type">TextComparator</span> LC.MatchString(
         <span class="type">string</span> text, 
         <span class="type">boolean</span> exact, 
         <span class="type">boolean</span> ignoreCase, 
@@ -635,7 +635,7 @@ span.type {
 </p>
 
 <p>
-    <code><span class="type">TextComparator</span> PLP.MatchAll(<span class="type">array&lt;TextComparator&gt;</span> textComparators)</code>
+    <code><span class="type">TextComparator</span> LC.MatchAll(<span class="type">array&lt;TextComparator&gt;</span> textComparators)</code>
 </p>
 <p class="desc">Creates a TextComparator object. This comparator will succeed when the source string matches all of the provided comparators</p>
 
@@ -649,7 +649,7 @@ span.type {
 </p>
 
 <p>
-    <code><span class="type">TextComparator</span> PLP.MatchAny(<span class="type">array&lt;TextComparator&gt;</span> textComparators)</code>
+    <code><span class="type">TextComparator</span> LC.MatchAny(<span class="type">array&lt;TextComparator&gt;</span> textComparators)</code>
 </p>
 <p class="desc">Creates a TextComparator object. This comparator will succeed when the source string matches any of the provided comparators</p>
 
@@ -663,7 +663,7 @@ span.type {
 </p>
 
 <p>
-    <code><span class="type">TextComparator</span> PLP.MatchRegex(<span class="type">string</span> regexPattern, <span class="type">boolean</span> ignoreCase)</code>
+    <code><span class="type">TextComparator</span> LC.MatchRegex(<span class="type">string</span> regexPattern, <span class="type">boolean</span> ignoreCase)</code>
 </p>
 <p class="desc">Creates a TextComparator object. This comparator will succeed when the source string matches the provided regular expression</p>
 
@@ -679,7 +679,7 @@ span.type {
 </p>
 
 <p>
-    <code><span class="type">TextComparator</span> PLP.MatchSubstrings(
+    <code><span class="type">TextComparator</span> LC.MatchSubstrings(
         <span class="type">string</span> delimiter, 
         <span class="type">boolean</span> trimLine,
         <span class="type">dictionary&lt;TextComparator&gt;</span> substringComparators
@@ -702,7 +702,7 @@ span.type {
 </p>
 
 <p>
-    <code><span class="type">TextComparator</span> PLP.MatchWords(
+    <code><span class="type">TextComparator</span> LC.MatchWords(
         <span class="type">dictionary&lt;TextComparator&gt;</span> wordComparators
     )</code>
 </p>
@@ -719,7 +719,7 @@ span.type {
 </p>
 
 <p>
-    <code><span class="type">TextComparator</span> PLP.MatchCustom(
+    <code><span class="type">TextComparator</span> LC.MatchCustom(
         <span class="type">function</span> comparatorFunction
     )</code>
 </p>
@@ -742,7 +742,7 @@ span.type {
 <p id="otherTag"><b>Other</b></p>
 
 <p>
-    <code><span class="type">void</span> PLP:core():printConsole(<span class="type">string</span> text)</code>
+    <code><span class="type">void</span> LC:core():printConsole(<span class="type">string</span> text)</code>
 </p>
 <p class="desc">Prints text to console</p>
 
@@ -756,7 +756,7 @@ span.type {
 </p>
 
 <p>
-    <code><span class="type">void</span> PLP:core():printConsoleEx(<span class="type">string</span> text, <span class="type">number</span> level)</code>
+    <code><span class="type">void</span> LC:core():printConsoleEx(<span class="type">string</span> text, <span class="type">number</span> level)</code>
 </p>
 <p class="desc">Prints text to console with the given severity level</p>
 
@@ -774,7 +774,7 @@ span.type {
 </p>
 
 <p>
-    <code><span class="type">boolean</span> PLP:core():isCanceled()</code>
+    <code><span class="type">boolean</span> LC:core():isCanceled()</code>
 </p>
 <p class="desc">Returns true if any current operation has been canceled. E.x. when user presses "Cancel" button in scripting console. Used when a long-running operation needs to be cancellable</p>
 

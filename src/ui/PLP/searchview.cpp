@@ -227,22 +227,22 @@ void SearchView::startSearch() {
 
     //validate user input
     if(dataPath.simplified().isEmpty()){
-        QMessageBox::information(this,"PLP","Source file path cannot be empty",QMessageBox::Ok);
+        QMessageBox::information(this,"Error","Source file path cannot be empty",QMessageBox::Ok);
         return;
     }
 
     if(destDir.simplified().isEmpty()){
-        QMessageBox::information(this,"PLP","Save to file directory cannot be empty",QMessageBox::Ok);
+        QMessageBox::information(this,"Error","Save to file directory cannot be empty",QMessageBox::Ok);
         return;
     }
 
     if(destName.simplified().isEmpty()){
-        QMessageBox::information(this,"PLP","Save to file name cannot be empty",QMessageBox::Ok);
+        QMessageBox::information(this,"Error","Save to file name cannot be empty",QMessageBox::Ok);
         return;
     }
 
     if(startLine > endLine){
-        QMessageBox::information(this,"PLP","Start line must be smaller or equal to end line",QMessageBox::Ok);
+        QMessageBox::information(this,"Error","Start line must be smaller or equal to end line",QMessageBox::Ok);
         return;
     }
 
@@ -270,7 +270,7 @@ void SearchView::startSearch() {
     // Create required objects
     CoreObjPtr<PLP::FileReaderI> fileReader = createCoreObjPtr(futureWatcher.result(), _plpCore);
     if(!fileReader){
-        QMessageBox::information(this,"PLP","File reader failed to initialize",QMessageBox::Ok);
+        QMessageBox::information(this,"Error","File reader failed to initialize",QMessageBox::Ok);
         return;
     }
 
@@ -279,7 +279,7 @@ void SearchView::startSearch() {
     if(!indexPath.simplified().isEmpty()){
         indexReader = createCoreObjPtr(_plpCore->createIndexReader(indexPath.toStdString(), 0), _plpCore);
         if(!indexReader){
-            QMessageBox::information(this,"PLP","Index reader failed to initialize",QMessageBox::Ok);
+            QMessageBox::information(this,"Error","Index reader failed to initialize",QMessageBox::Ok);
             return;
         }
     }
@@ -290,7 +290,7 @@ void SearchView::startSearch() {
         _plpCore
     );
     if(!indexWriter){
-        QMessageBox::information(this,"PLP","Index writer failed to initialize",QMessageBox::Ok);
+        QMessageBox::information(this,"Error","Index writer failed to initialize",QMessageBox::Ok);
         return;
     }
 
@@ -320,7 +320,7 @@ void SearchView::startRegularSearch(
         ){
     QString searchPattern = _searchField->text();
     if(searchPattern.isEmpty()){
-        QMessageBox::information(this,"PLP","Search pattern cannot be empty",QMessageBox::Ok);
+        QMessageBox::information(this,"Error","Search pattern cannot be empty",QMessageBox::Ok);
         return;
     }
 
@@ -335,7 +335,7 @@ void SearchView::startRegularSearch(
     }
 
     if(!comparator || !comparator->initialize()){
-        QMessageBox::information(this,"PLP","Comparator failed to initialize",QMessageBox::Ok);
+        QMessageBox::information(this,"Error","Comparator failed to initialize",QMessageBox::Ok);
         return;
     }
 
@@ -481,7 +481,7 @@ void SearchView::openFile() {
 }
 
 void SearchView::openIndex(){
-    QString path = QFileDialog::getOpenFileName(this, tr("Select indices to open")/*, "", tr("Index (*.plpidx)")*/);
+    QString path = QFileDialog::getOpenFileName(this, tr("Select indices to open")/*, "", tr("Index (*.lcidx)")*/);
     if(path.isEmpty()){
         return;
     }
@@ -504,7 +504,7 @@ void SearchView::onSearchCompletion(bool success){
     }
 
     if(!success){
-        QMessageBox::critical(this,"PLP","Search failed",QMessageBox::Ok);
+        QMessageBox::critical(this,"Error","Search failed",QMessageBox::Ok);
         return;
     }
 

@@ -25,7 +25,7 @@ AboutDialog::AboutDialog(QWidget *parent) : QWidget(parent)
     QString path(QString::fromStdString(Common::RESOURCE_PATH) + "/about.html");
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QMessageBox::critical(this,"PLP","Failed to open about.html",QMessageBox::Ok);
+        QMessageBox::critical(this,"Error","Failed to open about.html",QMessageBox::Ok);
         return;
     }
 

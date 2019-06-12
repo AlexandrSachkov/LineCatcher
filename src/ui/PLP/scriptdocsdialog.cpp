@@ -24,7 +24,7 @@ ScriptDocsDialog::ScriptDocsDialog(QWidget *parent) : QWidget(parent)
     QString path(QString::fromStdString(Common::RESOURCE_PATH) + "/scriptdocs.html");
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QMessageBox::critical(this,"PLP","Failed to open scriptdocs.html",QMessageBox::Ok);
+        QMessageBox::critical(this,"Error","Failed to open scriptdocs.html",QMessageBox::Ok);
         return;
     }
 

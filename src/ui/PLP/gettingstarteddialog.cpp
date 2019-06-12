@@ -24,7 +24,7 @@ GettingStartedDialog::GettingStartedDialog(QWidget* parent) : QWidget (parent)
     QString path(QString::fromStdString(Common::RESOURCE_PATH) + "/gettingstarted.html");
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QMessageBox::critical(this,"PLP","Failed to open gettingstarted.html",QMessageBox::Ok);
+        QMessageBox::critical(this,"Error","Failed to open gettingstarted.html",QMessageBox::Ok);
         return;
     }
 

@@ -644,7 +644,7 @@ namespace PLP {
     }
 
     void Core::attachLuaBindings(lua_State* state) {
-        auto module = LuaIntf::LuaBinding(state).beginModule("PLP");
+        auto module = LuaIntf::LuaBinding(state).beginModule("LC");
         module.addConstant("ERROR", LineReaderResult::ERROR);
         module.addConstant("NOT_FOUND", LineReaderResult::NOT_FOUND);
         module.addConstant("SUCCESS", LineReaderResult::SUCCESS);

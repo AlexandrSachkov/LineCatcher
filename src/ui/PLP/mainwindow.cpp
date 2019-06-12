@@ -17,13 +17,13 @@
 #include <memory>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
-    setWindowTitle("Programmable Log Parser");
+    setWindowTitle("Line Catcher");
     _centralWidget = new QWidget();
     setCentralWidget(_centralWidget);
 
     _plpCore = PLP::createCore();
     if(!_plpCore || !_plpCore->initialize()){
-        QMessageBox::critical(this,"PLP","Application failed to initialize and needs to exit.",QMessageBox::Ok);
+        QMessageBox::critical(this,"Error","Application failed to initialize and needs to exit.",QMessageBox::Ok);
         PLP::release(_plpCore);
         QApplication::quit();
     }
@@ -165,7 +165,7 @@ void MainWindow::openFile() {
     }
 
     if(!openFile(path) && !_plpCore->isCancelled()){
-        QMessageBox::critical(this,"PLP","Failed to open file: " + path,QMessageBox::Ok);
+        QMessageBox::critical(this,"Error","Failed to open file: " + path,QMessageBox::Ok);
     }
 }
 
@@ -235,7 +235,7 @@ void MainWindow::openIndex(const QString& path){
     );
 
     if(!indexReader){
-        QMessageBox::critical(this,"PLP","Failed to open index: " + path,QMessageBox::Ok);
+        QMessageBox::critical(this,"Error","Failed to open index: " + path,QMessageBox::Ok);
         return;
     }
 
@@ -245,7 +245,7 @@ void MainWindow::openIndex(const QString& path){
     if(!openFile(possibleFileLocations)){
         if(!_plpCore->isCancelled()){
             QMessageBox::critical(this,
-                "PLP","Failed to open file at " + qDataFileOriginalPath + " or " + qDataFileLocalPath,
+                "Error","Failed to find file at locations " + qDataFileOriginalPath + " and " + qDataFileLocalPath,
                 QMessageBox::Ok
             );
         }
@@ -266,7 +266,7 @@ void MainWindow::openIndex(const QString& path){
         }
     }
 
-    QMessageBox::critical(this,"PLP","Failed to open index: " + path,QMessageBox::Ok);
+    QMessageBox::critical(this,"Error","Failed to open index: " + path,QMessageBox::Ok);
 }
 
 void MainWindow::showScriptView() {

@@ -111,6 +111,6 @@ namespace PLP {
 
     static const unsigned int RESULT_SET_VERSION = 1; // increment if format changes
 
-    static const char* FILE_RANDOM_ACCESS_INDEX_EXTENSION = ".plpfraidx";
-    static const char* FILE_INDEX_EXTENSION = ".plpidx";
+    static const char* FILE_RANDOM_ACCESS_INDEX_EXTENSION = ".lcfraidx";
+    static const char* FILE_INDEX_EXTENSION = ".lcidx";
 }
