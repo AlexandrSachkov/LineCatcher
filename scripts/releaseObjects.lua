@@ -7,9 +7,9 @@ LC:core():releaseFileWriter(fileWriter2);
 local fileReader = LC:core():createFileReader("D:/Repositories/LogParser/resources/test.txt", 0);
 LC:core():releaseFileReader(fileReader);
 local fileReader2 = LC:core():createFileReader("D:/Repositories/LogParser/resources/test.txt", 0);
-local indexWriter = LC:core():createIndexWriter("D:/Repositories/LogParser/resources/testIndex.LCidx", 0, fileReader2, true);
+local indexWriter = LC:core():createIndexWriter("D:/Repositories/LogParser/resources/testIndex.lcidx", 0, fileReader2, true);
 LC:core():releaseIndexWriter(indexWriter);
-local indexReader = LC:core():createIndexReader("D:/Repositories/LogParser/resources/testIndex.LCidx", 0);
+local indexReader = LC:core():createIndexReader("D:/Repositories/LogParser/resources/testIndex.lcidx", 0);
 
 
 

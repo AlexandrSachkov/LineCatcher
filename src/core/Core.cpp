@@ -81,7 +81,7 @@ namespace PLP {
 
         _cancelled = false;
 
-        auto module = LuaIntf::LuaBinding(_state).beginModule("PLP");
+        auto module = LuaIntf::LuaBinding(_state).beginModule("LC");
         module.addFunction("core", [this] {
             return this;
         });
