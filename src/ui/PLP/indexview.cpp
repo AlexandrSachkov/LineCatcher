@@ -17,7 +17,7 @@ IndexView::IndexView(
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
 
-    QFont lineNavFont("Courier New", 14);
+    QFont lineNavFont("Courier New", 12);
     lineNavFont.setStyleHint(QFont::Monospace);
 
     QHBoxLayout* lineSelectionLayout = new QHBoxLayout();

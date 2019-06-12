@@ -17,9 +17,6 @@ const char* ScriptView::LOG_SUBSCRIBER_NAME = "console";
 
 ScriptView::ScriptView(PLP::CoreI* plpCore, QWidget *parent) : QWidget(parent)
 {
-    if(!_plpCore){
-        //TODO
-    }
     _plpCore = plpCore;
 
     QVBoxLayout* mainLayout = new QVBoxLayout();
@@ -38,7 +35,7 @@ ScriptView::ScriptView(PLP::CoreI* plpCore, QWidget *parent) : QWidget(parent)
     _scriptPath = new QLineEdit(this);
     scriptLoadControlLayout->addWidget(_scriptPath);
 
-    _open = new QPushButton("Open", this);
+    _open = new QPushButton("Browse", this);
     scriptLoadControlLayout->addWidget(_open);
     connect(_open, SIGNAL(clicked(void)), this, SLOT(openScript(void)));
 
@@ -103,9 +100,9 @@ ScriptView::ScriptView(PLP::CoreI* plpCore, QWidget *parent) : QWidget(parent)
         _logData.push_back({level, QString::fromStdString(msg)});
     };
 
-    QFont f("Courier New", 14);
-    f.setStyleHint(QFont::Monospace);
-    this->setFont(f);
+    QFont font = this->font();
+    font.setPointSize(12);
+    this->setFont(font);
 
     setScriptModified(false);
 }

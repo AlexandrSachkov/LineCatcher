@@ -33,6 +33,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     _mainLayout->setSpacing(6);
     _mainLayout->setContentsMargins(2, 2, 2, 2);
 
+    QFont menuFont = menuBar()->font();
+    menuFont.setPointSize(12);
+    menuBar()->setFont(menuFont);
+
     QMenu* fileMenu = new QMenu("File");
     menuBar()->addMenu(fileMenu);
     connect(this, &MainWindow::fontChanged, fileMenu, &QMenu::setFont);
@@ -105,7 +109,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(about, SIGNAL(triggered(void)), this, SLOT(showAboutDialog(void)));
     connect(this, &MainWindow::fontChanged, about, &QAction::setFont);
 
+    QFont tabFont = this->font();
+    tabFont.setPointSize(10);
+
     _fileViewer = new QTabWidget(_centralWidget);
+    _fileViewer->setFont(tabFont);
     _mainLayout->addWidget(_fileViewer);
     _fileViewer->setTabsClosable(true);
     connect(_fileViewer, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));

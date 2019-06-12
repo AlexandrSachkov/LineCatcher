@@ -35,6 +35,10 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QWidget(parent)
     contentFontSize->setMinimum(10);
     contentFontSize->setMaximum(20);
     contentFontSize->setValue(12);
+
+    QFont font = this->font();
+    font.setPointSize(12);
+    this->setFont(font);
 }
 
 void SettingsDialog::changeUIFontSize(int size){

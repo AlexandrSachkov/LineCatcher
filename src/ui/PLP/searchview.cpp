@@ -67,25 +67,13 @@ void SearchView::createSourceContent(QLayout* mainLayout){
     QHBoxLayout* openFileLayout = new QHBoxLayout();
     _filePath = new QLineEdit(this);
     _filePath->setReadOnly(true);
-    QPushButton* openFile = new QPushButton("Open", this);
+    QPushButton* openFile = new QPushButton("Browse", this);
     connect(openFile, SIGNAL(clicked(void)), this, SLOT(openFile(void)));
     openFile->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
     openFileLayout->addWidget(_filePath);
     openFileLayout->addWidget(openFile);
     sourceLayout->addRow("File: ", openFileLayout);
-
-    QHBoxLayout* openIndexLayout = new QHBoxLayout();
-    _indexPath = new QLineEdit(this);
-    _indexPath->setReadOnly(true);
-    QPushButton* openIndex = new QPushButton("Open", this);
-    connect(openIndex, SIGNAL(clicked(void)), this, SLOT(openIndex(void)));
-    openIndex->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-
-    openIndexLayout->addWidget(_indexPath);
-    openIndexLayout->addWidget(openIndex);
-
-    sourceLayout->addRow("Index (Optional): ", openIndexLayout);
 }
 
 void SearchView::createDestinationContent(QLayout* mainLayout){
@@ -100,7 +88,7 @@ void SearchView::createDestinationContent(QLayout* mainLayout){
     QHBoxLayout* openDirLayout = new QHBoxLayout();
     _destDir = new QLineEdit(this);
     _destDir->setReadOnly(true);
-    QPushButton* openDir = new QPushButton("Open", this);
+    QPushButton* openDir = new QPushButton("Browse", this);
     connect(openDir, SIGNAL(clicked(void)), this, SLOT(openDestinationDir(void)));
     openDir->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
@@ -131,6 +119,18 @@ void SearchView::createSearchLimiterContent(QLayout* mainLayout){
     _numResultsBox = new ULLSpinBox(this);
     _numResultsBox->setRange(0, ULLONG_MAX);
     limiterLayout->addRow("Max result#: ", _numResultsBox);
+
+    QHBoxLayout* openIndexLayout = new QHBoxLayout();
+    _indexPath = new QLineEdit(this);
+    _indexPath->setReadOnly(true);
+    QPushButton* openIndex = new QPushButton("Browse", this);
+    connect(openIndex, SIGNAL(clicked(void)), this, SLOT(openIndex(void)));
+    openIndex->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+
+    openIndexLayout->addWidget(_indexPath);
+    openIndexLayout->addWidget(openIndex);
+
+    limiterLayout->addRow("Index (Optional): ", openIndexLayout);
 }
 
 void SearchView::createSearchOptionContent(QLayout* mainLayout) {
