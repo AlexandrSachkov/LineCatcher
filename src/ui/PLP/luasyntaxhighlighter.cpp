@@ -29,7 +29,7 @@ LuaSyntaxHighlighter::LuaSyntaxHighlighter(QTextDocument *parent) : QSyntaxHighl
     highlightingRules.append(rule);
 
     quotationFormat.setForeground(Qt::darkGreen);
-    rule.pattern = QRegularExpression("\".*\"");
+    rule.pattern = QRegularExpression("\"[^\"]*\"");
     rule.format = quotationFormat;
     highlightingRules.append(rule);
 
