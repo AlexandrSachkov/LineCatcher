@@ -74,7 +74,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     runMenu->addAction(runScript);
     connect(runScript, SIGNAL(triggered(void)), this, SLOT(showScriptView(void)));
 
-    QMenu* configMenu = new QMenu("Config");
+    QMenu* configMenu = new QMenu("Configure");
     menuBar()->addMenu(configMenu);
 
     QAction* settings = new QAction("Settings");
@@ -124,11 +124,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     _gettingStartedDialog->hide();
 
     _settingsDialog = new SettingsDialog([&](int pointSize){
-        for(int i = 0; i < _fileViewer->count(); i++){
-            FileView* fileView = static_cast<FileView*>(_fileViewer->widget(i));
-            fileView->setFontSize(pointSize);
-        }
-        _scriptView->setFontSize(pointSize);
+        setFontSize(pointSize);
     }, this);
     _settingsDialog->hide();
 }
@@ -217,6 +213,7 @@ bool MainWindow::openFile(const QString& path)
     _fileViewer->addTab(fileView, fileName);
     _fileViewer->setTabToolTip(_fileViewer->count() - 1, path);
     _fileViewer->setCurrentIndex(_fileViewer->count() - 1);
+    setFontSize(_viewerFontSize);
     fileView->show();
 
     return true;
@@ -263,6 +260,7 @@ void MainWindow::openIndex(const QString& path){
             if(possibleLocation.compare(existingPath) == 0){
                 _fileViewer->setCurrentIndex(i);
                 fileView->openIndex(std::move(indexReader));
+                setFontSize(_viewerFontSize);
                 return;
             }
         }
@@ -314,4 +312,14 @@ void MainWindow::closeAllTabs(){
 
 void MainWindow::exit(){
     QApplication::quit();
+}
+
+void MainWindow::setFontSize(int pointSize) {
+    _viewerFontSize = pointSize;
+
+    for(int i = 0; i < _fileViewer->count(); i++){
+        FileView* fileView = static_cast<FileView*>(_fileViewer->widget(i));
+        fileView->setFontSize(pointSize);
+    }
+    _scriptView->setFontSize(pointSize);
 }

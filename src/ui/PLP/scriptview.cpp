@@ -175,7 +175,7 @@ void ScriptView::clearConsole() {
 }
 
 void ScriptView::hideEvent(QHideEvent* event) {
-    QSettings settings("AlexandrSachkov", "PLP");
+    QSettings settings("AlexandrSachkov", "LC");
     settings.beginGroup("ScriptView");
     settings.setValue("size", size());
     settings.setValue("pos", pos());
@@ -190,7 +190,7 @@ void ScriptView::showEvent(QShowEvent* event) {
     int defaultPosX = (screenGeometry.width() - defaultSize.width()) / 2;
     int defaultPosY = (screenGeometry.height() - defaultSize.height()) / 2;
 
-    QSettings settings("AlexandrSachkov", "PLP");
+    QSettings settings("AlexandrSachkov", "LC");
     settings.beginGroup("ScriptView");
     resize(settings.value("size", defaultSize).toSize());
     move(settings.value("pos", QPoint(defaultPosX, defaultPosY)).toPoint());

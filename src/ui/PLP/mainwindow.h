@@ -44,7 +44,9 @@ public slots:
 private:
     bool openFile(const std::vector<QString>& candidates);
     bool openFile(const QString& path);
+    void setFontSize(int pointSize);
 
+    int _viewerFontSize = 12;
     QWidget* _centralWidget;
     QVBoxLayout* _mainLayout;
     QAction* _openFile;

@@ -5,6 +5,7 @@
 #include <QPushButton>
 #include <QFormLayout>
 #include <QSlider>
+#include <QSettings>
 
 SettingsDialog::SettingsDialog(
         const std::function<void(int)>& changeViewerFont,
@@ -21,13 +22,13 @@ SettingsDialog::SettingsDialog(
     setMinimumWidth(400);
     setMinimumHeight(300);
 
-    QSlider* contentFontSize = new QSlider(Qt::Orientation::Horizontal, this);
-    mainLayout->addRow("Viewer font size:", contentFontSize);
-    contentFontSize->setTickPosition(QSlider::TickPosition::TicksBelow);
-    contentFontSize->setTickInterval(1);
-    contentFontSize->setMinimum(10);
-    contentFontSize->setMaximum(24);
-    connect(contentFontSize, &QSlider::valueChanged, [changeViewerFont](int value){
+    _viewerFontSize = new QSlider(Qt::Orientation::Horizontal, this);
+    mainLayout->addRow("Viewer font size:", _viewerFontSize);
+    _viewerFontSize->setTickPosition(QSlider::TickPosition::TicksBelow);
+    _viewerFontSize->setTickInterval(1);
+    _viewerFontSize->setMinimum(10);
+    _viewerFontSize->setMaximum(24);
+    connect(_viewerFontSize, &QSlider::valueChanged, [changeViewerFont](int value){
         changeViewerFont(value);
     });
 
@@ -35,7 +36,21 @@ SettingsDialog::SettingsDialog(
     font.setPointSize(12);
     this->setFont(font);
 
-    QMetaObject::invokeMethod(contentFontSize, [&](){
-        contentFontSize->setValue(14);
+    QSettings settings("AlexandrSachkov", "LC");
+    settings.beginGroup("Settings");
+
+    int viewerFontSizeVal = settings.value("viewerFontSize", 14).toInt();
+    QMetaObject::invokeMethod(_viewerFontSize, [&, viewerFontSizeVal](){
+        _viewerFontSize->setValue(viewerFontSizeVal);
+        changeViewerFont(viewerFontSizeVal);
     });
+
+    settings.endGroup();
+}
+
+void SettingsDialog::hideEvent(QHideEvent* event) {
+    QSettings settings("AlexandrSachkov", "LC");
+    settings.beginGroup("Settings");
+    settings.setValue("viewerFontSize", _viewerFontSize->value());
+    settings.endGroup();
 }
