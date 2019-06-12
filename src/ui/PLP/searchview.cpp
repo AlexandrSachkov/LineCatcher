@@ -481,7 +481,10 @@ void SearchView::openFile() {
 }
 
 void SearchView::openIndex(){
-    QString path = QFileDialog::getOpenFileName(this, tr("Select indices to open")/*, "", tr("Index (*.lcidx)")*/);
+    std::string fileFilter = "Index (*" + std::string(PLP::FILE_INDEX_EXTENSION) +")";
+    QString path = QFileDialog::getOpenFileName(this, tr("Select indices to open"), "",
+        tr(fileFilter.c_str()));
+
     if(path.isEmpty()){
         return;
     }
