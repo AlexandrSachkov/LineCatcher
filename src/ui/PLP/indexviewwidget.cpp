@@ -257,7 +257,7 @@ void IndexViewWidget::mouseReleaseEvent(QMouseEvent* event) {
 
     unsigned long long lineNum;
     if(_indexReader->getResult(_startLineNum + cursor.blockNumber(), lineNum)){
-        _fileViewer->gotoLine(lineNum);
+        _fileViewer->gotoLine(lineNum, true);
     }
 }
 

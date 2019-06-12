@@ -14,6 +14,12 @@
 #include <memory>
 #include <vector>
 
+class FileViewExtraSelection : public QTextEdit::ExtraSelection {
+public:
+    FileViewExtraSelection() : QTextEdit::ExtraSelection(){}
+    unsigned long long lineNumber = 0;
+};
+
 class PagedFileViewWidget : public QPlainTextEdit
 {
     Q_OBJECT
@@ -29,7 +35,7 @@ public:
 signals:
 
 public slots:
-    void gotoLine(unsigned long long lineNum);
+    void gotoLine(unsigned long long lineNum, bool highlightLine = false);
 
 private slots:
     void textChangedImpl();
@@ -48,6 +54,7 @@ private:
     void calcNumVisibleLines();
     void readNextBlock();
     void readPreviousBlock();
+    void highlightLine(unsigned long long lineNum);
 
     static const unsigned int MAX_NUM_BLOCKS = 1000;
     static const unsigned int NUM_LINES_PER_READ = 250;
@@ -60,6 +67,7 @@ private:
 
     QWidget* _lineNumberArea;
     ULLSpinBox* _lineNavBox;
+    FileViewExtraSelection _indexSelection;
 };
 
 #endif // PAGEDFILEVIEW_H

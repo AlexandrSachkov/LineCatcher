@@ -75,7 +75,11 @@ void PagedFileViewWidget::mouseMoveEvent(QMouseEvent *e) {
     selection.cursor = this->cursorForPosition(e->pos());
     selection.cursor.clearSelection();
 
-    this->setExtraSelections({selection});
+    if(_indexSelection.lineNumber >= _startLineNum && _indexSelection.lineNumber <= _endLineNum){
+        this->setExtraSelections({selection, _indexSelection});
+    } else {
+        this->setExtraSelections({selection});
+    }
 }
 
 void PagedFileViewWidget::calcNumVisibleLines() {
@@ -267,9 +271,12 @@ bool PagedFileViewWidget::getLineFromIndex(
     return true;
 }
 
-void PagedFileViewWidget::gotoLine(unsigned long long lineNum){
+void PagedFileViewWidget::gotoLine(unsigned long long lineNum, bool highlight){
     if(lineNum >= _startLineNum && lineNum < _endLineNum){
         this->verticalScrollBar()->setValue(lineNum - _startLineNum);
+        if(highlight){
+            highlightLine(lineNum);
+        }
         return;
     }
 
@@ -319,6 +326,11 @@ void PagedFileViewWidget::gotoLine(unsigned long long lineNum){
         _startLineNum = _endLineNum - MAX_NUM_BLOCKS;
     }
     this->verticalScrollBar()->setValue(lineNum - _startLineNum);
+
+
+    if(highlight){
+        highlightLine(lineNum);
+    }
 }
 
 void PagedFileViewWidget::scrollBarMoved(int val) {
@@ -329,4 +341,18 @@ void PagedFileViewWidget::setFontSize(int pointSize) {
     QFont font = this->font();
     font.setPointSize(pointSize);
     this->setFont(font);
+}
+
+void PagedFileViewWidget::highlightLine(unsigned long long lineNum) {
+    int lineToHighlight = (int)(lineNum - _startLineNum);
+    QTextCursor cursor(document()->findBlockByLineNumber(lineToHighlight));
+
+    QColor lineColor = QColor(Qt::lightGray).lighter(110);
+    _indexSelection.lineNumber = lineNum;
+    _indexSelection.format.setBackground(lineColor);
+    _indexSelection.format.setProperty(QTextFormat::FullWidthSelection, true);
+    _indexSelection.cursor = cursor;
+    cursor.clearSelection();
+
+    this->setExtraSelections({_indexSelection});
 }
