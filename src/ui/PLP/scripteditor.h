@@ -9,7 +9,7 @@ class ScriptEditor : public QPlainTextEdit
     Q_OBJECT
 public:
     ScriptEditor(QWidget* parent = nullptr);
-
+    void setFontSize(int pointSize);
 protected:
     void resizeEvent(QResizeEvent* e) override;
 

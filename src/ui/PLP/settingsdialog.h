@@ -2,17 +2,14 @@
 #define SETTINGSDIALOG_H
 
 #include <QWidget>
+#include <functional>
 
 class SettingsDialog : public QWidget
 {
     Q_OBJECT
 public:
-    explicit SettingsDialog(QWidget *parent = nullptr);
+    explicit SettingsDialog(const std::function<void(int)>& changeViewerFont, QWidget* parent = nullptr);
 
-signals:
-
-private slots:
-    void changeUIFontSize(int size);
 
 };
 

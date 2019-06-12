@@ -26,12 +26,6 @@ public:
     ~MainWindow();
     void openIndex(const QString& path);
 
-signals:
-    void fontChanged(const QFont&);
-
-protected:
-    void changeEvent(QEvent* event);
-
 public slots:
     void closeTab(int index);
     void closeAllTabs();

@@ -24,6 +24,8 @@ public:
         QWidget* parent = nullptr
     );
 
+    void setFontSize(int pointSize);
+
 protected:
     void resizeEvent(QResizeEvent *e) override;
 public slots:

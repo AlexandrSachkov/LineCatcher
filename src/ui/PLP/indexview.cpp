@@ -34,10 +34,14 @@ IndexView::IndexView(
     numLinesLabel->setContentsMargins(0, 0, 5, 0);
     lineSelectionLayout->addWidget(numLinesLabel, 0);
 
-    IndexViewWidget* indexView = new IndexViewWidget(std::move(indexReader), fileViewer, lineNavBox, this);
-    mainLayout->addWidget(indexView);
+    _indexView = new IndexViewWidget(std::move(indexReader), fileViewer, lineNavBox, this);
+    mainLayout->addWidget(_indexView);
 }
 
 const QString& IndexView::getFilePath(){
     return _filePath;
+}
+
+void IndexView::setFontSize(int pointSize) {
+    _indexView->setFontSize(pointSize);
 }

@@ -6,7 +6,9 @@
 #include <QFormLayout>
 #include <QSlider>
 
-SettingsDialog::SettingsDialog(QWidget *parent) : QWidget(parent)
+SettingsDialog::SettingsDialog(
+        const std::function<void(int)>& changeViewerFont,
+        QWidget* parent) : QWidget(parent)
 {
     QFormLayout* mainLayout = new QFormLayout();
     this->setLayout(mainLayout);
@@ -19,31 +21,21 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QWidget(parent)
     setMinimumWidth(400);
     setMinimumHeight(300);
 
-    QSlider* uiFontSize = new QSlider(Qt::Orientation::Horizontal, this);
-    mainLayout->addRow("UI font size:", uiFontSize);
-    uiFontSize->setTickPosition(QSlider::TickPosition::TicksBothSides);
-    uiFontSize->setTickInterval(1);
-    uiFontSize->setMinimum(10);
-    uiFontSize->setMaximum(20);
-    uiFontSize->setValue(12);
-    connect(uiFontSize, &QSlider::valueChanged,this, &SettingsDialog::changeUIFontSize);
-
     QSlider* contentFontSize = new QSlider(Qt::Orientation::Horizontal, this);
-    mainLayout->addRow("Content font size:", contentFontSize);
-    contentFontSize->setTickPosition(QSlider::TickPosition::TicksBothSides);
+    mainLayout->addRow("Viewer font size:", contentFontSize);
+    contentFontSize->setTickPosition(QSlider::TickPosition::TicksBelow);
     contentFontSize->setTickInterval(1);
     contentFontSize->setMinimum(10);
-    contentFontSize->setMaximum(20);
-    contentFontSize->setValue(12);
+    contentFontSize->setMaximum(24);
+    connect(contentFontSize, &QSlider::valueChanged, [changeViewerFont](int value){
+        changeViewerFont(value);
+    });
 
     QFont font = this->font();
     font.setPointSize(12);
     this->setFont(font);
-}
 
-void SettingsDialog::changeUIFontSize(int size){
-    MainWindow* main = static_cast<MainWindow*>(parent());
-    QFont f = main->font();
-    f.setPointSize(size);
-    main->setFont(f);
+    QMetaObject::invokeMethod(contentFontSize, [&](){
+        contentFontSize->setValue(14);
+    });
 }

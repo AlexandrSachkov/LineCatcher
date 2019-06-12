@@ -274,3 +274,7 @@ void ScriptView::printLogDataToConsole() {
     }
     _logData.clear();
 }
+
+void ScriptView::setFontSize(int pointSize) {
+    _scriptEditor->setFontSize(pointSize);
+}

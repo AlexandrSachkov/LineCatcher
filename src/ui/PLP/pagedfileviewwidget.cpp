@@ -40,7 +40,7 @@ PagedFileViewWidget::PagedFileViewWidget(
     connect(scrollBar, SIGNAL(valueChanged(int)), this, SLOT(scrollBarMoved(int)));
     this->setVerticalScrollBar(scrollBar);
 
-    QFont f("Courier New", 16);
+    QFont f("Courier New", 14);
     f.setStyleHint(QFont::Monospace);
     this->setFont(f);
 
@@ -323,4 +323,10 @@ void PagedFileViewWidget::gotoLine(unsigned long long lineNum){
 
 void PagedFileViewWidget::scrollBarMoved(int val) {
     _lineNavBox->setValue(_startLineNum + val);
+}
+
+void PagedFileViewWidget::setFontSize(int pointSize) {
+    QFont font = this->font();
+    font.setPointSize(pointSize);
+    this->setFont(font);
 }

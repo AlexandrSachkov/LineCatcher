@@ -95,3 +95,9 @@ void ScriptEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
         ++blockNumber;
     }
 }
+
+void ScriptEditor::setFontSize(int pointSize) {
+    QFont font = this->font();
+    font.setPointSize(pointSize);
+    this->setFont(font);
+}

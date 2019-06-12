@@ -107,3 +107,12 @@ void FileView::openIndex(CoreObjPtr<PLP::IndexReaderI> indexReader){
         _splitter->setSizes(QList<int>({screenGeometry.height() / 4 * 3, screenGeometry.height() / 4}));
     }
 }
+
+void FileView::setFontSize(int pointSize) {
+    _dataView->setFontSize(pointSize);
+
+    for(int i = 0; i < _indexViewer->count(); i++){
+        IndexView* indexView = static_cast<IndexView*>(_indexViewer->widget(i));
+        indexView->setFontSize(pointSize);
+    }
+}

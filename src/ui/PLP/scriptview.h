@@ -13,6 +13,7 @@
 #include <QProgressBar>
 
 #include "Core.h"
+#include "scripteditor.h"
 
 #include <functional>
 #include <mutex>
@@ -24,6 +25,7 @@ class ScriptView : public QWidget
 public:
     explicit ScriptView(PLP::CoreI* plpCore, QWidget *parent = nullptr);
     ~ScriptView();
+    void setFontSize(int pointSize);
 signals:
 
 private slots:
@@ -57,7 +59,7 @@ private:
     QPushButton* _run;
     QPushButton* _clearConsole;
     QLineEdit* _scriptPath;
-    QPlainTextEdit* _scriptEditor;
+    ScriptEditor* _scriptEditor;
     QPlainTextEdit* _console;
     QProgressBar* _progressBar;
 

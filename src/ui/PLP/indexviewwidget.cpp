@@ -40,7 +40,7 @@ IndexViewWidget::IndexViewWidget(
     connect(scrollBar, SIGNAL(valueChanged(int)), this, SLOT(scrollBarMoved(int)));
     this->setVerticalScrollBar(scrollBar);
 
-    QFont f("Courier New", 16);
+    QFont f("Courier New", 14);
     f.setStyleHint(QFont::Monospace);
     this->setFont(f);
 
@@ -316,4 +316,10 @@ void IndexViewWidget::gotoLine(unsigned long long lineNum){
 
 void IndexViewWidget::scrollBarMoved(int val) {
     _lineNavBox->setValue(_startLineNum + val);
+}
+
+void IndexViewWidget::setFontSize(int pointSize) {
+    QFont font = this->font();
+    font.setPointSize(pointSize);
+    this->setFont(font);
 }

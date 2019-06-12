@@ -5,6 +5,7 @@
 
 #include "coreobjptr.h"
 #include "pagedfileviewwidget.h"
+#include "indexviewwidget.h"
 #include "ullspinbox.h"
 #include "IndexReaderI.h"
 #include "FileReaderI.h"
@@ -21,13 +22,11 @@ public:
     );
 
     const QString& getFilePath();
-
-signals:
-
-public slots:
+    void setFontSize(int pointSize);
 
 private:
     QString _filePath;
+    IndexViewWidget* _indexView;
 };
 
 #endif // INDEXVIEW_H

@@ -25,6 +25,7 @@ public:
 
     const QString& getFilePath();
     void openIndex(CoreObjPtr<PLP::IndexReaderI> indexReader);
+    void setFontSize(int pointSize);
 signals:
 
 private slots:

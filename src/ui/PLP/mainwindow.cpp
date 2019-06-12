@@ -39,31 +39,25 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
     QMenu* fileMenu = new QMenu("File");
     menuBar()->addMenu(fileMenu);
-    connect(this, &MainWindow::fontChanged, fileMenu, &QMenu::setFont);
 
     QMenu* openMenu = new QMenu("Open", fileMenu);
     fileMenu->addMenu(openMenu);
-    connect(this, &MainWindow::fontChanged, openMenu, &QMenu::setFont);
 
     QAction* closeAll = new QAction("Close All", fileMenu);
     fileMenu->addAction(closeAll);
     connect(closeAll, SIGNAL(triggered(void)), this, SLOT(closeAllTabs(void)));
-    connect(this, &MainWindow::fontChanged, closeAll, &QAction::setFont);
 
     QAction* exit = new QAction("Exit", fileMenu);
     fileMenu->addAction(exit);
     connect(exit, SIGNAL(triggered(void)), this, SLOT(exit(void)));
-    connect(this, &MainWindow::fontChanged, exit, &QAction::setFont);
 
     _openFile = new QAction("Data", openMenu);
     openMenu->addAction(_openFile);
     connect(_openFile, SIGNAL(triggered(void)), this, SLOT(openFile(void)));
-    connect(this, &MainWindow::fontChanged, _openFile, &QAction::setFont);
 
     QAction* openIndex = new QAction("Index", openMenu);
     openMenu->addAction(openIndex);
     connect(openIndex, SIGNAL(triggered(void)), this, SLOT(openIndex(void)));
-    connect(this, &MainWindow::fontChanged, openIndex, &QAction::setFont);
 
     QMenu* runMenu = new QMenu("Run");
     menuBar()->addMenu(runMenu);
@@ -71,17 +65,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     QAction* runStandardSearch = new QAction("Search", runMenu);
     runMenu->addAction(runStandardSearch);
     connect(runStandardSearch, SIGNAL(triggered(void)), this, SLOT(showStandardSearch(void)));
-    connect(this, &MainWindow::fontChanged, runStandardSearch, &QAction::setFont);
 
     QAction* runAdvancedSearch = new QAction("Search (Advanced)", runMenu);
     runMenu->addAction(runAdvancedSearch);
     connect(runAdvancedSearch, SIGNAL(triggered(void)), this, SLOT(showAdvancedSearch(void)));
-    connect(this, &MainWindow::fontChanged, runAdvancedSearch, &QAction::setFont);
 
     QAction* runScript = new QAction("Script");
     runMenu->addAction(runScript);
     connect(runScript, SIGNAL(triggered(void)), this, SLOT(showScriptView(void)));
-    connect(this, &MainWindow::fontChanged, runScript, &QAction::setFont);
 
     QMenu* configMenu = new QMenu("Config");
     menuBar()->addMenu(configMenu);
@@ -89,7 +80,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     QAction* settings = new QAction("Settings");
     configMenu->addAction(settings);
     connect(settings, SIGNAL(triggered(void)), this, SLOT(showSettingsDialog(void)));
-    connect(this, &MainWindow::fontChanged, settings, &QAction::setFont);
 
     QMenu* helpMenu = new QMenu("Help", this);
     menuBar()->addMenu(helpMenu);
@@ -97,17 +87,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     QAction* gettingStarted = new QAction("Getting Started", helpMenu);
     helpMenu->addAction(gettingStarted);
     connect(gettingStarted, SIGNAL(triggered(void)), this, SLOT(showGettingStartedDialog(void)));
-    connect(this, &MainWindow::fontChanged, gettingStarted, &QAction::setFont);
 
     QAction* scriptingDocs = new QAction("Lua API Docs", helpMenu);
     helpMenu->addAction(scriptingDocs);
     connect(scriptingDocs, SIGNAL(triggered(void)), this, SLOT(showScriptingDocsDialog(void)));
-    connect(this, &MainWindow::fontChanged, scriptingDocs, &QAction::setFont);
 
     QAction* about = new QAction("About", helpMenu);
     helpMenu->addAction(about);
     connect(about, SIGNAL(triggered(void)), this, SLOT(showAboutDialog(void)));
-    connect(this, &MainWindow::fontChanged, about, &QAction::setFont);
 
     QFont tabFont = this->font();
     tabFont.setPointSize(10);
@@ -136,7 +123,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     _gettingStartedDialog = new GettingStartedDialog(this);
     _gettingStartedDialog->hide();
 
-    _settingsDialog = new SettingsDialog(this);
+    _settingsDialog = new SettingsDialog([&](int pointSize){
+        for(int i = 0; i < _fileViewer->count(); i++){
+            FileView* fileView = static_cast<FileView*>(_fileViewer->widget(i));
+            fileView->setFontSize(pointSize);
+        }
+        _scriptView->setFontSize(pointSize);
+    }, this);
     _settingsDialog->hide();
 }
 
@@ -321,13 +314,4 @@ void MainWindow::closeAllTabs(){
 
 void MainWindow::exit(){
     QApplication::quit();
-}
-
-void MainWindow::changeEvent(QEvent* event) {
-    if (event->type() == QEvent::FontChange)
-    {
-        emit fontChanged(this->font());
-    }
-
-    QWidget::changeEvent(event);
 }

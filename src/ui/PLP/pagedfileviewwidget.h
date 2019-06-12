@@ -24,6 +24,8 @@ public:
         QString& data
     );
 
+    void setFontSize(int pointSize);
+
 signals:
 
 public slots:
