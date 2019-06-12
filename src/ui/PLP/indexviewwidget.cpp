@@ -248,7 +248,7 @@ void IndexViewWidget::mouseReleaseEvent(QMouseEvent* event) {
 
     QTextCursor cursor = this->cursorForPosition(event->pos());
     QTextEdit::ExtraSelection selection;
-    QColor lineColor = QColor(Qt::yellow).lighter(160);
+    QColor lineColor = QColor(Qt::lightGray).lighter(110);
     selection.format.setBackground(lineColor);
     selection.format.setProperty(QTextFormat::FullWidthSelection, true);
     selection.cursor = cursor;
