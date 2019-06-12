@@ -78,6 +78,10 @@ ScriptView::ScriptView(PLP::CoreI* plpCore, QWidget *parent) : QWidget(parent)
     _console->setMaximumBlockCount(MAX_LINES_CONSOLE);
     consoleLayout->addWidget(_console);
 
+    QFont consoleFont("Courier New", 12);
+    consoleFont.setStyleHint(QFont::Monospace);
+    _console->setFont(consoleFont);
+
     splitter->addWidget(_scriptEditor);
     splitter->addWidget(consoleWidget);
 
@@ -146,7 +150,7 @@ void ScriptView::runScript() {
         });
         _run->setText("Stop"); //TODO refactor to keep state in button
         _progressBar->setHidden(false);
-        _appendLogData(0, "======== Script started ========");
+        _appendLogData(0, "======== Script started  ========");
         _scriptRunTimer->start(250);
     }else{
         _plpCore->cancelOperation();
@@ -277,4 +281,8 @@ void ScriptView::printLogDataToConsole() {
 
 void ScriptView::setFontSize(int pointSize) {
     _scriptEditor->setFontSize(pointSize);
+
+    QFont font = _console->font();
+    font.setPointSize(pointSize);
+    _console->setFont(font);
 }
