@@ -309,7 +309,7 @@ namespace PLP {
         }
 
         const long double dLinesPerPercent = (end - start + 1) / 100.0;
-        const unsigned long long numLinesTillProgressUpdate = dLinesPerPercent > 1.0 ? (unsigned long long)dLinesPerPercent : 1;
+        const unsigned long long numLinesTillProgressUpdate = dLinesPerPercent > 1.0 ? (unsigned long long)nearbyintl(dLinesPerPercent) : 1;
         const int percentPerProgressUpdate = dLinesPerPercent > 1.0 ? 1 : (int)(1.0 / dLinesPerPercent);
 
         LineScanner scanner(fileReader, indexReader, start, end);
@@ -403,7 +403,7 @@ namespace PLP {
         }
         
         const long double dLinesPerPercent = (end - start + 1) / 100.0;
-        const unsigned long long numLinesTillProgressUpdate = dLinesPerPercent > 1.0 ? (unsigned long long)dLinesPerPercent : 1;
+        const unsigned long long numLinesTillProgressUpdate = dLinesPerPercent > 1.0 ? (unsigned long long)nearbyintl(dLinesPerPercent) : 1;
         const int percentPerProgressUpdate = dLinesPerPercent > 1.0 ? 1 : (int)(1.0 / dLinesPerPercent);
 
         int progressPercent = 0;
