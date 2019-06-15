@@ -145,12 +145,12 @@ void ScriptView::runScript() {
         _plpCore->attachLogOutput(LOG_SUBSCRIBER_NAME, &_appendLogData);
         std::wstring script = _scriptEditor->toPlainText().toStdWString();
 
+        _appendLogData(0, "======== Script started  ========");
         _scriptResult = QtConcurrent::run([&, script](){
             return _plpCore->runScript(&script);
         });
         _run->setText("Stop"); //TODO refactor to keep state in button
-        _progressBar->setHidden(false);
-        _appendLogData(0, "======== Script started  ========");
+        _progressBar->setHidden(false); 
         _scriptRunTimer->start(250);
     }else{
         _plpCore->cancelOperation();
