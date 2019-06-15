@@ -75,3 +75,5 @@ else:unix: LIBS += -L$$PWD/../../../bin64_core/ -lPLPCORE_d
 
 INCLUDEPATH += $$PWD/../../core
 DEPENDPATH += $$PWD/../../core
+
+RC_ICONS = $$PWD/../../../resources/images/icon_xl.ico
