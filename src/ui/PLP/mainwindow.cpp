@@ -181,7 +181,7 @@ bool MainWindow::openFile(const QString& path)
         }
     }
 
-    QProgressDialog dialog(this);
+    QProgressDialog dialog(this, Qt::WindowSystemMenuHint | Qt::WindowTitleHint);
     dialog.setWindowTitle("Opening file...");
     dialog.setWindowModality(Qt::WindowModal);
     dialog.setMinimumWidth(400);

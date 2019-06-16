@@ -16,7 +16,7 @@ SettingsDialog::SettingsDialog(
     mainLayout->setContentsMargins(5, 5, 5, 5);
     mainLayout->setSpacing(5);
 
-    setWindowFlags(Qt::Dialog);
+    setWindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint);
     setWindowTitle("Settings");
     setWindowModality(Qt::WindowModal);
     setMinimumWidth(400);

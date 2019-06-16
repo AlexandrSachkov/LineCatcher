@@ -16,7 +16,7 @@ AboutDialog::AboutDialog(QWidget *parent) : QWidget(parent)
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
 
-    setWindowFlags(Qt::Dialog);
+    setWindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint);
     setWindowTitle("About");
     setWindowModality(Qt::WindowModal);
     setMinimumWidth(400);

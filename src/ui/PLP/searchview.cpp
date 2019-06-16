@@ -32,7 +32,7 @@ SearchView::SearchView(PLP::CoreI* plpCore, bool multiline, QWidget *parent) : Q
     mainLayout->setContentsMargins(5, 5, 5, 5);
     mainLayout->setSpacing(5);
 
-    setWindowFlags(Qt::Dialog);
+    setWindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint);
     setWindowModality(Qt::WindowModal);
     setWindowTitle("Search");
     setMinimumWidth(450);
@@ -246,7 +246,7 @@ void SearchView::startSearch() {
         return;
     }
 
-    QProgressDialog dialog(this);
+    QProgressDialog dialog(this, Qt::WindowSystemMenuHint | Qt::WindowTitleHint);
     dialog.setWindowTitle("Opening file...");
     dialog.setWindowModality(Qt::WindowModal);
     dialog.setMinimumWidth(400);
@@ -340,7 +340,7 @@ void SearchView::startRegularSearch(
     }
 
 
-    QProgressDialog dialog(this);
+    QProgressDialog dialog(this, Qt::WindowSystemMenuHint | Qt::WindowTitleHint);
     dialog.setWindowTitle("Searching...");
     dialog.setWindowModality(Qt::WindowModal);
     dialog.setMinimumWidth(400);
@@ -427,7 +427,7 @@ void SearchView::startMultilineSearch(
         }
     }
 
-    QProgressDialog dialog(this);
+    QProgressDialog dialog(this, Qt::WindowSystemMenuHint | Qt::WindowTitleHint);
     dialog.setWindowTitle("Searching...");
     dialog.setWindowModality(Qt::WindowModal);
     dialog.setMinimumWidth(400);
