@@ -28,8 +28,8 @@ SettingsDialog::SettingsDialog(
     _viewerFontSize->setTickInterval(1);
     _viewerFontSize->setMinimum(10);
     _viewerFontSize->setMaximum(24);
-    connect(_viewerFontSize, &QSlider::valueChanged, [changeViewerFont](int value){
-        changeViewerFont(value);
+    connect(_viewerFontSize, &QSlider::sliderReleased, [&, changeViewerFont](){
+        changeViewerFont(_viewerFontSize->value());
     });
 
     QFont font = this->font();
