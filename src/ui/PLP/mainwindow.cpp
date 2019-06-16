@@ -124,7 +124,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     _gettingStartedDialog = new GettingStartedDialog(this);
     _gettingStartedDialog->hide();
 
-    _settingsDialog = new SettingsDialog([&](int pointSize){
+    _settingsDialog = new SettingsDialog(_plpCore, [&](int pointSize){
         setFontSize(pointSize);
     }, this);
     _settingsDialog->hide();

@@ -34,6 +34,7 @@ SET(HEADERS
     FrameBuffer.h
     FStreamPagedReader.h
     FStreamPagedWriter.h
+    GenFileTracker.h
     IndexedLineReader.h
     LineBuffer.h
     LineReader.h
@@ -63,6 +64,7 @@ SET(SOURCES
     FrameBuffer.cpp
     FStreamPagedReader.cpp
     FStreamPagedWriter.cpp
+    GenFileTracker.cpp
     IndexedLineReader.cpp
     LineBuffer.cpp
     LineReader.cpp

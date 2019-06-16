@@ -15,6 +15,7 @@
 #include "FrameBuffer.h"
 #include "TextComparator.h"
 #include "Scanner.h"
+#include "GenFileTracker.h"
 
 #include "lua.hpp"
 #include "LuaIntf/LuaIntf.h"
@@ -27,6 +28,7 @@
 #include <limits>
 #include <algorithm>
 #include <unordered_map>
+#include <cstdio>
 
 namespace LuaIntf {
     LUA_USING_SHARED_PTR_TYPE(std::shared_ptr);
@@ -51,6 +53,13 @@ namespace PLP {
         if (_state) {
             lua_close(_state);
         }
+
+        if (_creanupGeneratedFiles) {
+            for (auto& path : LC::GenFileTracker::getFiles()) {
+                remove(wstring_to_string(path).c_str());
+            }
+            LC::GenFileTracker::clear();
+        }
     }
 
     bool Core::initialize() {
@@ -71,6 +80,10 @@ namespace PLP {
 
         Logger::send(INFO, "Successfully initialized PLP core");
         return true;
+    }
+
+    void Core::cleanupGeneratedFilesOnRelease(bool val) {
+        _creanupGeneratedFiles = val;
     }
 
     bool Core::runScript(const std::wstring* scriptLua) {

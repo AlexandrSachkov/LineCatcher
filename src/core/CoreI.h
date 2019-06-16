@@ -17,6 +17,7 @@ namespace PLP {
         virtual ~CoreI() {}
 
         virtual bool initialize() = 0;
+        virtual void cleanupGeneratedFilesOnRelease(bool val) = 0;
         virtual bool runScript(const std::wstring* scriptLua) = 0;
         virtual void cancelOperation() = 0;
         virtual bool isCancelled() = 0;

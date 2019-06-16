@@ -4,6 +4,7 @@
 #include "FileReader.h"
 #include "TaskRunner.h"
 #include "Logger.h"
+#include "GenFileTracker.h"
 
 namespace PLP {
     IndexWriter::IndexWriter() {}
@@ -41,6 +42,8 @@ namespace PLP {
         if (!writer->initialize(indexPath, preferredBufferSizeBytes, overwriteIfExists, asyncTaskRunner)) {
             return false;
         }
+
+        LC::GenFileTracker::addFile(indexPath);
 
         if (!_writer->write(reinterpret_cast<const char*>(&RESULT_SET_VERSION), sizeof(RESULT_SET_VERSION))) {
             return false;

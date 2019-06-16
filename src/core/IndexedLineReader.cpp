@@ -2,6 +2,7 @@
 #include "Utils.h"
 #include "Core.h"
 #include "Logger.h"
+#include "GenFileTracker.h"
 
 #include "cereal/types/vector.hpp"
 #include "cereal/types/string.hpp"
@@ -124,6 +125,8 @@ namespace PLP {
             Logger::send(ERR, "Failed to create index file: " + wstring_to_string(indexPath));
             return false;
         }
+
+        LC::GenFileTracker::addFile(indexPath);
 
         _indexHeader.filePath = wstring_to_string(dataFilePath);
         _indexHeader.lineIndexFreq = LINE_INDEX_FREQUENCY;

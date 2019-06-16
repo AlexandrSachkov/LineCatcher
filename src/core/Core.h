@@ -33,6 +33,7 @@ namespace PLP {
         ~Core();
 
         bool initialize();
+        void cleanupGeneratedFilesOnRelease(bool val) override;
         bool runScript(const std::wstring* scriptLua) override;
         void cancelOperation() override;
         bool isCancelled() override;
@@ -187,6 +188,7 @@ namespace PLP {
         lua_State* _state;
         std::unique_ptr<Thread> _fileOpThread;
         std::atomic<bool> _cancelled = false;
+        bool _creanupGeneratedFiles = false;
     };
 
     PLP_LIB_API PLP::CoreI* createCore();
