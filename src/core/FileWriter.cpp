@@ -56,7 +56,7 @@ namespace PLP {
         if (!success) {
             return false;
         }
-        return append("\r\n", 1); //TODO change on linux
+        return append("\r\n", 2); //TODO change on linux
     }
 
     bool FileWriter::append(const char* data, unsigned long long size) {
