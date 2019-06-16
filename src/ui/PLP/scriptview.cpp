@@ -59,7 +59,6 @@ ScriptView::ScriptView(PLP::CoreI* plpCore, QWidget *parent) : QWidget(parent)
 
     _scriptEditor = new ScriptEditor(this);
     _scriptEditor->setReadOnly(false);
-    connect(_scriptEditor, SIGNAL(textChanged(void)), this, SLOT(onScriptModified(void)));
 
     QWidget* consoleWidget = new QWidget(splitter);
     QVBoxLayout* consoleLayout = new QVBoxLayout();
@@ -107,7 +106,13 @@ ScriptView::ScriptView(PLP::CoreI* plpCore, QWidget *parent) : QWidget(parent)
     font.setPointSize(12);
     this->setFont(font);
 
-    setScriptModified(false);
+    // PlainTextEdit emits textChanged signal when first initialized. Therefore, we connect after its initialization
+    QTimer::singleShot(0, this, [&](){
+        connect(_scriptEditor, &ScriptEditor::textChanged, [&](){
+            setScriptModified(true);
+        });
+        setScriptModified(false);
+    });
 }
 
 ScriptView::~ScriptView() {
@@ -163,14 +168,14 @@ void ScriptView::runScript() {
     }
 }
 
-void ScriptView::saveScript() {
+bool ScriptView::saveScript() {
+    // path is only unavailable when no script was selected. Therefore, nothing to save
     QString path = _scriptPath->text().trimmed();
     if(path.isEmpty()){
-        return;
+        return true;
     }
 
     QString script = _scriptEditor->toPlainText().trimmed();
-
     if(_file){
         QTextStream out(_file.get());
         out << script;
@@ -178,11 +183,12 @@ void ScriptView::saveScript() {
         if (out.status() != QTextStream::Ok)
         {
             QMessageBox::critical(this,"Error","Failed to save script", QMessageBox::Ok);
-            return;
+            return false;
         }
 
         setScriptModified(false);
     }
+    return true;
 }
 
 void ScriptView::clearConsole() {
@@ -216,10 +222,6 @@ void ScriptView::showEvent(QShowEvent* event) {
     }
 
     settings.endGroup();
-}
-
-void ScriptView::onScriptModified(){
-    setScriptModified(true);
 }
 
 void ScriptView::setScriptModified(bool modified) {
@@ -296,4 +298,8 @@ void ScriptView::setFontSize(int pointSize) {
     QFont font = _console->font();
     font.setPointSize(pointSize);
     _console->setFont(font);
+}
+
+bool ScriptView::hasUnsavedContent(){
+    return !_saved;
 }

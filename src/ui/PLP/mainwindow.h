@@ -45,6 +45,7 @@ private:
     bool openFile(const std::vector<QString>& candidates);
     bool openFile(const QString& path);
     void setFontSize(int pointSize);
+    void closeEvent(QCloseEvent *event);
 
     int _viewerFontSize = 12;
     QWidget* _centralWidget;

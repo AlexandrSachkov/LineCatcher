@@ -323,3 +323,21 @@ void MainWindow::setFontSize(int pointSize) {
     }
     _scriptView->setFontSize(pointSize);
 }
+
+void MainWindow::closeEvent(QCloseEvent* event){
+    if(_scriptView->hasUnsavedContent()){
+        QMessageBox::StandardButton saveScriptDialog =
+                QMessageBox::question(
+                    this,
+                    "",
+                    "Would you like to save script before exiting?",
+                    QMessageBox::Yes|QMessageBox::No);
+
+        if (saveScriptDialog == QMessageBox::Yes && !_scriptView->saveScript()) {
+            event->ignore();
+            return;
+        }
+    }
+
+    event->accept();
+}

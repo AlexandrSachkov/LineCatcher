@@ -26,14 +26,16 @@ public:
     explicit ScriptView(PLP::CoreI* plpCore, QWidget *parent = nullptr);
     ~ScriptView();
     void setFontSize(int pointSize);
-signals:
+    bool hasUnsavedContent();
+
+public slots:
+    bool saveScript();
 
 private slots:
     void openScript();
-    void saveScript();
+
     void runScript();
     void clearConsole();
-    void onScriptModified();
     void checkScriptCompleted();
 
 protected:
