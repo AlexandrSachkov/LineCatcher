@@ -30,7 +30,6 @@ signals:
 
 private slots:
     void openScript();
-    void loadScript();
     void saveScript();
     void runScript();
     void clearConsole();
@@ -54,7 +53,6 @@ private:
     bool _saved = false;
 
     QPushButton* _open;
-    QPushButton* _load;
     QPushButton* _save;
     QPushButton* _run;
     QPushButton* _clearConsole;

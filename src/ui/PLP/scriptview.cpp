@@ -1,5 +1,6 @@
 #include "scriptview.h"
 #include "scripteditor.h"
+#include "common.h"
 
 #include <QtWidgets/QVBoxLayout>
 #include <QHBoxLayout>
@@ -33,15 +34,12 @@ ScriptView::ScriptView(PLP::CoreI* plpCore, QWidget *parent) : QWidget(parent)
 
 
     _scriptPath = new QLineEdit(this);
+    _scriptPath->setReadOnly(true);
     scriptLoadControlLayout->addWidget(_scriptPath);
 
     _open = new QPushButton("Browse", this);
     scriptLoadControlLayout->addWidget(_open);
     connect(_open, SIGNAL(clicked(void)), this, SLOT(openScript(void)));
-
-    _load = new QPushButton("Load", this);
-    scriptLoadControlLayout->addWidget(_load);
-    connect(_load, SIGNAL(clicked(void)), this, SLOT(loadScript(void)));
 
     _save = new QPushButton("Save", this);
     scriptLoadControlLayout->addWidget(_save);
@@ -116,25 +114,30 @@ ScriptView::~ScriptView() {
 }
 
 void ScriptView::openScript(){
-    QString path = QFileDialog::getOpenFileName(this, "Select file to open");
+    QFileDialog fileDialog(this, "Select file to open", "", tr("Lua (*.lua)"));
+    fileDialog.setFileMode(QFileDialog::AnyFile);
+
+    if (!fileDialog.exec()){
+        return;
+    }
+
+    QStringList paths = fileDialog.selectedFiles();
+    QString path = paths[0].trimmed();
     if(path.isEmpty()){
         return;
     }
 
+    QString scriptDir = Common::getDirFromPath(path);
     QString fileName = path.split('/').last();
+    if(!fileName.endsWith(".lua")){
+        fileName += ".lua";
+    }
+
+    path = scriptDir + "/" + fileName;
     _scriptPath->setText(path);
 
-    loadScript();
-}
-
-void ScriptView::loadScript() {
-    QString path = _scriptPath->text().trimmed();
-    if(path.isEmpty()){
-        return;
-    }
-
     QFile file(path);
-    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    if (file.open(QIODevice::ReadWrite | QIODevice::Text)) {
         _scriptEditor->setPlainText(file.readAll());
         setScriptModified(false);
     }
