@@ -297,13 +297,17 @@ void MainWindow::showScriptView() {
 
 void MainWindow::showStandardSearch() {
     FileView* fileView = static_cast<FileView*>(_fileViewer->currentWidget());
-    _standardSearchView->setSourcePath(fileView->getFilePath());
+    if(fileView){
+        _standardSearchView->setSourcePath(fileView->getFilePath());
+    }
     _standardSearchView->show();
 }
 
 void MainWindow::showAdvancedSearch() {
     FileView* fileView = static_cast<FileView*>(_fileViewer->currentWidget());
-    _advancedSearchView->setSourcePath(fileView->getFilePath());
+    if(fileView){
+        _advancedSearchView->setSourcePath(fileView->getFilePath());
+    }
     _advancedSearchView->show();
 }
 
@@ -353,11 +357,12 @@ void MainWindow::setFontSize(int pointSize) {
 void MainWindow::closeEvent(QCloseEvent* event){
     if(_scriptView->hasUnsavedContent()){
         QMessageBox::StandardButton saveScriptDialog =
-                QMessageBox::question(
-                    this,
-                    "",
-                    "Would you like to save script before exiting?",
-                    QMessageBox::Yes|QMessageBox::No);
+            QMessageBox::question(
+                this,
+                "",
+                "Would you like to save script before exiting?",
+                QMessageBox::Yes|QMessageBox::No
+            );
 
         if (saveScriptDialog == QMessageBox::Yes && !_scriptView->saveScript()) {
             event->ignore();
