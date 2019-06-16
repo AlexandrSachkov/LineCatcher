@@ -23,6 +23,7 @@ public:
     void createSearchLimiterContent(QLayout* mainLayout);
     void createSearchOptionContent(QLayout* mainLayout);
     void createMultilineSearchOptionContent(QLayout* mainLayout);
+    void setSourcePath(const QString& path);
 signals:
 
 private slots:

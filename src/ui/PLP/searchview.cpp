@@ -561,3 +561,7 @@ void SearchView::showEvent(QShowEvent* event) {
     int defaultPosY = (screenGeometry.height() - size().height()) / 2;
     move(defaultPosX, defaultPosY);
 }
+
+void SearchView::setSourcePath(const QString& path){
+    _filePath->setText(path);
+}

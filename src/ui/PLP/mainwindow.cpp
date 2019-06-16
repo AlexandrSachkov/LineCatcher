@@ -296,10 +296,14 @@ void MainWindow::showScriptView() {
 }
 
 void MainWindow::showStandardSearch() {
+    FileView* fileView = static_cast<FileView*>(_fileViewer->currentWidget());
+    _standardSearchView->setSourcePath(fileView->getFilePath());
     _standardSearchView->show();
 }
 
 void MainWindow::showAdvancedSearch() {
+    FileView* fileView = static_cast<FileView*>(_fileViewer->currentWidget());
+    _advancedSearchView->setSourcePath(fileView->getFilePath());
     _advancedSearchView->show();
 }
 
