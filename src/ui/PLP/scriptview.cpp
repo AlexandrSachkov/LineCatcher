@@ -169,13 +169,18 @@ void ScriptView::runScript() {
 }
 
 bool ScriptView::saveScript() {
-    // path is only unavailable when no script was selected. Therefore, nothing to save
-    QString path = _scriptPath->text().trimmed();
-    if(path.isEmpty()){
+    if(!hasUnsavedContent()){
         return true;
     }
 
+    QString path = _scriptPath->text().trimmed();
     QString script = _scriptEditor->toPlainText().trimmed();
+
+    if(path.isEmpty()){
+        QMessageBox::critical(this,"Error","Failed to save script. No path specified", QMessageBox::Ok);
+        return false;
+    }
+
     if(_file){
         QTextStream out(_file.get());
         out << script;
@@ -301,5 +306,11 @@ void ScriptView::setFontSize(int pointSize) {
 }
 
 bool ScriptView::hasUnsavedContent(){
+    QString path = _scriptPath->text().trimmed();
+    QString script = _scriptEditor->toPlainText().trimmed();
+
+    if(path.isEmpty() && script.isEmpty()){
+        return false;
+    }
     return !_saved;
 }

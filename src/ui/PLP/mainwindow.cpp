@@ -335,6 +335,7 @@ void MainWindow::closeEvent(QCloseEvent* event){
 
         if (saveScriptDialog == QMessageBox::Yes && !_scriptView->saveScript()) {
             event->ignore();
+            _scriptView->show();
             return;
         }
     }
