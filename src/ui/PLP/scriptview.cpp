@@ -13,6 +13,7 @@
 #include <QSettings>
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QMessageBox>
 
 const char* ScriptView::LOG_SUBSCRIBER_NAME = "console";
 
@@ -136,10 +137,12 @@ void ScriptView::openScript(){
     path = scriptDir + "/" + fileName;
     _scriptPath->setText(path);
 
-    QFile file(path);
-    if (file.open(QIODevice::ReadWrite | QIODevice::Text)) {
-        _scriptEditor->setPlainText(file.readAll());
+    _file.reset(new QFile(path));
+    if (_file->open(QIODevice::ReadWrite | QIODevice::Text)) {
+        _scriptEditor->setPlainText(_file->readAll());
         setScriptModified(false);
+    }else{
+        QMessageBox::critical(this,"Error","Failed to open script: " + path, QMessageBox::Ok);
     }
 }
 
@@ -168,10 +171,15 @@ void ScriptView::saveScript() {
 
     QString script = _scriptEditor->toPlainText().trimmed();
 
-    QFile file(path);
-    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QTextStream out(&file);
+    if(_file){
+        QTextStream out(_file.get());
         out << script;
+
+        if (out.status() != QTextStream::Ok)
+        {
+            QMessageBox::critical(this,"Error","Failed to save script", QMessageBox::Ok);
+            return;
+        }
 
         setScriptModified(false);
     }

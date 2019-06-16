@@ -60,6 +60,7 @@ private:
     ScriptEditor* _scriptEditor;
     QPlainTextEdit* _console;
     QProgressBar* _progressBar;
+    std::unique_ptr<QFile> _file = nullptr;
 
     PLP::CoreI* _plpCore;
     QFuture<bool> _scriptResult;
