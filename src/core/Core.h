@@ -188,7 +188,7 @@ namespace PLP {
         lua_State* _state;
         std::unique_ptr<Thread> _fileOpThread;
         std::atomic<bool> _cancelled = false;
-        bool _creanupGeneratedFiles = false;
+        bool _cleanupGeneratedFiles = false;
     };
 
     PLP_LIB_API PLP::CoreI* createCore();

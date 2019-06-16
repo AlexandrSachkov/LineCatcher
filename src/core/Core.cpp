@@ -54,7 +54,7 @@ namespace PLP {
             lua_close(_state);
         }
 
-        if (_creanupGeneratedFiles) {
+        if (_cleanupGeneratedFiles) {
             for (auto& path : LC::GenFileTracker::getFiles()) {
                 remove(wstring_to_string(path).c_str());
             }
@@ -83,7 +83,7 @@ namespace PLP {
     }
 
     void Core::cleanupGeneratedFilesOnRelease(bool val) {
-        _creanupGeneratedFiles = val;
+        _cleanupGeneratedFiles = val;
     }
 
     bool Core::runScript(const std::wstring* scriptLua) {
