@@ -153,7 +153,7 @@ void PagedFileViewWidget::readNextBlock() {
     PLP::LineReaderResult result = _fileReader->getLine(_endLineNum, lineStart, length);
     if(result == PLP::LineReaderResult::SUCCESS){
         cursor.movePosition(QTextCursor::End);
-        cursor.insertText(QString::fromUtf8(lineStart, static_cast<int>(length)));
+        cursor.insertText(QString::fromUtf8(lineStart, static_cast<int>(length)).replace("\r",""));
         _endLineNum++;
 
         for(unsigned int i = 0; i < NUM_LINES_PER_READ - 1; i++){
@@ -162,7 +162,7 @@ void PagedFileViewWidget::readNextBlock() {
                 break;
             }
             cursor.movePosition(QTextCursor::End);
-            cursor.insertText(QString::fromUtf8(lineStart, static_cast<int>(length)));
+            cursor.insertText(QString::fromUtf8(lineStart, static_cast<int>(length)).replace("\r",""));
             _endLineNum++;
         }
     }
@@ -222,14 +222,14 @@ void PagedFileViewWidget::readPreviousBlock() {
     cursor.movePosition(QTextCursor::Start);
     PLP::LineReaderResult result = _fileReader->getLine(_startLineNum, lineStart, length);
     if(result == PLP::LineReaderResult::SUCCESS){
-        cursor.insertText(QString::fromUtf8(lineStart, length));
+        cursor.insertText(QString::fromUtf8(lineStart, length).replace("\r",""));
 
         for(unsigned int i = 0; i < numLinesToRead - 1; i++){
             result = _fileReader->nextLine(lineStart, length);
             if(result != PLP::LineReaderResult::SUCCESS){
                 break;
             }
-            cursor.insertText(QString::fromUtf8(lineStart, length));
+            cursor.insertText(QString::fromUtf8(lineStart, length).replace("\r",""));
         }
     }
 
@@ -267,7 +267,7 @@ bool PagedFileViewWidget::getLineFromIndex(
         return false;
     }
 
-    data = QString::fromUtf8(lineStart, length);
+    data = QString::fromUtf8(lineStart, length).replace("\r","");
     return true;
 }
 
@@ -303,7 +303,7 @@ void PagedFileViewWidget::gotoLine(unsigned long long lineNum, bool highlight){
     PLP::LineReaderResult result = _fileReader->getLine(_endLineNum, lineStart, length);
     if(result == PLP::LineReaderResult::SUCCESS){
         cursor.movePosition(QTextCursor::End);
-        cursor.insertText(QString::fromUtf8(lineStart, static_cast<int>(length)));
+        cursor.insertText(QString::fromUtf8(lineStart, static_cast<int>(length)).replace("\r",""));
         _endLineNum++;
 
         for(unsigned int i = 0; i < NUM_LINES_PER_READ - 1; i++){
@@ -312,7 +312,7 @@ void PagedFileViewWidget::gotoLine(unsigned long long lineNum, bool highlight){
                 break;
             }
             cursor.movePosition(QTextCursor::End);
-            cursor.insertText(QString::fromUtf8(lineStart, static_cast<int>(length)));
+            cursor.insertText(QString::fromUtf8(lineStart, static_cast<int>(length)).replace("\r",""));
             _endLineNum++;
         }
     }
