@@ -311,7 +311,7 @@ void MainWindow::closeAllTabs(){
 }
 
 void MainWindow::exit(){
-    QApplication::quit();
+    this->close();
 }
 
 void MainWindow::setFontSize(int pointSize) {
