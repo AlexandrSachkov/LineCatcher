@@ -1,0 +1,2 @@
+Line Catcher (LC) is an advanced programmable log parsing tool aimed to simplify and save time on viewing, searching, and parsing large text files.
+Created by Alexandr Sachkov
