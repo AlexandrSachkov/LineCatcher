@@ -120,7 +120,12 @@ ScriptView::~ScriptView() {
 }
 
 void ScriptView::openScript(){
-    QFileDialog fileDialog(this, "Select file to open", "", tr("Lua (*.lua)"));
+    QSettings settings("AlexandrSachkov", "LC");
+    settings.beginGroup("CommonDirectories");
+    QString scriptOpenDir = settings.value("scriptOpenDir", "scripts").toString();
+    settings.endGroup();
+
+    QFileDialog fileDialog(this, "Select file to open", scriptOpenDir, tr("Lua (*.lua)"));
     fileDialog.setFileMode(QFileDialog::AnyFile);
 
     if (!fileDialog.exec()){
@@ -134,6 +139,11 @@ void ScriptView::openScript(){
     }
 
     QString scriptDir = Common::getDirFromPath(path);
+
+    settings.beginGroup("CommonDirectories");
+    settings.setValue("scriptOpenDir", scriptDir);
+    settings.endGroup();
+
     QString fileName = path.split('/').last();
     if(!fileName.endsWith(".lua")){
         fileName += ".lua";

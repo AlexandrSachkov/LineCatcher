@@ -85,9 +85,15 @@ void SearchView::createDestinationContent(QLayout* mainLayout){
     QFormLayout* destLayout = new QFormLayout();
     destGroup->setLayout(destLayout);
 
+    QSettings settings("AlexandrSachkov", "LC");
+    settings.beginGroup("CommonDirectories");
+    QString searchDestDir = settings.value("searchDestDir", settings.value("fileOpenDir", "")).toString();
+    settings.endGroup();
+
     QHBoxLayout* openDirLayout = new QHBoxLayout();
     _destDir = new QLineEdit(this);
     _destDir->setReadOnly(true);
+    _destDir->setText(searchDestDir);
     QPushButton* openDir = new QPushButton("Browse", this);
     connect(openDir, SIGNAL(clicked(void)), this, SLOT(openDestinationDir(void)));
     openDir->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -469,10 +475,18 @@ void SearchView::startMultilineSearch(
 }
 
 void SearchView::openFile() {
-    QString path = QFileDialog::getOpenFileName(this, "Select file to open");
+    QSettings settings("AlexandrSachkov", "LC");
+    settings.beginGroup("CommonDirectories");
+
+    QString fileOpenDir = settings.value("fileOpenDir", "").toString();
+    QString path = QFileDialog::getOpenFileName(this, "Select file to open", fileOpenDir);
     if(path.isEmpty()){
+        settings.endGroup();
         return;
     }
+
+    settings.setValue("fileOpenDir", Common::getDirFromPath(path));
+    settings.endGroup();
 
     _filePath->setText(path);
     if(_destDir->text().isEmpty()){
@@ -481,24 +495,40 @@ void SearchView::openFile() {
 }
 
 void SearchView::openIndex(){
+    QSettings settings("AlexandrSachkov", "LC");
+    settings.beginGroup("CommonDirectories");
+
+    QString indexOpenDir = settings.value("indexOpenDir", settings.value("fileOpenDir", "")).toString();
     std::string fileFilter = "Index (*" + std::string(PLP::FILE_INDEX_EXTENSION) +")";
-    QString path = QFileDialog::getOpenFileName(this, tr("Select indices to open"), "",
+    QString path = QFileDialog::getOpenFileName(this, tr("Select index to open"), indexOpenDir,
         tr(fileFilter.c_str()));
 
     if(path.isEmpty()){
+        settings.endGroup();
         return;
     }
+
+    settings.setValue("indexOpenDir", Common::getDirFromPath(path));
+    settings.endGroup();
 
     _indexPath->setText(path);
 }
 
 void SearchView::openDestinationDir(){
-    QString path = QFileDialog::getExistingDirectory(this, tr("Select directory"));
-    if(path.isEmpty()){
+    QSettings settings("AlexandrSachkov", "LC");
+    settings.beginGroup("CommonDirectories");
+
+    QString searchDestDir = settings.value("searchDestDir", settings.value("fileOpenDir", "")).toString();
+    QString dir = QFileDialog::getExistingDirectory(this, tr("Select directory"), searchDestDir);
+    if(dir.isEmpty()){
+        settings.endGroup();
         return;
     }
 
-    _destDir->setText(path);
+    settings.setValue("searchDestDir", dir);
+    settings.endGroup();
+
+    _destDir->setText(dir);
 }
 
 void SearchView::onSearchCompletion(bool success){

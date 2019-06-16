@@ -11,6 +11,7 @@
 #include <QMessageBox>
 #include <QFutureWatcher>
 #include <QApplication>
+#include <QSettings>
 
 #include "Utils.h"
 #include "IndexReaderI.h"
@@ -159,10 +160,18 @@ bool MainWindow::openFile(const std::vector<QString>& candidates){
 }
 
 void MainWindow::openFile() {
-    QString path = QFileDialog::getOpenFileName(this, "Select file to open");
+    QSettings settings("AlexandrSachkov", "LC");
+    settings.beginGroup("CommonDirectories");
+
+    QString fileOpenDir = settings.value("fileOpenDir", "").toString();
+    QString path = QFileDialog::getOpenFileName(this, "Select file to open", fileOpenDir).trimmed();
     if(path.isEmpty()){
+        settings.endGroup();
         return;
     }
+
+    settings.setValue("fileOpenDir", Common::getDirFromPath(path));
+    settings.endGroup();
 
     if(!openFile(path) && !_plpCore->isCancelled()){
         QMessageBox::critical(this,"Error","Failed to open file: " + path,QMessageBox::Ok);
@@ -220,9 +229,22 @@ bool MainWindow::openFile(const QString& path)
 }
 
 void MainWindow::openIndex() {
+    QSettings settings("AlexandrSachkov", "LC");
+    settings.beginGroup("CommonDirectories");
+
+    QString indexOpenDir = settings.value("indexOpenDir", settings.value("fileOpenDir", "")).toString();
     std::string fileFilter = "Index (*" + std::string(PLP::FILE_INDEX_EXTENSION) +")";
-    QStringList paths = QFileDialog::getOpenFileNames(this, tr("Select indices to open"), "",
+    QStringList paths = QFileDialog::getOpenFileNames(this, tr("Select indices to open"), indexOpenDir,
         tr(fileFilter.c_str()));
+
+    if(paths.empty()){
+        settings.endGroup();
+        return;
+    }
+
+    settings.setValue("indexOpenDir", Common::getDirFromPath(paths[0]));
+    settings.endGroup();
+
     for(QString path : paths){
         openIndex(path);
     }
