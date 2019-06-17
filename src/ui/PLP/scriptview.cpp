@@ -192,6 +192,7 @@ bool ScriptView::saveScript() {
     }
 
     if(_file){
+        _file->resize(0);
         QTextStream out(_file.get());
         out << script;
 
