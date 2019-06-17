@@ -312,7 +312,13 @@ void ScriptView::printLogDataToConsole() {
         tf.setForeground(QBrush(textColor));
         cursor.setCharFormat(tf);
         cursor.movePosition(QTextCursor::End);
-        cursor.insertText(levelName + msg + "\n");
+
+        QString text = levelName + msg;
+        if(text.endsWith("\n")){
+            cursor.insertText(text);
+        }else{
+            cursor.insertText(text + "\n");
+        }
     }
 
     if(_logData.size() > 0){
