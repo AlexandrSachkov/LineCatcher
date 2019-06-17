@@ -138,6 +138,20 @@ void ScriptView::openScript(){
         return;
     }
 
+    if(hasUnsavedContent()){
+        QMessageBox::StandardButton saveScriptDialog =
+            QMessageBox::question(
+                this,
+                "",
+                "Would you like to save current script?",
+                QMessageBox::Yes|QMessageBox::No
+            );
+
+        if (saveScriptDialog == QMessageBox::Yes && !saveScript()) {
+            return;
+        }
+    }
+
     QString scriptDir = Common::getDirFromPath(path);
 
     settings.beginGroup("CommonDirectories");
