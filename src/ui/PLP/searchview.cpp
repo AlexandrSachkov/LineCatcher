@@ -20,6 +20,9 @@
 #include <QDesktopWidget>
 
 #include "Utils.h"
+#include "CoreI.h"
+#include "FileReaderI.h"
+#include "IndexReaderI.h"
 #include <unordered_map>
 
 SearchView::SearchView(PLP::CoreI* plpCore, bool multiline, QWidget *parent) : QWidget(parent)
@@ -280,7 +283,6 @@ void SearchView::startSearch() {
         return;
     }
 
-
     CoreObjPtr<PLP::IndexReaderI> indexReader = nullptr;
     if(!indexPath.simplified().isEmpty()){
         indexReader = createCoreObjPtr(_plpCore->createIndexReader(indexPath.toStdString(), 0), _plpCore);
@@ -288,6 +290,11 @@ void SearchView::startSearch() {
             QMessageBox::information(this,"Error","Index reader failed to initialize",QMessageBox::Ok);
             return;
         }
+    }
+
+    if(indexReader && QString::fromUtf8(indexReader->getDataFilePath()) != dataPath){
+        QMessageBox::information(this,"Error","Index file must correspond to the source file",QMessageBox::Ok);
+        return;
     }
 
     QString destPath = destDir + "/" + destName;
