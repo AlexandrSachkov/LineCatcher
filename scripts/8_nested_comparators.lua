@@ -27,6 +27,7 @@ local criteria = LC.MatchAll({ -- match all the following criteria
 	LC.MatchString("lorem", false, true), -- line contains "lorem"
 	LC.MatchRegex(".*ipsum.*", false), -- line matches regular expression (contains "ipsum")
 	LC.MatchCustom(notContains) -- line matches custom criteria defined by our function (line does not contain "Suspendisse")
+	-- see Lua API docs for more comparator types
 });
 
 --read file one line at a time
