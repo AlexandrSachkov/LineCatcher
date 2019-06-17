@@ -688,7 +688,7 @@ namespace PLP {
                 = &FileReader::getLineFromResult;
             fileReaderClass.addFunction("nextLine", nextLine);
             fileReaderClass.addFunction("getLine", getLine);
-            fileReaderClass.addFunction("getLineFromResult", getLineFromResult);
+            fileReaderClass.addFunction("getLineFromIndex", getLineFromResult);
             fileReaderClass.addFunction("getLineNumber", &FileReader::getLineNumber);
             fileReaderClass.addFunction("getNumberOfLines", &FileReader::getNumberOfLines);
             fileReaderClass.addFunction("restart", &FileReader::restart);

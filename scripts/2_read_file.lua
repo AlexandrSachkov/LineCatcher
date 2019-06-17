@@ -1,6 +1,6 @@
 -- open file
 local fileReader = LC:core():createFileReader(
-	"D:/Repositories/LogParser/scripts/test_data/lorem-ipsum.txt", -- file path
+	"D:/Repositories/LogParser/data/test_data/lorem-ipsum.txt", -- file path
 	 0	-- preferred buffer size (0 means use default size of 64 KB)
 );
 
