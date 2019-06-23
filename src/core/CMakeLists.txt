@@ -1,10 +1,10 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
-PROJECT (PLPCore)
+PROJECT (LCCore)
 
-set (LP_VERSION_MAJOR 1)
-set (LP_VERSION_MINOR 0)
-set (LP_VERSION_PATCH 0)
+set (LC_VERSION_MAJOR 1)
+set (LC_VERSION_MINOR 0)
+set (LC_VERSION_PATCH 0)
 
 set (CMAKE_CXX_STANDARD 11)
 
@@ -141,35 +141,12 @@ IF(TBB_LIBRARY_RELEASE_PATH STREQUAL "")
 	MESSAGE(SEND_ERROR "TBB library release path must be specified")
 ENDIF(TBB_LIBRARY_RELEASE_PATH STREQUAL "")
 
-SET(HEADERS
-        ${HEADERS}
-        #${NLE_IMGUI_INCLUDE_PATH}/imgui.h
-        #${NLE_IMGUI_INCLUDE_PATH}/imconfig.h
-        #${NLE_IMGUI_INCLUDE_PATH}/imgui_internal.h
-        #${NLE_IMGUI_INCLUDE_PATH}/stb_rect_pack.h
-        #${NLE_IMGUI_INCLUDE_PATH}/stb_textedit.h
-        #${NLE_IMGUI_INCLUDE_PATH}/stb_truetype.h
-        #p3d/device/d3d11/DDSTextureLoader.h
-        #${P3D_DIRECT_X_TEX_INCLUDE_PATH}/WICTextureLoader/WICTextureLoader.h
-    )
-
-    SET(SOURCES 
-        ${SOURCES}
-        #${NLE_IMGUI_INCLUDE_PATH}/imgui.cpp
-        #${NLE_IMGUI_INCLUDE_PATH}/imgui_demo.cpp
-        #${NLE_IMGUI_INCLUDE_PATH}/imgui_draw.cpp
-        #p3d/device/d3d11/DDSTextureLoader.cpp
-        #${P3D_DIRECT_X_TEX_INCLUDE_PATH}/WICTextureLoader/WICTextureLoader.cpp
-    )
-
 
 INCLUDE_DIRECTORIES(
     ${LUA_INCLUDE_PATH}
     ${LUA_INTF_INCLUDE_PATH}
     ${TBB_INCLUDE_PATH}
     ${CEREAL_INCLUDE_PATH}
-    #${NLE_D3D11_INCLUDE_PATH}
-    #${P3D_GLM_INCLUDE_PATH}
     )
 
 ADD_DEFINITIONS(
@@ -183,12 +160,12 @@ LINK_DIRECTORIES(
     ${TBB_LIBRARY_RELEASE_PATH}
     )
 
-add_library (PLPCORE SHARED
+add_library (lcCore SHARED
   ${HEADERS}
   ${SOURCES}
 )
 
-TARGET_LINK_LIBRARIES(PLPCORE 
+TARGET_LINK_LIBRARIES(lcCore 
     debug lua51
     optimized lua51
 
@@ -196,4 +173,4 @@ TARGET_LINK_LIBRARIES(PLPCORE
 	optimized tbb
     )
 
-set_target_properties(PLPCORE PROPERTIES DEBUG_POSTFIX _d)
+set_target_properties(lcCore PROPERTIES DEBUG_POSTFIX _d)

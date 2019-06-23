@@ -5,7 +5,7 @@
 #define MyAppVersion "0.9-beta"
 #define MyAppPublisher "Alexandr Sachkov"
 #define MyAppURL "https://github.com/AlexandrSachkov/LogParser"
-#define MyAppExeName "PLP.exe"
+#define MyAppExeName "LineCatcher.exe"
 
 #define QtInstallDir "D:\Qt\5.12.0\msvc2017_64"
 #define LCBuildDir "D:\Repositories\LogParser\src\ui\build-PLP-Desktop_Qt_5_12_0_MSVC2017_64bit-Release\release"
@@ -43,13 +43,13 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "{#LCBuildDir}\PLP.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#LCBuildDir}\PLP_resource.res"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#LCBuildDir}\LineCatcher.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#LCBuildDir}\LineCatcher_resource.res"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\resources\*"; DestDir: "{app}\resources"; Flags: ignoreversion recursesubdirs
 Source: "..\scripts\*"; DestDir: "{app}\scripts"; Flags: ignoreversion recursesubdirs
 Source: "..\License.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\README.md"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#LCBuildDir}\PLPCORE.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#LCBuildDir}\lcCore.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#LCBuildDir}\lua51.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#LCBuildDir}\jit\*"; DestDir: "{app}\jit"; Flags: ignoreversion recursesubdirs
 Source: "{#LCBuildDir}\luajit.exe"; DestDir: "{app}"; Flags: ignoreversion

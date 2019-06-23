@@ -8,7 +8,7 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = PLP
+TARGET = LineCatcher
 TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
@@ -69,9 +69,9 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../bin64_core/Release/ -lPLPCORE
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../bin64_core/Debug/ -lPLPCORE_d
-else:unix: LIBS += -L$$PWD/../../../bin64_core/ -lPLPCORE_d
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../bin64_core/Release/ -llcCore
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../bin64_core/Debug/ -llcCore_d
+else:unix: LIBS += -L$$PWD/../../../bin64_core/ -llcCore_d
 
 INCLUDEPATH += $$PWD/../../core
 DEPENDPATH += $$PWD/../../core

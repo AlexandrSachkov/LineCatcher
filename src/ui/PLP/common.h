@@ -4,7 +4,7 @@
 #include <QString>
 #include <QColor>
 
-//#define LC_DEPLOYMENT
+#define LC_DEPLOYMENT
 
 static const QString SEARCH_GROUP_STYLESHEET =
         "QGroupBox {"
