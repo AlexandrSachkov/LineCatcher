@@ -1,6 +1,7 @@
 #include "pagedfileviewwidget.h"
 #include "signalingscrollbar.h"
 #include "linenumberarea.h"
+#include "common.h"
 #include <QDebug>
 #include <QPainter>
 #include <QTextBlock>
@@ -69,8 +70,8 @@ void PagedFileViewWidget::mouseMoveEvent(QMouseEvent *e) {
     QPlainTextEdit::mouseMoveEvent(e);
 
     QTextEdit::ExtraSelection selection;
-    QColor lineColor = QColor(Qt::lightGray).lighter(110);
-    selection.format.setBackground(lineColor);
+    selection.format.setBackground(Common::LineHighlightBGColor);
+    selection.format.setForeground(Common::LineHighlightTextColor);
     selection.format.setProperty(QTextFormat::FullWidthSelection, true);
     selection.cursor = this->cursorForPosition(e->pos());
     selection.cursor.clearSelection();
@@ -120,7 +121,7 @@ void PagedFileViewWidget::updateLineNumberArea(const QRect &rect, int dy)
 void PagedFileViewWidget::lineNumberAreaPaintEvent(QPaintEvent *event)
 {
     QPainter painter(_lineNumberArea);
-    painter.fillRect(event->rect(), Qt::lightGray);
+    painter.fillRect(event->rect(), Common::LineNumberAreaBGColor);
 
 
     QTextBlock block = firstVisibleBlock();
@@ -131,7 +132,7 @@ void PagedFileViewWidget::lineNumberAreaPaintEvent(QPaintEvent *event)
     while (block.isValid() && top <= event->rect().bottom()) {
         if (block.isVisible() && bottom >= event->rect().top()) {
             QString number = QString::number(_startLineNum + blockNumber);
-            painter.setPen(Qt::black);
+            painter.setPen(Common::LineNumberAreaTextColor);
             painter.drawText(0, top, _lineNumberArea->width(), fontMetrics().height(), Qt::AlignLeft, number);
         }
 
@@ -347,9 +348,9 @@ void PagedFileViewWidget::highlightLine(unsigned long long lineNum) {
     int lineToHighlight = (int)(lineNum - _startLineNum);
     QTextCursor cursor(document()->findBlockByLineNumber(lineToHighlight));
 
-    QColor lineColor = QColor(Qt::lightGray).lighter(110);
     _indexSelection.lineNumber = lineNum;
-    _indexSelection.format.setBackground(lineColor);
+    _indexSelection.format.setBackground(Common::LineHighlightBGColor);
+    _indexSelection.format.setForeground(Common::LineHighlightTextColor);
     _indexSelection.format.setProperty(QTextFormat::FullWidthSelection, true);
     _indexSelection.cursor = cursor;
     cursor.clearSelection();

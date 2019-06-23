@@ -1,5 +1,6 @@
 #include "scripteditor.h"
 #include "linenumberarea.h"
+#include "common.h"
 
 #include <QTextBlock>
 #include <QPainter>
@@ -74,7 +75,7 @@ void ScriptEditor::updateLineNumberArea(const QRect &rect, int dy)
 void ScriptEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
 {
     QPainter painter(_lineNumberArea);
-    painter.fillRect(event->rect(), Qt::lightGray);
+    painter.fillRect(event->rect(), Common::LineNumberAreaBGColor);
 
 
     QTextBlock block = firstVisibleBlock();
@@ -85,7 +86,7 @@ void ScriptEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
     while (block.isValid() && top <= event->rect().bottom()) {
         if (block.isVisible() && bottom >= event->rect().top()) {
             QString number = QString::number(blockNumber + 1);
-            painter.setPen(Qt::black);
+            painter.setPen(Common::LineHighlightTextColor);
             painter.drawText(0, top, _lineNumberArea->width(), fontMetrics().height(), Qt::AlignLeft, number);
         }
 

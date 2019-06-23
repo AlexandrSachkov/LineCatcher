@@ -1,6 +1,7 @@
 #include "indexviewwidget.h"
 #include "signalingscrollbar.h"
 #include "linenumberarea.h"
+#include "common.h"
 #include <QDebug>
 #include <QTextBlock>
 #include <QScrollBar>
@@ -108,7 +109,7 @@ void IndexViewWidget::updateLineNumberArea(const QRect &rect, int dy)
 void IndexViewWidget::lineNumberAreaPaintEvent(QPaintEvent *event)
 {
     QPainter painter(_lineNumberArea);
-    painter.fillRect(event->rect(), Qt::lightGray);
+    painter.fillRect(event->rect(), Common::LineNumberAreaBGColor);
 
 
     QTextBlock block = firstVisibleBlock();
@@ -119,7 +120,7 @@ void IndexViewWidget::lineNumberAreaPaintEvent(QPaintEvent *event)
     while (block.isValid() && top <= event->rect().bottom()) {
         if (block.isVisible() && bottom >= event->rect().top()) {
             QString number = QString::number(_startLineNum + blockNumber);
-            painter.setPen(Qt::black);
+            painter.setPen(Common::LineNumberAreaTextColor);
             painter.drawText(0, top, _lineNumberArea->width(), fontMetrics().height(), Qt::AlignLeft, number);
         }
 
@@ -248,8 +249,8 @@ void IndexViewWidget::mouseReleaseEvent(QMouseEvent* event) {
 
     QTextCursor cursor = this->cursorForPosition(event->pos());
     QTextEdit::ExtraSelection selection;
-    QColor lineColor = QColor(Qt::lightGray).lighter(110);
-    selection.format.setBackground(lineColor);
+    selection.format.setBackground(Common::LineHighlightBGColor);
+    selection.format.setForeground(Common::LineHighlightTextColor);
     selection.format.setProperty(QTextFormat::FullWidthSelection, true);
     selection.cursor = cursor;
     selection.cursor.clearSelection();

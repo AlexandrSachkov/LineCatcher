@@ -2,6 +2,7 @@
 #define COMMON_H
 
 #include <QString>
+#include <QColor>
 
 //#define LC_DEPLOYMENT
 
@@ -28,6 +29,11 @@ namespace Common {
 
         return path.left(pos);
     }
+
+    static QColor LineNumberAreaBGColor = Qt::black;
+    static QColor LineNumberAreaTextColor = QColor(192,250,174);
+    static QColor LineHighlightBGColor = Qt::black;
+    static QColor LineHighlightTextColor = QColor(192,250,174);
 
 #ifdef LC_DEPLOYMENT
     static const char* RESOURCE_PATH = "resources";
