@@ -2,23 +2,294 @@
 <html>
 <head>
 <style>
-h1, p, a {
+p.title {
     text-align: center;
+    font-size: 28px;
+    font-weight: bold;
 }
 
-p {
+p.header {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+p.sub_header {
+    font-size: 20px;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+
+p, a, ul, ol li, li > * {
     font-size: 16px;
 }
 
-a {
-    font-size: 20px;
+table, th, td {
+    border-width: 1px;
+    border-style: solid;
+    border-color: black;
+    border-collapse: collapse;
+    padding: 5px;
+    font-size: 16px;
+}
+
+th {
+    text-align: left;
+    padding: 4px; <!-- this reduces header padding by 1px to solve border artifact problem
+                    https://stackoverflow.com/questions/14588692/double-line-in-html-table-->
+}
+
+<!-- makes ordered list numbers appear bold -->
+ol li {
+    font-weight:bold;
+}
+li > * {
+    font-weight:normal;
 }
 
 </style>
 </head>
 <body>
 
-<h1>Getting Started</h1>
+<p class="title">Getting Started Guide</p>
+
+<p>
+    <p class="header">Table of Contents:</p>
+    <ol>
+        <li><b><a href="#overview">Overview</a></b></li>
+            <ol type="a">
+                <li><a href="#appFeatures">Application features</a></li>
+                <li><a href="#sysRequirements">System requirements</a></li>
+            </ol>
+        <li><b><a href="#usingLC">Using Line Catcher</a></b></li>
+            <ol type="a">
+                <li><a href="#openAndView">How-to: Open and view large files</a></li>
+                <li><a href="#regularSearch">How-to: Search and open search results</a></li>
+                <li><a href="#multiLineSearch">How-to: Multi-line search</a></li>
+                <li><a href="#scripting">How-to: Scripting</a></li>
+                <li><a href="#settings">How-to: Settings</a></li>
+            </ol>
+    </ol>
+</p>
+
+<p class="header" id="overview">Overview</p>
+
+<p>Line Catcher (LC) is an advanced programmable log parsing tool aimed to simplify
+    and save time on viewing, searching, and parsing large text files.</p>
+    
+<p><table>
+    <tr>
+        <th>Issues with large files</th>
+        <th>How we solve them</th>
+    </tr>
+    <tr>
+        <td>Large files are hard to open since they do not fit into memory</td>
+        <td>LC keeps only the required part of the file in memory while still allowing 
+            fast navigation using indexes. Indexes are generated the first time file is opened.</td>
+    </tr>
+    <tr>
+        <td>Searches are time-consuming. For example, searches on a file of 50GB can take over 30 mins; 
+            tweaking search parameters would mean re-running this lengthy process many times.</td>
+        <td>LC is optimized for fast file processing. While there are limits to how fast a file 
+            can be read since we are bound by disk read speeds, we can search smarter by limiting 
+            the amount of lines to process. LC offers a number of tools to limit search area including 
+            reusing previous search results. As an example, you can first run a general search to note 
+            points of interest (generate an index), then run a more detailed search that narrows down 
+            results from the previous search. As a result, the next search can be significantly faster 
+            than the first.</td>
+    </tr>
+    <tr>
+        <td>There are too many results. Searching a large file can produce thousands of results,
+            most of them may be irrelevant.</td>
+        <td>LC allows defining very specific search criteria to retrieve only relevant results. 
+            Multi-line search enables using information from adjacent lines to include more context 
+            in the search.</td>
+    </tr>
+    <tr>
+        <td>Extracting information is challenging and often requires custom parsing scripts/applications.</td>
+        <td>LC contains an embedded Lua scripting engine allowing you to write a custom parser and output 
+            data in any format. </td>
+    </tr>
+</table></p>
+
+<p class="sub_header" id="appFeatures">Application features</p>
+<p>The LC version 0.9 beta provides the following functionality:</p>
+<ul>
+    <li>Opening and viewing large files;</li>
+    <li>Supported file formats: any files containing text ( txt, xml, JSON, csv, etc.)</li>
+    <li>Instant random access to any portion of a file using line navigator;</li>
+    <li>Regular search and advanced multi-line search functionality;</li>
+    <li>Multiple options for limiting the search area, including the reuse of previous search results;</li>
+    <li>Script Editor for creating and running custom parsing scripts;</li>
+    <li>Font size adjustment settings</li>
+</ul>
+
+<p class="sub_header" id="sysRequirements">System Requirements</p>
+<ul>
+    <li>OS: Windows 64 bit</li>
+    <li>Memory: Minimum 1GB</li>
+</ul>
+
+<br>
+<p class="header" id="usingLC">Using Line Catcher</p>
+<p class="sub_header" id="openAndView">How-to: Open and view large files</p>
+
+<p>On launching LC, you will see the <b>main application screen</b> where you can access key menu options:</p>
+<ul>
+    <li>In the <b>File</b> menu, you can <u>open data files</u>, 
+        <u>open index files</u>, <u>close all tabs</u>, and <u>exit the application</u>.</li>
+    <li>In the <b>Run</b> menu, you can open <u>search</u> and <u>advanced search</u> windows, 
+        as well as launch a <u>Script Editor</u>.</li>
+    <li>In the <b>Configure</b> menu, you can access settings to <u>change viewer font size</u> and 
+        select an option to <u>cleanup files on closure</u>.</li>
+    <li>In the <b>Help</b> menu, you can open this <u>getting started guide</u>, 
+        <u>Lua API docs</u>, and <u>About</u> window.</li>
+</ul>
+<p><img src="images/main_screen.png" alt="Main application screen"></p>
+
+<p>
+<u>Open a file</u> to view by clicking <b>“File” >> “Open” >> “Data”</b>. A browsing window will pop up 
+    where you can navigate to the desired file directory. Once you’ve clicked <b>“Open”</b>, the file contents 
+    will be displayed in the <b>file viewer</b> area.
+</p>
+
+<p>
+    The first time you open a file, LC will generate indexes to enable random access. <b>Line navigator</b>
+    lets you see the total number of lines, as well as swiftly jump to a specific line by typing
+    its number in the line navigator window. Indexes can be set to be automatically deleted after closing 
+    application by enabling <u>"Cleanup files on closure"</u> setting.
+</p>
+<p><img src="images/file_viewer.png" alt="File viewer"></p>
+
+
+<p class="sub_header" id="regularSearch">How-to: Search and open search results</p>
+<p>To <u>search a file</u>, click <b>“Run” >> “Search”</b> to open a search window.</p>
+<p><img src="images/regular_search.png" alt="Regular search"></p>
+
+<ol>
+    <li><span><b>Source</b>: Use the Browse button to navigate to the source file you want to perform search 
+        operations on.</span></li>
+    <li><span><b>Save results to</b>: You can save your search result to re-use it for other searches. 
+        You need to select a <u>directory</u> to save you search results and provide a meaningful <u>file 
+        name</u> to find them later.</span></li>
+    <li><span><b>Limiters</b>: Limiters are used to narrow down the search area.</span>
+        <ul>
+            <li><span><u>Start line #</u> is the first line LC will refer to when starting the search. 
+                By default the value is set to 0, which means LC will start searching from the 
+                first line.</span></li>
+            <li><span><u>End line #</u> is the last line LC will consider when ending the search. By default 
+                is set to 0, which means - end the search with the last line of the document.</span></li>
+            <li><span><u>Max result #</u> is the max number of results to retrieve. By default is set to 0, 
+                which means - find all occurrences.</span></li>
+            <li><span><u>Index</u>: This feature allows reusing previous search results to generate a more specific
+                result set without having to search the entire file again. If index file is specified, 
+                then the search will only look at lines specified in the index. You can use indexes with
+                other limiters to get an even more specific search result.</span></li>
+        </ul>
+    </li>
+    <li><span><b>Search</b></span>:
+        <ul>
+            <li><span><u>Pattern line</u> contains the pattern to use during search. By default, every 
+                line will be checked for containing the pattern text.</span></li>
+            <li><span><u>Regex</u> option if checked - the pattern is treated like a regular expression.</span></li>
+            <li><span>Select <u>Ignore case</u> box, the pattern is applied while ignoring upper/lower 
+                character differences.</span></li>
+        </ul>
+    </li>
+</ol>
+
+<p>
+    After the search is complete, a <b>search viewer</b> window will open at the bottom of the <b>file 
+    viewer</b> area. You can drag this window up or down to reduce or increase its size. If your case requires
+    more specific search parameters than UI permits, refer to <b>How-to: Scripting</b> section<u></u>
+</p>
+<p><img src="images/result_viewer.png" alt="Result viewer"></p>
+
+<p>
+    Search results (index file .lcidx) are persisted to file due to their potential size as well as to allow reuse 
+    in subsequent runs. You can <u>open the results output file</u> by clicking <b>“File” >> “Open” >> “Index”</b>. 
+    The results file contains full path to the associate data file. Consequently, opening the index file will 
+    result in the data file opening as well, unless it is already open. If data file is not found at the provided path, 
+    Line Catcher will also look in the index's local directory for it. Search result files can be set to be
+    automatically deleted after closing application by enabling <u>"Cleanup files on closure"</u> setting. 
+</p>
+
+
+<p class="sub_header" id="multiLineSearch">How-to: Multi-line search</p>
+<p>
+    Multi-line search allows specifying search parameters for adjacent lines to increase result relevancy.
+    It works by sliding a frame of 21 lines wide down the length of the file allowing to specify search criteria
+    for the current line (equivalent to standard search), previous 10 lines, and subsequent 10 lines.
+    You can think about it as a standard search which searches one line at a time but also allowing you to look
+    back 10 lines and ahead 10 lines.
+</p>
+<p><img src="images/frame.png" alt="Frame"></p>
+
+<p>To run <u>multi-line search</u>, click <b>“Run” >> “Search (Advanced)</b>” to open a search window. 
+    Most parameters in this dialog will be identical to the regular search, except for the <u>Search</u> section.
+    The Search section allows specifying search criteria for multiple lines within a 21 line frame (read above) up
+    to a maximum of 5 lines (Scripting allows using all 21 lines. See <b>How-to: Scripting</b> section).  
+    Each row contains parameters for a single line. <u>Line #</u> is the number of the line to search relative
+    to the center of the frame (Line #0) and can be any number between -10 and 10 inclusive. Checkbox in front
+    of each row enables using parameters specified in that row. The rest of parameters are identical
+    to the standard search. During search, if the given frame matches all search parameters, 
+    the center of the frame will be added to search results.
+</p>
+
+<p><img src="images/advanced_search.png" alt="Multi-line search"></p>
+
+<p>
+    As an example, lets have a look at the above image. This image depicts configuration for a milti-line search
+    that specifies search parameters for 3 lines:
+    <ul>
+        <li><span> Line #-1 must contain text "test 1"</span></li>
+        <li><span> Line #0 (frame center) must also contain text "test 1"</span></li>
+        <li><span> Line #2 must contain text "7"</span></li>
+        <li><span> Other line parameters are deactivated (unchecked)</span></li>
+    </ul>
+</p>
+
+<p>
+    Line Catcher automatically handles edge cases where a frame hangs off the end of file. If an index is specified 
+    in the <u>Limiters</u> section, the search will only touch parts of the file specified by the index with
+    frame center being positioned on each index location. For example, if the index contains line #1000, 
+    the above search parameters will check if line #999 contains "test 1", line #1000 contains "test 1", 
+    and line #1002 contains "7". If there is a match, then line #1000 (center frame) will be added to search results.
+</p>
+
+<p>
+    When using multi-line search, consider search performance. Performance for this search is considerably lower
+    than the standard one due to the increased number of comparisons. Therefore, it is recommended to use
+    it with an index as a method for narrowing down results (if the file is large).
+</p>
+
+
+<p class="sub_header" id="scripting">How-to: Scripting</p>
+<p>
+    Scripting is a powerful feature that allows leveraging Line Catcher's systems to perform custom searches,
+    write parsing algorithms, and extract data.
+</p>
+
+<p>
+    To access scripting view, go to <b>“Run” >> “Script”</b>. A Script Editor window will pop up. 
+    We provided some <b>example scripts</b> for you in <b>“&lt;installation directory&gt;/Line Catcher/scripts”</b>. 
+</p>
+
+<p>
+    To run a script, click <b>“Run”</b> button. The <b>console output</b> window will notify you if 
+    the script compiled or failed to compile. If you have made any changes to the script, 
+    the <b>“Save”</b> button will turn red as a reminder to save the changes. 
+</p>
+<p><img src="images/script_editor.png" alt="Script editor"></p>
+
+
+<p class="sub_header" id="settings">How-to: Settings</p>
+<p>
+    <u>Change font size</u> of your file by dragging the pointer left or right.<br/>
+    <u>Cleanup files on closure</u> by checking the box. It will delete generated index and search results 
+    files automatically on closure. This is disabled by default.
+</p>
+<p><img src="images/settings.png" alt="Settings"></p>
 
 </body>
 </html>

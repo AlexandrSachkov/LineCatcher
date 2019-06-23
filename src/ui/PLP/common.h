@@ -3,6 +3,8 @@
 
 #include <QString>
 
+//#define LC_DEPLOYMENT
+
 static const QString SEARCH_GROUP_STYLESHEET =
         "QGroupBox {"
             "border: 2px solid silver;"
@@ -27,7 +29,11 @@ namespace Common {
         return path.left(pos);
     }
 
-    static const char* RESOURCE_PATH = "D:/Repositories/LogParser/resources"; //TODO change before release
+#ifdef LC_DEPLOYMENT
+    static const char* RESOURCE_PATH = "resources";
+#else
+    static const char* RESOURCE_PATH = "D:/Repositories/LogParser/resources";
+#endif
 }
 
 #endif // COMMON_H

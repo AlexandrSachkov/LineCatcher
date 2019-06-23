@@ -32,4 +32,5 @@ GettingStartedDialog::GettingStartedDialog(QWidget* parent) : QWidget (parent)
     mainLayout->addWidget(browser);
     browser->setOpenExternalLinks(true);
     browser->setHtml(file.readAll());
+    browser->setSearchPaths({Common::RESOURCE_PATH});
 }
