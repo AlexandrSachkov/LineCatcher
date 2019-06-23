@@ -184,9 +184,10 @@ void SearchView::createMultilineSearchOptionContent(QLayout* mainLayout){
         lineOffsetLabel->setAlignment(Qt::AlignHCenter);
         formLayout->addWidget(lineOffsetLabel, 0, 1);
 
-        for(int i = 0; i < NUM_ROWS; i++){
+        for(int i = 0, val = - (NUM_ROWS / 2); i < NUM_ROWS; i++, val++){
             QSpinBox* lineOffsetBox = new QSpinBox(this);
             lineOffsetBox->setRange(-10, 10);
+            lineOffsetBox->setValue(val);
             lineOffsetBox->setButtonSymbols(QAbstractSpinBox::ButtonSymbols::NoButtons);
             _lineOffsetBoxes.push_back(lineOffsetBox);
             formLayout->addWidget(lineOffsetBox, i + 1, 1);
