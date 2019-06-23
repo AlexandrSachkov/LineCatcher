@@ -19,8 +19,7 @@ AboutDialog::AboutDialog(QWidget *parent) : QWidget(parent)
     setWindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint);
     setWindowTitle("About");
     setWindowModality(Qt::WindowModal);
-    setMinimumWidth(400);
-    setMinimumHeight(300);
+    setFixedSize(600, 250);
 
     QString path(QString::fromStdString(Common::RESOURCE_PATH) + "/about.html");
     QFile file(path);
@@ -33,6 +32,7 @@ AboutDialog::AboutDialog(QWidget *parent) : QWidget(parent)
     mainLayout->addWidget(browser);
     browser->setOpenExternalLinks(true);
     browser->setHtml(file.readAll());
+    browser->setSearchPaths({Common::RESOURCE_PATH});
 
     QPushButton* ok = new QPushButton("Ok", this);
     mainLayout->addWidget(ok, 1, Qt::AlignRight);
