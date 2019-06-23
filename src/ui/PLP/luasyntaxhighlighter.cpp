@@ -8,6 +8,7 @@ LuaSyntaxHighlighter::LuaSyntaxHighlighter(QTextDocument *parent) : QSyntaxHighl
     keywordFormat.setFontWeight(QFont::Bold);
     QStringList keywordPatterns;
     keywordPatterns << "\\blocal\\b" //variable prefix
+                    << "\\bfunction\\b" //function
                     << "\\bnil\\b" << "\\btrue\\b" << "\\bfalse\\b" //predefined values
                     << "\\band\\b" << "\\bor\\b" << "\\bnot\\b" //operators
                     << "\\bwhile\\b" << "\\bdo\\b" << "\\bend\\b" << "\\bfor\\b" << "\\bin\\b" << "\\brepeat\\b"  //loop control
