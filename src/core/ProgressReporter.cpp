@@ -18,6 +18,7 @@ namespace LC {
             return false;
         }
 
+        _start = start;
         _progressUpdate = const_cast<std::function<void(int percent)>*>(progressUpdate);
 
         const long double dNumPerPercent = (end - start + 1) / 100.0;
@@ -34,8 +35,8 @@ namespace LC {
         }
 
         if (current >= _numTillNextProgressUpdate) {
-            int numUpdatesToDo = (int)(current / _numPerProgressUpdate);
-            _numTillNextProgressUpdate = (numUpdatesToDo + 1) * _numPerProgressUpdate;
+            int numUpdatesToDo = (int)((current - _start) / _numPerProgressUpdate);
+            _numTillNextProgressUpdate = (numUpdatesToDo + 1) * _numPerProgressUpdate + _start;
             _currPercent = numUpdatesToDo * _percentPerProgressUpdate;
 
             (*_progressUpdate)(_currPercent);

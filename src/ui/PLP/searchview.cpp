@@ -251,7 +251,7 @@ void SearchView::startSearch() {
         return;
     }
 
-    if(startLine > endLine){
+    if(endLine != 0 && startLine > endLine){
         QMessageBox::information(this,"Error","Start line must be smaller or equal to end line",QMessageBox::Ok);
         return;
     }

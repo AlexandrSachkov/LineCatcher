@@ -18,6 +18,7 @@ namespace LC {
     private:
         std::function<void(int percent)>* _progressUpdate = nullptr;
 
+        unsigned long long _start = 0;
         unsigned long long _numPerProgressUpdate = 0;
         int _percentPerProgressUpdate = 0;
         unsigned long long _numTillNextProgressUpdate = 0;
