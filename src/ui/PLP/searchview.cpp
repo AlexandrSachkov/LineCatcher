@@ -271,7 +271,7 @@ void SearchView::startSearch() {
                 dialog.setValue(percent);
             });
         };
-        return _plpCore->createFileReader(dataPath.toStdString(), 0, nullptr);
+        return _plpCore->createFileReader(dataPath.toStdString(), 0, &update);
     }));
 
     dialog.exec();

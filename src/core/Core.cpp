@@ -16,6 +16,7 @@
 #include "TextComparator.h"
 #include "Scanner.h"
 #include "GenFileTracker.h"
+#include "ProgressReporter.h"
 
 #include "lua.hpp"
 #include "LuaIntf/LuaIntf.h"
@@ -310,20 +311,19 @@ namespace PLP {
             Logger::send(ERR, "Comparator cannot be null");
             return false;
         }
+        
+        end = end > 0 ? end : fileReader->getNumberOfLines() - 1;
         if (start > end) {
             Logger::send(ERR, "Start line must be smaller or equal to end line");
             return false;
         }
-        end = end > 0 ? end : fileReader->getNumberOfLines() - 1;
 
-        std::function<void(int)> defaultProgressUpdate = [](int) {};
-        if (progressUpdate == nullptr) {
-            progressUpdate = &defaultProgressUpdate;
+
+        LC::ProgressReporter progressReporter;
+        if (!progressReporter.initialize(start, end, progressUpdate)) {
+            Logger::send(ERR, "Progress reporter failed to initialize");
+            return false;
         }
-
-        const long double dLinesPerPercent = (end - start + 1) / 100.0;
-        const unsigned long long numLinesTillProgressUpdate = dLinesPerPercent > 1.0 ? (unsigned long long)nearbyintl(dLinesPerPercent) : 1;
-        const int percentPerProgressUpdate = dLinesPerPercent > 1.0 ? 1 : (int)(1.0 / dLinesPerPercent);
 
         LineScanner scanner(fileReader, indexReader, start, end);
         if (!scanner.initialize()) {
@@ -331,8 +331,7 @@ namespace PLP {
             return false;
         }
 
-        int progressPercent = 0;
-        unsigned long long numProcessedLines = 0;
+        int lastProgressPercent = 0;
 
         unsigned long long lineNum;
         unsigned long long fileOffset;
@@ -347,14 +346,12 @@ namespace PLP {
                 }
             }
 
-            numProcessedLines++;
-            if (numProcessedLines % numLinesTillProgressUpdate == 0) {
-                progressPercent += percentPerProgressUpdate;
-                (*progressUpdate)(progressPercent);
-            }
-
-            if (numProcessedLines % 10000000 == 0 && _cancelled) {
+            progressReporter.update(fileReader->getLineNumber());
+            if (lastProgressPercent < progressReporter.getCurrentPercent() && _cancelled) {
+                Logger::send(INFO, "Canceled by user");
                 return false;
+            } else {
+                lastProgressPercent = progressReporter.getCurrentPercent();
             }
         }
 
@@ -362,11 +359,6 @@ namespace PLP {
             Logger::send(ERR, "Failed to get line");
             return false;
         }
-
-        if (progressPercent < 100) {
-            (*progressUpdate)(100);
-        }
-
 
         return true;
     }
@@ -386,11 +378,12 @@ namespace PLP {
             Logger::send(ERR, "File reader and index writer cannot be null");
             return false;
         }
+
+        end = end > 0 ? end : fileReader->getNumberOfLines() - 1;
         if (start > end) {
             Logger::send(ERR, "Start line must be smaller or equal to end line");
             return false;
         }
-        end = end > 0 ? end : fileReader->getNumberOfLines() - 1;
 
         std::vector<std::pair<int, TextComparator*>> vLineComparators;
         for (auto& pair : lineComparators) {
@@ -406,6 +399,12 @@ namespace PLP {
             return false;
         }
 
+        LC::ProgressReporter progressReporter;
+        if (!progressReporter.initialize(start, end, progressUpdate)) {
+            Logger::send(ERR, "Progress reporter failed to initialize");
+            return false;
+        }
+
         MultilineScanner scanner(fileReader, indexReader, 
             vLineComparators[0].first, vLineComparators[vLineComparators.size() - 1].first, 
             start, end
@@ -414,13 +413,8 @@ namespace PLP {
             Logger::send(ERR, "Failed to initialize multi-line scanner");
             return false;
         }
-        
-        const long double dLinesPerPercent = (end - start + 1) / 100.0;
-        const unsigned long long numLinesTillProgressUpdate = dLinesPerPercent > 1.0 ? (unsigned long long)nearbyintl(dLinesPerPercent) : 1;
-        const int percentPerProgressUpdate = dLinesPerPercent > 1.0 ? 1 : (int)(1.0 / dLinesPerPercent);
 
-        int progressPercent = 0;
-        unsigned long long numProcessedLines = 0;
+        int lastProgressPercent = 0;
 
         unsigned long long lineNum;
         unsigned long long fileOffset;
@@ -449,24 +443,18 @@ namespace PLP {
                 }
             }
 
-            numProcessedLines++;
-            if (numProcessedLines % numLinesTillProgressUpdate == 0) {
-                progressPercent += percentPerProgressUpdate;
-                (*progressUpdate)(progressPercent);
-            }
-
-            if (numProcessedLines % 10000000 == 0 && _cancelled) {
+            progressReporter.update(fileReader->getLineNumber());
+            if (lastProgressPercent < progressReporter.getCurrentPercent() && _cancelled) {
+                Logger::send(INFO, "Canceled by user");
                 return false;
+            } else {
+                lastProgressPercent = progressReporter.getCurrentPercent();
             }
         }
 
         if (result == LineReaderResult::ERROR) {
             Logger::send(ERR, "Failed to get line");
             return false;
-        }
-
-        if (progressPercent < 100) {
-            (*progressUpdate)(100);
         }
 
         return true;

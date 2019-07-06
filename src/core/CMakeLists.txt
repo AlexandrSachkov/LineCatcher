@@ -36,16 +36,17 @@ SET(HEADERS
     FStreamPagedWriter.h
     GenFileTracker.h
     IndexedLineReader.h
+    IndexReader.h
+    IndexReaderI.h
+    IndexWriter.h
+    IndexWriterI.h
     LineBuffer.h
     LineReader.h
     Logger.h
     MemMappedPagedReader.h
     PagedReader.h
     PagedWriter.h
-    IndexReader.h
-    IndexReaderI.h
-    IndexWriter.h
-    IndexWriterI.h
+    ProgressReporter.h
     ReturnType.h
     Scanner.h
     TaskRunner.h
@@ -66,12 +67,13 @@ SET(SOURCES
     FStreamPagedWriter.cpp
     GenFileTracker.cpp
     IndexedLineReader.cpp
+    IndexReader.cpp
+    IndexWriter.cpp
     LineBuffer.cpp
     LineReader.cpp
     Logger.cpp
     MemMappedPagedReader.cpp
-    IndexReader.cpp
-    IndexWriter.cpp
+    ProgressReporter.cpp
     Scanner.cpp
     Thread.cpp
     Utils.cpp
