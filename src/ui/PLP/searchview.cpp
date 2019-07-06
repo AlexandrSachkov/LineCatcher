@@ -36,7 +36,6 @@ SearchView::SearchView(PLP::CoreI* plpCore, bool multiline, QWidget *parent) : Q
     mainLayout->setSpacing(5);
 
     setWindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint);
-    setWindowModality(Qt::WindowModal);
     setWindowTitle("Search");
     setMinimumWidth(450);
 
@@ -511,7 +510,7 @@ void SearchView::openIndex(){
     QString path = QFileDialog::getOpenFileName(this, tr("Select index to open"), indexOpenDir,
         tr(fileFilter.c_str()));
 
-    if(!path.isEmpty()){
+    if(!path.trimmed().isEmpty()){
         settings.setValue("indexOpenDir", Common::getDirFromPath(path));
     }
     settings.endGroup();
