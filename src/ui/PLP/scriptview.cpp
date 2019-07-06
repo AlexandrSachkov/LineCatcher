@@ -158,12 +158,9 @@ void ScriptView::openScript(){
     settings.setValue("scriptOpenDir", scriptDir);
     settings.endGroup();
 
-    QString fileName = path.split('/').last();
-    if(!fileName.endsWith(".lua")){
-        fileName += ".lua";
+    if(!path.endsWith(".lua")){
+        path += ".lua";
     }
-
-    path = scriptDir + "/" + fileName;
     _scriptPath->setText(path);
 
     _file.reset(new QFile(path));
@@ -201,23 +198,48 @@ bool ScriptView::saveScript() {
     QString script = _scriptEditor->toPlainText().trimmed();
 
     if(path.isEmpty()){
-        QMessageBox::critical(this,"Error","Failed to save script. No path specified", QMessageBox::Ok);
-        return false;
-    }
+        QSettings settings("AlexandrSachkov", "LC");
+        settings.beginGroup("CommonDirectories");
+        QString scriptOpenDir = settings.value("scriptOpenDir", "scripts").toString();
+        settings.endGroup();
 
-    if(_file){
-        _file->resize(0);
-        QTextStream out(_file.get());
-        out << script;
+        QFileDialog fileDialog(this, "Select file to save", scriptOpenDir, tr("Lua (*.lua)"));
+        fileDialog.setFileMode(QFileDialog::AnyFile);
 
-        if (out.status() != QTextStream::Ok)
-        {
-            QMessageBox::critical(this,"Error","Failed to save script", QMessageBox::Ok);
+        if (!fileDialog.exec()){
             return false;
         }
 
-        setScriptModified(false);
+        QStringList paths = fileDialog.selectedFiles();
+        path = paths[0].trimmed();
+        if(path.isEmpty()){
+            return false;
+        }
+
+        if(!path.endsWith(".lua")){
+            path += ".lua";
+        }
     }
+
+    if(!_file){
+        _file.reset(new QFile(path));
+        if (!_file->open(QIODevice::ReadWrite | QIODevice::Text)) {
+            return false;
+        }
+    }
+
+    _file->resize(0);
+    QTextStream out(_file.get());
+    out << script;
+
+    if (out.status() != QTextStream::Ok)
+    {
+        QMessageBox::critical(this,"Error","Failed to save script", QMessageBox::Ok);
+        return false;
+    }
+
+    setScriptModified(false);
+
     return true;
 }
 
