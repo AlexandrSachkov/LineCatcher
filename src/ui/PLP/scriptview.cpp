@@ -224,6 +224,7 @@ bool ScriptView::saveScript() {
     if(!_file){
         _file.reset(new QFile(path));
         if (!_file->open(QIODevice::ReadWrite | QIODevice::Text)) {
+            QMessageBox::critical(this,"Error","Failed to save script", QMessageBox::Ok);
             return false;
         }
     }
