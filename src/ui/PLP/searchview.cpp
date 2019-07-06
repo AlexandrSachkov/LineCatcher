@@ -511,12 +511,9 @@ void SearchView::openIndex(){
     QString path = QFileDialog::getOpenFileName(this, tr("Select index to open"), indexOpenDir,
         tr(fileFilter.c_str()));
 
-    if(path.isEmpty()){
-        settings.endGroup();
-        return;
+    if(!path.isEmpty()){
+        settings.setValue("indexOpenDir", Common::getDirFromPath(path));
     }
-
-    settings.setValue("indexOpenDir", Common::getDirFromPath(path));
     settings.endGroup();
 
     _indexPath->setText(path);
