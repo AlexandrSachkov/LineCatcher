@@ -148,12 +148,12 @@ namespace PLP {
                     std::wregex regex(string_to_wstring(_regexPattern), flags);
                     _match = [regex](const std::string& data) {
                         std::wstring wData(string_to_wstring(data)); //TODO refactor for better performance
-                        return std::regex_match(wData, regex);
+                        return std::regex_search(wData, regex);
                     };
                 } else {
                     std::regex regex(_regexPattern, flags);
                     _match = [regex](const std::string& data) {
-                        return std::regex_match(data, regex);
+                        return std::regex_search(data, regex);
                     };
                 }
             } catch (std::regex_error&) {
