@@ -81,6 +81,14 @@ namespace PLP {
         }
     }
 
+    static std::string stringTrim(const std::string& str) {
+        char* strStart = nullptr;
+        unsigned int size = 0;
+        stringTrim(str.data(), (unsigned int)str.length(), strStart, size);
+
+        return std::string(strStart, size);
+    }
+
     static void splitIntoWords(const char* str, unsigned int size, std::vector<std::pair<const char*, unsigned int>>& words) {
         words.clear();
 
@@ -98,6 +106,17 @@ namespace PLP {
                 numCharsInWord = 0;
             }
         }
+    }
+
+    static std::vector<std::string> splitIntoWords(const std::string& str) {
+        std::vector<std::pair<const char*, unsigned int>> words;
+        splitIntoWords(str.data(), (unsigned int)str.length(), words);
+
+        std::vector<std::string> strWords;
+        for (auto& pair : words) {
+            strWords.emplace_back(pair.first, pair.second);
+        }
+        return strWords;
     }
 
     //https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-2000-server/cc938632(v=technet.10)

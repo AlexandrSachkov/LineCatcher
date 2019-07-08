@@ -650,6 +650,11 @@ namespace PLP {
         module.addConstant("NOT_FOUND", LineReaderResult::NOT_FOUND);
         module.addConstant("SUCCESS", LineReaderResult::SUCCESS);
 
+        std::string(*stringTrimL)(const std::string&) = &stringTrim;
+        module.addFunction("stringTrim", stringTrimL);
+        std::vector<std::string>(*splitIntoWordsL)(const std::string&) = &splitIntoWords;
+        module.addFunction("splitIntoWords", splitIntoWordsL);
+
         auto plpClass = module.beginClass<Core>("Core");
         plpClass.addFunction("createFileReader", &Core::createFileReaderL);
         plpClass.addFunction("createFileWriter", &Core::createFileWriterL);
