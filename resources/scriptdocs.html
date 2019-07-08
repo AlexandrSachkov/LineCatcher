@@ -663,6 +663,20 @@ span.type {
 </p>
 
 <p>
+    <code><span class="type">TextComparator</span> LC.MatchNot(TextComparator textComparator)</code>
+</p>
+<p class="desc">Creates a TextComparator object. This comparator will succeed when the provided text comparator fails.</p>
+
+<p>
+    <dl>
+        <dt>textComparator:</dt>
+        <dd>- TextComparator object</dd>
+        <dt>returns:</dt>
+        <dd>- TextComparator object on success. nil on failure</dd>
+    </dl>
+</p>
+
+<p>
     <code><span class="type">TextComparator</span> LC.MatchRegex(<span class="type">string</span> regexPattern, <span class="type">boolean</span> ignoreCase)</code>
 </p>
 <p class="desc">Creates a TextComparator object. This comparator will succeed when the source string matches the provided regular expression</p>

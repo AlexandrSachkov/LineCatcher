@@ -83,6 +83,26 @@ namespace PLP {
         std::vector<std::shared_ptr<TextComparator>> _comparators;
     };
 
+    class MatchNot : public TextComparator {
+    public:
+        MatchNot(std::shared_ptr<TextComparator> comparator) : _comparator(comparator) {}
+
+        bool initialize() override {
+            return _comparator->initialize();
+        }
+
+        bool match(const char* data, unsigned int size) override {
+            return !_comparator->match(data, size);
+        }
+
+        bool match(const std::string& str) {
+            return match(str.c_str(), (unsigned int)str.length());
+        }
+
+    private:
+        std::shared_ptr<TextComparator> _comparator;
+    };
+
     class MatchString : public TextComparator {
     public:
         MatchString(const std::string& text, bool exact, bool ignoreCase) {

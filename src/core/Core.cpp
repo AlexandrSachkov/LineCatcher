@@ -772,6 +772,16 @@ namespace PLP {
         });
         tcMatchAny.endClass();
 
+        auto tcMatchNot = module.beginClass<MatchNot>("MatchNot");
+        tcMatchNot.addFactory([](std::shared_ptr<TextComparator> comparator) -> std::shared_ptr<TextComparator> {
+            std::shared_ptr<TextComparator> notComparator(new MatchNot(comparator));
+            if (!notComparator->initialize()) {
+                return nullptr;
+            }
+            return notComparator;
+        });
+        tcMatchNot.endClass();
+
         auto tcMatchRegex = module.beginClass<MatchRegex>("MatchRegex");
         tcMatchRegex.addFactory([](const std::string& regexPattern, bool ignoreCase)  -> std::shared_ptr<TextComparator> {
             std::shared_ptr<TextComparator> comparator(new MatchRegex(regexPattern, ignoreCase));
