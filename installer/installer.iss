@@ -8,7 +8,8 @@
 #define MyAppExeName "LineCatcher.exe"
 
 #define QtInstallDir "D:\Qt\5.12.0\msvc2017_64"
-#define LCBuildDir "D:\Repositories\LogParser\src\ui\build-PLP-Desktop_Qt_5_12_0_MSVC2017_64bit-Release\release"
+#define LCCoreBuildDir "D:\Repositories\LogParser\bin64_core\Release"
+#define LCUIBuildDir "D:\Repositories\LogParser\src\ui\build-PLP-Desktop_Qt_5_12_0_MSVC2017_64bit-Release\release"
 #define MSVCDir "D:\Programs\Microsoft Visual Studio\2017\Community\VC\Redist\MSVC\14.16.27012"
 
 [Setup]
@@ -43,17 +44,17 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "{#LCBuildDir}\LineCatcher.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#LCBuildDir}\LineCatcher_resource.res"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#LCUIBuildDir}\LineCatcher.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#LCUIBuildDir}\LineCatcher_resource.res"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\resources\*"; DestDir: "{app}\resources"; Flags: ignoreversion recursesubdirs
 Source: "..\scripts\*"; DestDir: "{app}\scripts"; Flags: ignoreversion recursesubdirs
 Source: "..\License.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\README.md"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#LCBuildDir}\lcCore.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#LCBuildDir}\lua51.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#LCBuildDir}\jit\*"; DestDir: "{app}\jit"; Flags: ignoreversion recursesubdirs
-Source: "{#LCBuildDir}\luajit.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#LCBuildDir}\tbb.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#LCCoreBuildDir}\lcCore.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#LCUIBuildDir}\lua51.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#LCUIBuildDir}\jit\*"; DestDir: "{app}\jit"; Flags: ignoreversion recursesubdirs
+Source: "{#LCUIBuildDir}\luajit.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#LCUIBuildDir}\tbb.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#MSVCDir}\x64\Microsoft.VC141.CRT\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 Source: "{#QtInstallDir}\bin\Qt5Core.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#QtInstallDir}\bin\Qt5Gui.dll"; DestDir: "{app}"; Flags: ignoreversion
