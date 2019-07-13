@@ -1,7 +1,7 @@
 local fileReader = LC:core():createFileReader("D:/Repositories/LogParser/data/largeGeneratedFile.txt", 0);
 
 local indexWriter = LC:core():createIndexWriter(
-	"D:/Repositories/LogParser/data/largeGeneratedFileResults1", 
+	"D:/Repositories/LogParser/data/largeGeneratedFileResults1.lcidx", 
 	1000000, -- use 1MB buffer
 	fileReader, 
 	true	--overwrite if exists

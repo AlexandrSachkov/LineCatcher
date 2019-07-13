@@ -23,15 +23,16 @@ namespace PLP {
     ) {
         release();
 
-        FileScopedLock readingLock = FileScopedLock::lockForReading(path);
+        std::wstring unixPath = windowsToUnixPath(path);
+        FileScopedLock readingLock = FileScopedLock::lockForReading(unixPath);
         if (!readingLock.isLocked()) {
-            Logger::send(ERR, "Unable to acquare a read lock on file " + wstring_to_string(path) + ". Release writers using the file");
+            Logger::send(ERR, "Unable to acquare a read lock on file " + wstring_to_string(unixPath) + ". Release writers using the file");
             return false;
         }
 
         FStreamPagedReader* pagedReader = new FStreamPagedReader();
         _pager.reset(pagedReader);
-        if (!pagedReader->initialize(path, preferredBuffSizeBytes)) {
+        if (!pagedReader->initialize(unixPath, preferredBuffSizeBytes)) {
             return false;
         }
 

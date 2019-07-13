@@ -20,15 +20,16 @@ namespace PLP {
     ) {
         release();
 
-        FileScopedLock writingLock = FileScopedLock::lockForWriting(path);
+        std::wstring unixPath = windowsToUnixPath(path);
+        FileScopedLock writingLock = FileScopedLock::lockForWriting(unixPath);
         if (!writingLock.isLocked()) {
-            Logger::send(ERR, "Unable to acquare a write lock on file " + wstring_to_string(path) + ". File is in use");
+            Logger::send(ERR, "Unable to acquare a write lock on file " + wstring_to_string(unixPath) + ". File is in use");
             return false;
         }
 
         FStreamPagedWriter* writer = new FStreamPagedWriter();
         _writer.reset(writer);
-        if (!writer->initialize(path, preferredBuffSizeBytes, overwriteIfExists, asyncTaskRunner)) {
+        if (!writer->initialize(unixPath, preferredBuffSizeBytes, overwriteIfExists, asyncTaskRunner)) {
             return false;
         }
 

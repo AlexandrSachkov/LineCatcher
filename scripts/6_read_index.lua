@@ -4,7 +4,7 @@ local fileReader = LC:core():createFileReader(
 )
 
 local indexReader = LC:core():createIndexReader(
-	"D:/Repositories/LogParser/data/largeGeneratedFileResults1.txt", -- index path
+	"D:/Repositories/LogParser/data/largeGeneratedFileResults1.lcidx", -- index path
 	0 -- use default buffer size
 );
 

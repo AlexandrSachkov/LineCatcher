@@ -22,8 +22,9 @@ namespace PLP {
     ) {
         release();
 
-        std::wstring directory = getFileDirectory(path);
-        std::wstring fileName = getFileName(path);
+        std::wstring unixPath = windowsToUnixPath(path);
+        std::wstring directory = getFileDirectory(unixPath);
+        std::wstring fileName = getFileName(unixPath);
         if (std::wstring::npos == fileName.find(string_to_wstring(FILE_INDEX_EXTENSION))) {
             fileName += string_to_wstring(FILE_INDEX_EXTENSION);
         }

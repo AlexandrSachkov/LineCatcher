@@ -6,6 +6,7 @@
 #include <locale>
 #include <codecvt>
 #include <cctype>
+#include <algorithm>
 
 namespace PLP {
     static std::wstring string_to_wstring(const std::string& str) {
@@ -44,6 +45,11 @@ namespace PLP {
         } else {
             return fileName.substr(0, fileExtPos);
         }
+    }
+
+    static std::wstring windowsToUnixPath(std::wstring path) {
+        std::replace(path.begin(), path.end(), '\\', '/');
+        return path;
     }
 
     const char* findLastLineEnding(const char* buff, unsigned long long buffSize, const char* currPos);

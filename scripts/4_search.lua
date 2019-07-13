@@ -6,7 +6,7 @@ local fileReader = LC:core():createFileReader(
 
 -- create index file for search results
 local inderWriter = LC:core():createIndexWriter(
-	"D:/Repositories/LogParser/data/test_data/lorem-ipsum-results1.plpidx",
+	"D:/Repositories/LogParser/data/test_data/lorem-ipsum-results1.lcidx",
 	0,
 	fileReader,
 	true
