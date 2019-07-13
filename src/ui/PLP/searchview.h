@@ -69,13 +69,11 @@ private:
     ULLSpinBox* _numResultsBox;
     QLineEdit* _searchField;
     QCheckBox* _regex;
-    QCheckBox* _ignoreCase;
 
     std::vector<QCheckBox*> _lineEnabledCheckBoxes;
     std::vector<QSpinBox*> _lineOffsetBoxes;
     std::vector<QLineEdit*> _searchPatternBoxes;
     std::vector<QCheckBox*> _regexCheckBoxes;
-    std::vector<QCheckBox*> _ignoreCaseCheckBoxes;
 };
 
 #endif // STANDARDSEARCHVIEW_H

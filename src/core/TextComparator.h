@@ -105,34 +105,16 @@ namespace PLP {
 
     class MatchString : public TextComparator {
     public:
-        MatchString(const std::string& text, bool exact, bool ignoreCase) {
+        MatchString(const std::string& text, bool exact) {
             std::wstring wText = string_to_wstring(text);
             if (exact) {
-                if (ignoreCase) {
-                    std::transform(wText.begin(), wText.end(), wText.begin(), ::towlower);
-                    _match = [wText](const char* data, unsigned int size) {
-                        std::wstring wData(string_to_wstring(std::string(data, size))); //TODO refactor for better performance
-                        std::transform(wData.begin(), wData.end(), wData.begin(), ::towlower);
-                        return wData.compare(wText) == 0;
-                    };
-                } else {
-                    _match = [text](const char* data, unsigned int size) {
-                        return std::string(data, size).compare(text) == 0;
-                    };
-                }
+                _match = [text](const char* data, unsigned int size) {
+                    return std::string(data, size).compare(text) == 0;
+                };
             } else {
-                if (ignoreCase) {
-                    std::transform(wText.begin(), wText.end(), wText.begin(), ::towlower);
-                    _match = [wText](const char* data, unsigned int size) {
-                        std::wstring wData(string_to_wstring(std::string(data, size))); //TODO refactor for better performance
-                        std::transform(wData.begin(), wData.end(), wData.begin(), ::towlower);
-                        return std::string::npos != wData.find(wText);
-                    };
-                } else {
-                    _match = [text](const char* data, unsigned int size) {
-                        return std::string::npos != std::string(data, size).find(text);
-                    };
-                }
+                _match = [text](const char* data, unsigned int size) {
+                    return std::string::npos != std::string(data, size).find(text);
+                };
             }
         }
 
@@ -154,28 +136,15 @@ namespace PLP {
 
     class MatchRegex : public TextComparator {
     public:
-        MatchRegex(const std::string& regexPattern, bool ignoreCase) : _regexPattern(regexPattern), _ignoreCase(ignoreCase) {}
+        MatchRegex(const std::string& regexPattern) : _regexPattern(regexPattern) {}
 
         bool initialize() override {
             std::regex_constants::syntax_option_type flags = std::regex_constants::optimize;
-            if (_ignoreCase) {
-                flags |= std::regex_constants::icase;
-            }
-
             try {
-                if (_ignoreCase) {
-                    //ignore case flag does not work on multibyte strings, so need to convert to wstring first
-                    std::wregex regex(string_to_wstring(_regexPattern), flags);
-                    _match = [regex](const std::string& data) {
-                        std::wstring wData(string_to_wstring(data)); //TODO refactor for better performance
-                        return std::regex_search(wData, regex);
-                    };
-                } else {
-                    std::regex regex(_regexPattern, flags);
-                    _match = [regex](const std::string& data) {
-                        return std::regex_search(data, regex);
-                    };
-                }
+                std::regex regex(_regexPattern, flags);
+                _match = [regex](const std::string& data) {
+                    return std::regex_search(data, regex);
+                };
             } catch (std::regex_error&) {
                 return false;
             }
@@ -194,7 +163,6 @@ namespace PLP {
     private:
         std::function<bool(const std::string& data)> _match;
         std::string _regexPattern;
-        const bool _ignoreCase;
     };
 
     class MatchSubstrings : public TextComparator {

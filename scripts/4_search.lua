@@ -15,8 +15,7 @@ local inderWriter = LC:core():createIndexWriter(
 -- create text comparator that will find us lines containing the word "ipsum"
 local comparator = LC.MatchString(
 	"ipsum", -- string to search for
-	false,	 -- do not use exact matching
-	true     -- ignore case
+	false	 -- do not use exact matching
 );
 
 local result = LC:core():search(

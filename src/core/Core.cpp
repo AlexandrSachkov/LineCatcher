@@ -748,8 +748,8 @@ namespace PLP {
         tcTextComparator.endClass();
 
         auto tcMatchString = module.beginClass<MatchString>("MatchString");
-        tcMatchString.addFactory([](const std::string& text, bool exact, bool ignoreCase) -> std::shared_ptr<TextComparator> {
-            std::shared_ptr<TextComparator> comparator(new MatchString(text, exact, ignoreCase));
+        tcMatchString.addFactory([](const std::string& text, bool exact) -> std::shared_ptr<TextComparator> {
+            std::shared_ptr<TextComparator> comparator(new MatchString(text, exact));
             if (!comparator->initialize()) {
                 return nullptr;
             }
@@ -788,8 +788,8 @@ namespace PLP {
         tcMatchNot.endClass();
 
         auto tcMatchRegex = module.beginClass<MatchRegex>("MatchRegex");
-        tcMatchRegex.addFactory([](const std::string& regexPattern, bool ignoreCase)  -> std::shared_ptr<TextComparator> {
-            std::shared_ptr<TextComparator> comparator(new MatchRegex(regexPattern, ignoreCase));
+        tcMatchRegex.addFactory([](const std::string& regexPattern)  -> std::shared_ptr<TextComparator> {
+            std::shared_ptr<TextComparator> comparator(new MatchRegex(regexPattern));
             if (!comparator->initialize()) {
                 return nullptr;
             }

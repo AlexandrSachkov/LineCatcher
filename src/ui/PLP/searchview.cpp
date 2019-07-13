@@ -154,9 +154,6 @@ void SearchView::createSearchOptionContent(QLayout* mainLayout) {
 
     _regex = new QCheckBox("Regex", this);
     searchLayout->addRow(_regex);
-
-    _ignoreCase = new QCheckBox("Ignore case", this);
-    searchLayout->addRow(_ignoreCase);
 }
 
 void SearchView::createMultilineSearchOptionContent(QLayout* mainLayout){
@@ -212,15 +209,6 @@ void SearchView::createMultilineSearchOptionContent(QLayout* mainLayout){
             QCheckBox* regexCheckBox = new QCheckBox("Regex", this);
             _regexCheckBoxes.push_back(regexCheckBox);
             formLayout->addWidget(regexCheckBox, i + 1, 3);
-        }
-    }
-
-    //Ignore case
-    {
-        for(int i = 0; i < NUM_ROWS; i++){
-            QCheckBox* ignoreCaseCheckBox = new QCheckBox("Ignore case", this);
-            _ignoreCaseCheckBoxes.push_back(ignoreCaseCheckBox);
-            formLayout->addWidget(ignoreCaseCheckBox, i + 1, 4);
         }
     }
 }
@@ -338,13 +326,12 @@ void SearchView::startRegularSearch(
     }
 
     bool regex = _regex->isChecked();
-    bool ignoreCase = _ignoreCase->isChecked();
 
     std::unique_ptr<PLP::TextComparator> comparator = nullptr;
     if(regex){
-        comparator.reset(new PLP::MatchRegex(searchPattern.toStdString(), ignoreCase));
+        comparator.reset(new PLP::MatchRegex(searchPattern.toStdString()));
     }else{
-        comparator.reset(new PLP::MatchString(searchPattern.toStdString(), false, ignoreCase));
+        comparator.reset(new PLP::MatchString(searchPattern.toStdString(), false));
     }
 
     if(!comparator || !comparator->initialize()){
@@ -413,15 +400,13 @@ void SearchView::startMultilineSearch(
 
             if(_regexCheckBoxes[i]->isChecked()){
                 std::shared_ptr<PLP::TextComparator> comparator(new PLP::MatchRegex(
-                    _searchPatternBoxes[i]->text().toStdString(),
-                    _ignoreCaseCheckBoxes[i]->isChecked()
+                    _searchPatternBoxes[i]->text().toStdString()
                 ));
                 lineComparators.emplace(_lineOffsetBoxes[i]->value(), comparator);
             }else{
                 std::shared_ptr<PLP::TextComparator> comparator(new PLP::MatchString(
                     _searchPatternBoxes[i]->text().toStdString(),
-                    false,
-                    _ignoreCaseCheckBoxes[i]->isChecked()
+                    false
                 ));
                 lineComparators.emplace(_lineOffsetBoxes[i]->value(), comparator);
             }

@@ -8,8 +8,8 @@ local indexWriter = LC:core():createIndexWriter(
 );
 
 local comparators = {
-	[-1]=LC.MatchString("9",false,false), -- previous line must contain "9"
-	[1]=LC.MatchString("11",false,false)	 -- next line must contain "11"
+	[-1]=LC.MatchString("9",false), -- previous line must contain "9"
+	[1]=LC.MatchString("11",false)	 -- next line must contain "11"
 }
 
 local result = LC:core():searchMultiline(

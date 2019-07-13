@@ -615,8 +615,7 @@ span.type {
 <p>
     <code><span class="type">TextComparator</span> LC.MatchString(
         <span class="type">string</span> text, 
-        <span class="type">boolean</span> exact, 
-        <span class="type">boolean</span> ignoreCase, 
+        <span class="type">boolean</span> exact
     )</code>
 </p>
 <p class="desc">Creates a TextComparator object. This comparator will match the source string agains the provided string pattern</p>
@@ -627,8 +626,6 @@ span.type {
         <dd>- string pattern to match against the source</dd>
         <dt>exact:</dt>
         <dd>- if true, source string must match the provided pattern exactly. If false, source string must contain the provided pattern</dd>
-        <dt>ignoreCase:</dt>
-        <dd>- if true, ingores case of the source string. If false, case must match</dd>
         <dt>returns:</dt>
         <dd>- TextComparator object on success. nil on failure</dd>
     </dl>
@@ -677,7 +674,7 @@ span.type {
 </p>
 
 <p>
-    <code><span class="type">TextComparator</span> LC.MatchRegex(<span class="type">string</span> regexPattern, <span class="type">boolean</span> ignoreCase)</code>
+    <code><span class="type">TextComparator</span> LC.MatchRegex(<span class="type">string</span> regexPattern)</code>
 </p>
 <p class="desc">Creates a TextComparator object. This comparator will succeed when the source string matches the provided regular expression</p>
 
@@ -685,8 +682,6 @@ span.type {
     <dl>
         <dt>regexPattern:</dt>
         <dd>- regular expression string</dd>
-        <dt>ignoreCase:</dt>
-        <dd>- if true, ingores case of the source string. If false, case must match</dd>
         <dt>returns:</dt>
         <dd>- TextComparator object on success. nil on failure</dd>
     </dl>
