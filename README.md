@@ -5,6 +5,13 @@
     
 <p><table>
     <tr>
+        <td><img src="resources/images/overview1.png" alt="Overview #1"></td>
+        <td><img src="resources/images/overview2.png" alt="Overview #2"></td>
+    </tr>
+</table></p>
+    
+<p><table>
+    <tr>
         <th>Issues with large files</th>
         <th>How we solve them</th>
     </tr>
