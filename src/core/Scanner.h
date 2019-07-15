@@ -37,6 +37,7 @@ namespace PLP {
         bool initialize();
         LineReaderResult nextFrame();
         bool getLine(int index, unsigned long long& lineNum, unsigned long long& fileOffset, char*& data, unsigned int& size);
+        std::tuple<bool, unsigned long long, std::string> getLine(int index);
     private:
         LineReaderResult loadFrame(unsigned long long refLine);
         FileReaderI* _fileReader = nullptr;

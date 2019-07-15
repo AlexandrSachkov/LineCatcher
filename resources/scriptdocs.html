@@ -62,6 +62,7 @@ span.type {
                 <li><a href="#writingFileTag">Writing file</a></li>
                 <li><a href="#readingIndexTag">Reading index</a></li>
                 <li><a href="#writingIndexTag">Writing index</a></li>
+                <li><a href="#scannersTag">Scanners</a></li>
             </ol>
         <li><b><a href="#searchingTag">Searching</a></b></li>
             <ol type="a">
@@ -444,11 +445,186 @@ span.type {
 </p>
 
 
-<hr>
-<p id="searchingTag" class="sectionHeader">Searching:</p>
 
+<!----------------------------------------------------- SCANNERS --------------------------------------------------->
+<br>
+<p id="scannersTag"><b>Scanners</b></p>
+<p>Scanners are convenience objects for reading files</p>
+<p>
+    <code><span class="type">LineScanner</span> LC.LineScanner(
+        <span class="type">FileReader</span> fileReader, 
+        <span class="type">number</span> startLine, 
+        <span class="type">number</span> endLine
+        )</code>
+</p>
+<p class="desc">LineScanner is a convenience object for reading files. It encapsulates functionality for reading portion of file between start and end lines</p>
+
+<p>
+    <dl>
+        <dt>fileReader:</dt>
+        <dd>- FileReader object</dd>
+        <dt>startLine:</dt>
+        <dd>- line from which to start reading file</dd>
+        <dt>endLine:</dt>
+        <dd>- line where to stop reading file (inclusive)</dd>
+        <dt>returns:</dt>
+        <dd>- LineScanner object if successful. Returns <span class="type">nil</span> on failure</dd>
+    </dl>
+</p>
+
+<p>
+    <code><span class="type">LineScanner</span> LC.LineScannerI(
+        <span class="type">FileReader</span> fileReader, 
+        <span class="type">IndexReader</span> indexReader,
+        <span class="type">number</span> startLine, 
+        <span class="type">number</span> endLine
+        )</code>
+</p>
+<p class="desc">
+    LineScanner object variation for limiting reading to lines specified in an index. 
+    It also encapsulates functionality for reading portion of file between start and end lines    
+</p>
+
+<p>
+    <dl>
+        <dt>fileReader:</dt>
+        <dd>- FileReader object</dd>
+        <dt>indexReader:</dt>
+        <dd>- IndexReader object</dd>
+        <dt>startLine:</dt>
+        <dd>- line from which to start reading file</dd>
+        <dt>endLine:</dt>
+        <dd>- line where to stop reading file (inclusive)</dd>
+        <dt>returns:</dt>
+        <dd>- LineScanner object if successful. Returns <span class="type">nil</span> on failure</dd>
+    </dl>
+</p>
+
+
+<br>
+<p class="objClass">LineScanner</p>
+
+<p>
+    <code>
+    <span class="type">number</span> result, 
+    <span class="type">number</span> lineNumber, 
+    <span class="type">string</span> line &lt;LineScanner object&gt;:nextLine()</code>
+</p>
+<p class="desc">Reads next line</p>
+
+<p>
+    <dl>
+        <dt>returns:</dt>
+        <dd>- result: LC.SUCCESS if successful, LC.NOT_FOUND if no more lines to read, LC.ERROR if an error occurred</dd>
+        <dd>- lineNumber: number of the line read</dd>
+        <dd>- line: line string</dd>
+    </dl>
+</p>
+
+
+
+<p>
+    <code><span class="type">MultilineScanner</span> LC.MultilineScanner(
+        <span class="type">FileReader</span> fileReader, 
+        <span class="type">number</span> frameLowerBound,
+        <span class="type">number</span> frameUpperBound,
+        <span class="type">number</span> startLine, 
+        <span class="type">number</span> endLine
+        )</code>
+</p>
+<p class="desc">MultilineScanner is a convenience object for reading files. It encapsulates functionality for reading frames (multiple lines) 
+    and limits portion of file between start and end lines. Frames are kept internally. So use getLine() to retrieve the desired lines.
+</p>
+
+<p>
+    <dl>
+        <dt>fileReader:</dt>
+        <dd>- FileReader object</dd>
+        <dt>frameLowerBound:</dt>
+        <dd>- lower bound of the frame relative to its center (line 0)</dd>
+        <dt>frameUpperBound:</dt>
+        <dd>- upper bound of the frame relative to its center</dd>
+        <dt>startLine:</dt>
+        <dd>- line from which to start reading file</dd>
+        <dt>endLine:</dt>
+        <dd>- line where to stop reading file (inclusive)</dd>
+        <dt>returns:</dt>
+        <dd>- MultilineScanner object if successful. Returns <span class="type">nil</span> on failure</dd>
+    </dl>
+</p>
+
+<p>
+    <code><span class="type">MultilineScanner</span> LC.MultilineScannerI(
+        <span class="type">FileReader</span> fileReader, 
+        <span class="type">IndexReader</span> indexReader, 
+        <span class="type">number</span> frameLowerBound,
+        <span class="type">number</span> frameUpperBound,
+        <span class="type">number</span> startLine, 
+        <span class="type">number</span> endLine
+        )</code>
+</p>
+<p class="desc">MultilineScanner variation for limiting reading to lines specified in an index. It encapsulates functionality for reading frames (multiple lines) 
+    and limits portion of file between start and end lines. Every index becomes the center of the frame. Therefore, this object allows you to retrieve information 
+    located around points of interest specified in the index. Frames are kept internally. So use getLine() to retrieve the desired lines.
+</p>
+
+<p>
+    <dl>
+        <dt>fileReader:</dt>
+        <dd>- FileReader object</dd>
+        <dt>indexReader:</dt>
+        <dd>- IndexReader object</dd>
+        <dt>frameLowerBound:</dt>
+        <dd>- lower bound of the frame relative to its center (line 0)</dd>
+        <dt>frameUpperBound:</dt>
+        <dd>- upper bound of the frame relative to its center</dd>
+        <dt>startLine:</dt>
+        <dd>- line from which to start reading file</dd>
+        <dt>endLine:</dt>
+        <dd>- line where to stop reading file (inclusive)</dd>
+        <dt>returns:</dt>
+        <dd>- MultilineScanner object if successful. Returns <span class="type">nil</span> on failure</dd>
+    </dl>
+</p>
+
+
+<br>
+<p class="objClass">MultilineScanner</p>
+
+<p>
+    <code><span class="type">number</span> result &lt;MultilineScanner object&gt;:nextFrame()</code>
+</p>
+<p class="desc">Reads next frame from file. Frame is kept internally</p>
+
+<p>
+    <dl>
+        <dt>returns:</dt>
+        <dd>- LC.SUCCESS if successful, LC.NOT_FOUND if no more frames to read, LC.ERROR if an error occurred</dd>
+    </dl>
+</p>
+
+<p>
+    <code>
+    <span class="type">boolean</span> result, 
+    <span class="type">number</span> lineNumber, 
+    <span class="type">string</span> line &lt;MultilineScanner object&gt;:getLine(<span class="type">number</span> lineIndex)</code>
+</p>
+<p class="desc">Gets line from the internally-kept frame specified by the index. Index must be between frame lower and upper bound (inclusive)</p>
+
+<p>
+    <dl>
+        <dt>lineIndex:</dt>
+        <dd>- result: index of desired line in a frame. Must be between frame lower and upper bound (inclusive)</dd>
+        <dt>returns:</dt>
+        <dd>- result: true if successful, false otherwise</dd>
+        <dd>- lineNumber: number of the line read</dd>
+        <dd>- line: line string</dd>
+    </dl>
+</p>
 
 <!----------------------------------------------------- SEARCH METHODS --------------------------------------------------->
+<hr>
+<p id="searchingTag" class="sectionHeader">Searching:</p>
 <p id="searchMethodsTag"><b>Search methods</b></p>
 <p>
     <code><span class="type">boolean</span> LC:core():search(

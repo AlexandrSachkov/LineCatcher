@@ -273,4 +273,17 @@ namespace PLP {
     bool MultilineScanner::getLine(int index, unsigned long long& lineNum, unsigned long long& fileOffset, char*& data, unsigned int& size) {
         return _frameBuff.get(index, lineNum, fileOffset, data, size);
     }
+
+    std::tuple<bool, unsigned long long, std::string> MultilineScanner::getLine(int index) {
+        unsigned long long lineNum = 0;
+        unsigned long long fileOffset = 0;
+        char* data = nullptr;
+        unsigned int size = 0;
+
+        bool result = getLine(index, lineNum, fileOffset, data, size);
+        if (!result) {
+            return { result, lineNum, std::string() };
+        }
+        return { result, lineNum, std::string(data, size) };
+    }
 }

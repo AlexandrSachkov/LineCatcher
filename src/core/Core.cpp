@@ -739,6 +739,63 @@ namespace PLP {
             lineScanner.addFunction("nextLine", nextLine);
             lineScanner.endClass();
         }
+        {
+            auto multilineScanner = module.beginClass<MultilineScanner>("MultilineScanner");
+            multilineScanner.addFactory([](
+                std::shared_ptr<FileReader> fileReader, 
+                int startFrameOffset,
+                int endFrameOffset,
+                unsigned long long startLine, 
+                unsigned long long endLine
+                ) {
+
+                auto multilineScanner = std::shared_ptr<MultilineScanner>(new MultilineScanner(
+                    fileReader.get(), 
+                    nullptr, 
+                    startFrameOffset,
+                    endFrameOffset,
+                    startLine, 
+                    endLine)
+                );
+                if (multilineScanner->initialize()) {
+                    return multilineScanner;
+                }
+                return std::shared_ptr<MultilineScanner>();
+            });
+            std::tuple<bool, unsigned long long, std::string>(MultilineScanner::*getLine)(int frameOffset) = &MultilineScanner::getLine;
+            multilineScanner.addFunction("nextFrame", &MultilineScanner::nextFrame);
+            multilineScanner.addFunction("getLine", getLine);
+            multilineScanner.endClass();
+        }
+        {
+            auto multilineScanner = module.beginClass<MultilineScanner>("MultilineScannerI");
+            multilineScanner.addFactory([](
+                std::shared_ptr<FileReader> fileReader,
+                std::shared_ptr<IndexReader> indexReader,
+                int startFrameOffset,
+                int endFrameOffset,
+                unsigned long long startLine,
+                unsigned long long endLine
+                ) {
+
+                auto multilineScanner = std::shared_ptr<MultilineScanner>(new MultilineScanner(
+                    fileReader.get(),
+                    indexReader.get(),
+                    startFrameOffset,
+                    endFrameOffset,
+                    startLine,
+                    endLine)
+                    );
+                if (multilineScanner->initialize()) {
+                    return multilineScanner;
+                }
+                return std::shared_ptr<MultilineScanner>();
+            });
+            std::tuple<bool, unsigned long long, std::string>(MultilineScanner::*getLine)(int frameOffset) = &MultilineScanner::getLine;
+            multilineScanner.addFunction("nextFrame", &MultilineScanner::nextFrame);
+            multilineScanner.addFunction("getLine", getLine);
+            multilineScanner.endClass();
+        }
         
 
         //Text compare
