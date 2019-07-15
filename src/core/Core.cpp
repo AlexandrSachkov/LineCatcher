@@ -331,7 +331,8 @@ namespace PLP {
             return false;
         }
 
-        int lastProgressPercent = 0;
+        const unsigned long long numOpsTillCheckCancelled = indexReader ? 1000 : 1000000;
+        unsigned long long currNumOps = 0;
 
         unsigned long long lineNum;
         unsigned long long fileOffset;
@@ -347,11 +348,10 @@ namespace PLP {
             }
 
             progressReporter.update(fileReader->getLineNumber());
-            if (lastProgressPercent < progressReporter.getCurrentPercent() && _cancelled) {
+            currNumOps++;
+            if (currNumOps % numOpsTillCheckCancelled == 0 && _cancelled) {
                 Logger::send(INFO, "Canceled by user");
                 return false;
-            } else {
-                lastProgressPercent = progressReporter.getCurrentPercent();
             }
         }
 
@@ -414,7 +414,8 @@ namespace PLP {
             return false;
         }
 
-        int lastProgressPercent = 0;
+        const unsigned long long numOpsTillCheckCancelled = indexReader ? 1000 : 1000000;
+        unsigned long long currNumOps = 0;
 
         unsigned long long lineNum;
         unsigned long long fileOffset;
@@ -444,11 +445,10 @@ namespace PLP {
             }
 
             progressReporter.update(fileReader->getLineNumber());
-            if (lastProgressPercent < progressReporter.getCurrentPercent() && _cancelled) {
+            currNumOps++;
+            if (currNumOps % numOpsTillCheckCancelled == 0 && _cancelled) {
                 Logger::send(INFO, "Canceled by user");
                 return false;
-            } else {
-                lastProgressPercent = progressReporter.getCurrentPercent();
             }
         }
 
