@@ -1,7 +1,14 @@
 <h1>Line Catcher</h1>
 
-<p>Line Catcher (LC) is an advanced programmable log parsing tool aimed to simplify
-    and save time on viewing, searching, and parsing large text files.</p>
+<p><b>Line Catcher (LC) is an advanced programmable log parsing tool aimed to simplify
+    and save time on viewing, searching, and parsing large text files.</b></p>
+    
+<p><table>
+    <tr>
+        <td><img src="resources/images/overview1.png" alt="Overview #1"></td>
+        <td><img src="resources/images/overview2.png" alt="Overview #2"></td>
+    </tr>
+</table></p>
     
 <p><table>
     <tr>
@@ -39,7 +46,7 @@
 </table></p>
 
 <h2>Application features</h2>
-<p>The LC version 0.9 beta provides the following functionality:</p>
+<p>The LC version 1.0 provides the following functionality:</p>
 <ul>
     <li>Opening and viewing large files;</li>
     <li>Supported files encoded with ASCII and UTF-8</li>
@@ -54,4 +61,9 @@
 <ul>
     <li>OS: Windows 64 bit</li>
     <li>Memory: Minimum 1GB</li>
+</ul>
+
+<h2>Installation Instructions</h2>
+<ul>
+    Installation is very easy. Visit https://github.com/AlexandrSachkov/LineCatcher/releases to download installer for the latest           release. Then run the installer.
 </ul>
