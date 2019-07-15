@@ -64,6 +64,7 @@
 </ul>
 
 <h2>Installation Instructions</h2>
-<ul>
+<p>
     Installation is very easy. Visit https://github.com/AlexandrSachkov/LineCatcher/releases to download installer for the latest           release. Then run the installer.
-</ul>
+</p>
+
