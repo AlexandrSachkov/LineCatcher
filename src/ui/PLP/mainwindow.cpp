@@ -434,3 +434,10 @@ void MainWindow::closeCurrentIndex() {
         fileView->closeCurrentIndex();
     }
 }
+
+void MainWindow::closeIndex(const QString& path) {
+    for(int i = 0; i < _fileViewer->count(); i++){
+        FileView* fileView = static_cast<FileView*>(_fileViewer->widget(i));
+        fileView->closeIndex(path);
+    }
+}

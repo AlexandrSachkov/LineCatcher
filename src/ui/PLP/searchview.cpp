@@ -121,7 +121,7 @@ void SearchView::createDestinationContent(QLayout* mainLayout){
     openDirLayout->addWidget(openDir);
     destLayout->addRow("Directory: ", openDirLayout);
 
-    _destName = new QLineEdit(this);
+    _destName = new QLineEdit("lc_results",this);
     destLayout->addRow("File name: ", _destName);
 }
 
@@ -303,6 +303,10 @@ void SearchView::startSearch() {
     }
 
     QString destPath = destDir + "/" + destName;
+    if(!destPath.endsWith(PLP::FILE_INDEX_EXTENSION)){
+        destPath += PLP::FILE_INDEX_EXTENSION;
+    }
+    static_cast<MainWindow*>(parent())->closeIndex(destPath); //close index with the same path if one is open
     CoreObjPtr<PLP::IndexWriterI> indexWriter = createCoreObjPtr(
         _plpCore->createIndexWriter(destPath.toStdString(), 0, fileReader.get(), true),
         _plpCore
@@ -547,12 +551,12 @@ void SearchView::onSearchCompletion(bool success){
         return;
     }
 
-    std::wstring fileName = _destName->text().toStdWString();
-    if (std::wstring::npos == fileName.find(PLP::string_to_wstring(PLP::FILE_INDEX_EXTENSION))) {
-        fileName += PLP::string_to_wstring(PLP::FILE_INDEX_EXTENSION);
+    QString fileName = _destName->text();
+    if (!fileName.endsWith(PLP::FILE_INDEX_EXTENSION)) {
+        fileName += PLP::FILE_INDEX_EXTENSION;
     }
 
-    QString indexPath = _destDir->text() + "/" + QString::fromStdWString(fileName);
+    QString indexPath = _destDir->text() + "/" + fileName;
     static_cast<MainWindow*>(parent())->openIndex(indexPath);
     this->hide();
 }

@@ -43,6 +43,7 @@ public:
     const QString& getFilePath();
     void openIndex(CoreObjPtr<PLP::IndexReaderI> indexReader);
     void closeCurrentIndex();
+    void closeIndex(const QString& path);
     void setFontSize(int pointSize);
 signals:
 

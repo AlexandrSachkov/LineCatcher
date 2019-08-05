@@ -47,6 +47,7 @@ public slots:
     void closeTab(int index);
     void closeCurrentData();
     void closeCurrentIndex();
+    void closeIndex(const QString& path);
     void closeAllTabs();
     void openFile();
     void openIndex();

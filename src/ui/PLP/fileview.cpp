@@ -99,6 +99,19 @@ void FileView::closeCurrentIndex() {
     closeTab(_indexViewer->currentIndex());
 }
 
+void FileView::closeIndex(const QString& path) {
+    int numTabs = _indexViewer->count();
+    for(int i = 0; i < numTabs; i++){
+        IndexView* indexView = static_cast<IndexView*>(_indexViewer->widget(i));
+        const QString& existingPath = indexView->getFilePath();
+        if(existingPath == path)
+        {
+            closeTab(i);
+            return;
+        }
+    }
+}
+
 const QString& FileView::getFilePath() {
     return _filePath;
 }
