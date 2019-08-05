@@ -95,6 +95,10 @@ void FileView::closeTab(int index) {
     }
 }
 
+void FileView::closeCurrentIndex() {
+    closeTab(_indexViewer->currentIndex());
+}
+
 const QString& FileView::getFilePath() {
     return _filePath;
 }

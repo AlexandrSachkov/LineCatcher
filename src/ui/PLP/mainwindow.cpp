@@ -61,7 +61,24 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     QMenu* openMenu = new QMenu("Open", fileMenu);
     fileMenu->addMenu(openMenu);
 
+    QMenu* closeMenu = new QMenu("Close", fileMenu);
+    fileMenu->addMenu(closeMenu);
+
+    QAction* closeData = new QAction("Current Data", fileMenu);
+    closeData->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Z));
+    closeData->setShortcutVisibleInContextMenu(true);
+    closeMenu->addAction(closeData);
+    connect(closeData, SIGNAL(triggered(void)), this, SLOT(closeCurrentData(void)));
+
+    QAction* closeIndex = new QAction("Current Index", fileMenu);
+    closeIndex->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Z));
+    closeIndex->setShortcutVisibleInContextMenu(true);
+    closeMenu->addAction(closeIndex);
+    connect(closeIndex, SIGNAL(triggered(void)), this, SLOT(closeCurrentIndex(void)));
+
     QAction* closeAll = new QAction("Close All", fileMenu);
+    closeAll->setShortcut(QKeySequence(Qt::SHIFT + Qt::Key_Escape));
+    closeAll->setShortcutVisibleInContextMenu(true);
     fileMenu->addAction(closeAll);
     connect(closeAll, SIGNAL(triggered(void)), this, SLOT(closeAllTabs(void)));
 
@@ -405,4 +422,15 @@ void MainWindow::closeEvent(QCloseEvent* event){
     }
 
     event->accept();
+}
+
+void MainWindow::closeCurrentData() {
+    closeTab(_fileViewer->currentIndex());
+}
+
+void MainWindow::closeCurrentIndex() {
+    FileView* fileView = static_cast<FileView*>(_fileViewer->currentWidget());
+    if(fileView){
+        fileView->closeCurrentIndex();
+    }
 }
