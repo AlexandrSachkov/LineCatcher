@@ -25,6 +25,10 @@
 #include <QtMath>
 #include <QScrollBar>
 #include <QMessageBox>
+#include <QMenu>
+#include <QAction>
+#include <QApplication>
+#include <QClipboard>
 
 #include "ReturnType.h"
 
@@ -57,6 +61,10 @@ PagedFileViewWidget::PagedFileViewWidget(
     connect(scrollBar, SIGNAL(wheelMoved(void)), this, SLOT(readBlockIfRequired(void)));
     connect(scrollBar, SIGNAL(valueChanged(int)), this, SLOT(scrollBarMoved(int)));
     this->setVerticalScrollBar(scrollBar);
+
+    this->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
+            this, SLOT(showRightClickMenu(const QPoint &)));
 
     QFont f("Courier New", 14);
     f.setStyleHint(QFont::Monospace);
@@ -373,4 +381,53 @@ void PagedFileViewWidget::highlightLine(unsigned long long lineNum) {
     cursor.clearSelection();
 
     this->setExtraSelections({_indexSelection});
+}
+
+void PagedFileViewWidget::showRightClickMenu(const QPoint& pos) {
+    QMenu menu(tr("Context menu"), this);
+
+    QAction copy("Copy", this);
+    copy.setShortcut(QKeySequence(Qt::CTRL + Qt::Key_C));
+    copy.setShortcutVisibleInContextMenu(true);
+    connect(&copy, SIGNAL(triggered()), this, SLOT(copySelection()));
+    menu.addAction(&copy);
+
+    QAction copyLineNum("Copy Line #", this);
+    connect(&copyLineNum, &QAction::triggered, [this, pos](){
+        copyLineNumber(pos);
+    });
+    menu.addAction(&copyLineNum);
+
+    QAction highlight("Highlight", this);
+    highlight.setShortcut(QKeySequence(Qt::CTRL + Qt::Key_H));
+    highlight.setShortcutVisibleInContextMenu(true);
+    highlight.setEnabled(false);
+
+    connect(&highlight, SIGNAL(triggered()), this, SLOT(highlightSelection()));
+    menu.addAction(&highlight);
+
+    QString selection = this->textCursor().selectedText();
+    if(selection.isEmpty()) {
+        copy.setEnabled(false);
+        highlight.setEnabled(false);
+    }
+
+    menu.exec(mapToGlobal(pos));
+}
+
+void PagedFileViewWidget::copySelection() {
+    QClipboard* clipboard = QApplication::clipboard();
+    clipboard->setText(this->textCursor().selectedText());
+}
+
+void PagedFileViewWidget::copyLineNumber(const QPoint& pos) {
+    QTextCursor cursor = this->cursorForPosition(pos);
+    unsigned long long lineNum = _startLineNum + cursor.blockNumber();
+
+    QClipboard* clipboard = QApplication::clipboard();
+    clipboard->setText(QString::number(lineNum));
+}
+
+void PagedFileViewWidget::highlightSelection() {
+
 }

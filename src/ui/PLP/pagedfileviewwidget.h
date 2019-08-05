@@ -62,6 +62,10 @@ private slots:
     void lineNumberAreaPaintEvent(QPaintEvent *event);
     int lineNumberAreaWidth() const;
     void scrollBarMoved(int val);
+    void showRightClickMenu(const QPoint& pos);
+    void copySelection();
+    void copyLineNumber(const QPoint& pos);
+    void highlightSelection();
 
 protected:
     void resizeEvent(QResizeEvent *e) override;

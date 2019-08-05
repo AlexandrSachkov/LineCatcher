@@ -284,7 +284,7 @@ void MainWindow::openIndex() {
 
     QString indexOpenDir = settings.value("indexOpenDir", settings.value("fileOpenDir", "")).toString();
     std::string fileFilter = "Index (*" + std::string(PLP::FILE_INDEX_EXTENSION) +")";
-    QStringList paths = QFileDialog::getOpenFileNames(this, tr("Select indices to open"), indexOpenDir,
+    QStringList paths = QFileDialog::getOpenFileNames(this, tr("Select indexes to open"), indexOpenDir,
         tr(fileFilter.c_str()));
 
     if(paths.empty()){
