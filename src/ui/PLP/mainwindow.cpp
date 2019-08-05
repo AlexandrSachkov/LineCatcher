@@ -66,14 +66,20 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(closeAll, SIGNAL(triggered(void)), this, SLOT(closeAllTabs(void)));
 
     QAction* exit = new QAction("Exit", fileMenu);
+    exit->setShortcut(QKeySequence(Qt::ALT + Qt::Key_F4));
+    exit->setShortcutVisibleInContextMenu(true);
     fileMenu->addAction(exit);
     connect(exit, SIGNAL(triggered(void)), this, SLOT(exit(void)));
 
-    _openFile = new QAction("Data", openMenu);
-    openMenu->addAction(_openFile);
-    connect(_openFile, SIGNAL(triggered(void)), this, SLOT(openFile(void)));
+    QAction* openFile = new QAction("Data", openMenu);
+    openFile->setShortcuts({QKeySequence(Qt::CTRL + Qt::Key_O), QKeySequence(Qt::CTRL + Qt::Key_D)});
+    openFile->setShortcutVisibleInContextMenu(true);
+    openMenu->addAction(openFile);
+    connect(openFile, SIGNAL(triggered(void)), this, SLOT(openFile(void)));
 
     QAction* openIndex = new QAction("Index", openMenu);
+    openIndex->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_I));
+    openIndex->setShortcutVisibleInContextMenu(true);
     openMenu->addAction(openIndex);
     connect(openIndex, SIGNAL(triggered(void)), this, SLOT(openIndex(void)));
 
@@ -81,14 +87,20 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     menuBar()->addMenu(runMenu);
 
     QAction* runStandardSearch = new QAction("Search", runMenu);
+    runStandardSearch->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_F));
+    runStandardSearch->setShortcutVisibleInContextMenu(true);
     runMenu->addAction(runStandardSearch);
     connect(runStandardSearch, SIGNAL(triggered(void)), this, SLOT(showStandardSearch(void)));
 
     QAction* runAdvancedSearch = new QAction("Search (Advanced)", runMenu);
+    runAdvancedSearch->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_F));
+    runAdvancedSearch->setShortcutVisibleInContextMenu(true);
     runMenu->addAction(runAdvancedSearch);
     connect(runAdvancedSearch, SIGNAL(triggered(void)), this, SLOT(showAdvancedSearch(void)));
 
     QAction* runScript = new QAction("Script");
+    runScript->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
+    runScript->setShortcutVisibleInContextMenu(true);
     runMenu->addAction(runScript);
     connect(runScript, SIGNAL(triggered(void)), this, SLOT(showScriptView(void)));
 
@@ -103,10 +115,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     menuBar()->addMenu(helpMenu);
 
     QAction* gettingStarted = new QAction("Getting Started", helpMenu);
+    gettingStarted->setShortcut(QKeySequence(Qt::Key_F1));
+    gettingStarted->setShortcutVisibleInContextMenu(true);
     helpMenu->addAction(gettingStarted);
     connect(gettingStarted, SIGNAL(triggered(void)), this, SLOT(showGettingStartedDialog(void)));
 
     QAction* scriptingDocs = new QAction("Lua API Docs", helpMenu);
+    scriptingDocs->setShortcut(QKeySequence(Qt::Key_F2));
+    scriptingDocs->setShortcutVisibleInContextMenu(true);
     helpMenu->addAction(scriptingDocs);
     connect(scriptingDocs, SIGNAL(triggered(void)), this, SLOT(showScriptingDocsDialog(void)));
 

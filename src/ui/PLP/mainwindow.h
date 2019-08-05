@@ -67,7 +67,6 @@ private:
     int _viewerFontSize = 12;
     QWidget* _centralWidget;
     QVBoxLayout* _mainLayout;
-    QAction* _openFile;
     QAction* _exit;
 
     QTabWidget* _fileViewer;
