@@ -426,6 +426,11 @@ void PagedFileViewWidget::showRightClickMenu(const QPoint& pos) {
         highlight.setEnabled(false);
     }
 
+    // disable if multiple lines are selected. Multi-line selection does not work
+    if(selection.contains(u'\u2029')){
+        highlight.setEnabled(false);
+    }
+
     menu.exec(mapToGlobal(pos));
 }
 

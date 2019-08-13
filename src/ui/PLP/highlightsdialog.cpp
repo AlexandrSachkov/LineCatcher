@@ -130,6 +130,10 @@ void HighlightsDialog::addHighlight(const QString& pattern, bool regex) {
 }
 
 void HighlightsDialog::addHighlight(const QString& pattern, bool regex, const QColor& color) {
+    if(pattern.isEmpty()){
+        return;
+    }
+
     QListWidgetItem* item = new QListWidgetItem();
     _highlightItems->addItem(item);
     _highlightItems->setItemWidget(item, new HighlightItem(pattern, regex, color, _highlightsUpdated, this));
