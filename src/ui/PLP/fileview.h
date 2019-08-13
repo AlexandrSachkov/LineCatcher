@@ -20,6 +20,7 @@
 
 #include "pagedfileviewwidget.h"
 #include "ullspinbox.h"
+#include "highlightsdialog.h"
 
 #include <QWidget>
 #include <QPlainTextEdit>
@@ -51,6 +52,7 @@ private slots:
     void closeTab(int index);
 
 private:
+    HighlightsDialog* _highlights = nullptr;
     PagedFileViewWidget* _dataView;
     QTabWidget* _indexViewer;
     ULLSpinBox* _currLineNumBox;

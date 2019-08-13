@@ -39,7 +39,8 @@ SOURCES += \
     aboutdialog.cpp \
     scriptdocsdialog.cpp \
     gettingstarteddialog.cpp \
-    settingsdialog.cpp
+    settingsdialog.cpp \
+    highlightsdialog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -59,7 +60,8 @@ HEADERS += \
     aboutdialog.h \
     scriptdocsdialog.h \
     gettingstarteddialog.h \
-    settingsdialog.h
+    settingsdialog.h \
+    highlightsdialog.h
 
 FORMS +=
 

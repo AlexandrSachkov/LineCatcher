@@ -37,8 +37,19 @@ FileView::FileView(CoreObjPtr<PLP::FileReaderI> fileReader, QWidget *parent) : Q
     std::wstring path(fileReader->getFilePath());
     _filePath = QString::fromStdWString(path);
 
-    QHBoxLayout* lineSelectionLayout = new QHBoxLayout();
-    mainLayout->addLayout(lineSelectionLayout);
+    QHBoxLayout* optionsLayout = new QHBoxLayout();
+    mainLayout->addLayout(optionsLayout);
+
+    _highlights = new HighlightsDialog([&](){
+        _dataView->onHighlightListUpdated();
+    }, this);
+    _highlights->hide();
+
+    QPushButton* showHighlights = new QPushButton("Highlights", this);
+    optionsLayout->addWidget(showHighlights);
+    connect(showHighlights, &QPushButton::clicked, [&, this](){
+        _highlights->show();
+    });
 
     QFont lineNavFont("Courier New", 12);
     lineNavFont.setStyleHint(QFont::Monospace);
@@ -47,12 +58,12 @@ FileView::FileView(CoreObjPtr<PLP::FileReaderI> fileReader, QWidget *parent) : Q
     _currLineNumBox->setFont(lineNavFont);
     unsigned long long maxRange = fileReader->getNumberOfLines() > 0 ? fileReader->getNumberOfLines() - 1 : 0;
     _currLineNumBox->setRange(0, maxRange);
-    lineSelectionLayout->addWidget(_currLineNumBox, 1, Qt::AlignRight);
+    optionsLayout->addWidget(_currLineNumBox, 1, Qt::AlignRight);
 
     QLabel* numLinesLabel = new QLabel("/" + QString::number(fileReader->getNumberOfLines()), this);
     numLinesLabel->setFont(lineNavFont);
     numLinesLabel->setContentsMargins(0, 0, 5, 0);
-    lineSelectionLayout->addWidget(numLinesLabel, 0);
+    optionsLayout->addWidget(numLinesLabel, 0);
 
     _splitter = new QSplitter(this);
     mainLayout->addWidget(_splitter);
@@ -60,7 +71,17 @@ FileView::FileView(CoreObjPtr<PLP::FileReaderI> fileReader, QWidget *parent) : Q
     _splitter->setHandleWidth(5);
     _splitter->setChildrenCollapsible(false);
 
-    _dataView = new PagedFileViewWidget(std::move(fileReader), _currLineNumBox, _splitter);
+    _dataView = new PagedFileViewWidget(std::move(fileReader), _currLineNumBox,
+        [&](){
+            return _highlights->getHighlights();
+        }, [&](const QString& text){
+            _highlights->addHighlight(text, false);
+        }, [&](){
+            _highlights->clear();
+        },
+        _splitter
+    );
+
     _dataView->setReadOnly(true);
     _splitter->addWidget(_dataView);
 

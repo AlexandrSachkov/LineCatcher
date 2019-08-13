@@ -37,17 +37,25 @@ public:
     unsigned long long lineNumber = 0;
 };
 
+class HighlightItem;
 class PagedFileViewWidget : public QPlainTextEdit
 {
     Q_OBJECT
 public:
-    PagedFileViewWidget(CoreObjPtr<PLP::FileReaderI> fileReader, ULLSpinBox* lineNavBox, QWidget *parent = nullptr);
+    PagedFileViewWidget(
+            CoreObjPtr<PLP::FileReaderI> fileReader,
+            ULLSpinBox* lineNavBox,
+            std::function<QList<const HighlightItem*>()> getHighlightedItems,
+            std::function<void(const QString&)> highlight,
+            std::function<void()> clearHighlights,
+            QWidget *parent = nullptr);
     bool getLineFromIndex(
         CoreObjPtr<PLP::IndexReaderI>& indexReader,
         QString& data
     );
 
     void setFontSize(int pointSize);
+    void onHighlightListUpdated();
 
 signals:
 
@@ -75,10 +83,16 @@ private:
     void calcNumVisibleLines();
     void readNextBlock();
     void readPreviousBlock();
-    void highlightLine(unsigned long long lineNum);
+    void setHighlightedLine(unsigned long long lineNum);
+    void buildHighlightList();
+    void doHighlighting();
 
     static const unsigned int MAX_NUM_BLOCKS = 1000;
     static const unsigned int NUM_LINES_PER_READ = 250;
+
+    std::function<QList<const HighlightItem*>()> _getHighlightedItems;
+    std::function<void(const QString&)> _highlight;
+    std::function<void()> _clearHighlights;
 
     unsigned long long _startLineNum = 0;
     unsigned long long _endLineNum = 0;
@@ -89,6 +103,8 @@ private:
     QWidget* _lineNumberArea;
     ULLSpinBox* _lineNavBox;
     FileViewExtraSelection _indexSelection;
+    FileViewExtraSelection _mouseOverSelection;
+    QList<QTextEdit::ExtraSelection> _highlights;
 };
 
 #endif // PAGEDFILEVIEW_H

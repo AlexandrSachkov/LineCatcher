@@ -19,6 +19,8 @@
 #include "signalingscrollbar.h"
 #include "linenumberarea.h"
 #include "common.h"
+#include "fileview.h"
+#include "highlightsdialog.h"
 #include <QDebug>
 #include <QPainter>
 #include <QTextBlock>
@@ -35,10 +37,16 @@
 PagedFileViewWidget::PagedFileViewWidget(
         CoreObjPtr<PLP::FileReaderI> fileReader,
         ULLSpinBox* lineNavBox,
+        std::function<QList<const HighlightItem*>()> getHighlightedItems,
+        std::function<void(const QString&)> highlight,
+        std::function<void()> clearHighlights,
         QWidget *parent) : QPlainTextEdit (parent) {
 
     _fileReader = std::move(fileReader);
     _lineNavBox = lineNavBox;
+    _getHighlightedItems = getHighlightedItems;
+    _highlight = highlight;
+    _clearHighlights = clearHighlights;
 
     _lineNavBox->setValue(0);
     connect(_lineNavBox, SIGNAL(valueUpdated(unsigned long long)), this, SLOT(gotoLine(unsigned long long)));
@@ -94,18 +102,14 @@ void PagedFileViewWidget::textChangedImpl() {
 void PagedFileViewWidget::mouseMoveEvent(QMouseEvent *e) {
     QPlainTextEdit::mouseMoveEvent(e);
 
-    QTextEdit::ExtraSelection selection;
-    selection.format.setBackground(Common::LineHighlightBGColor);
-    selection.format.setForeground(Common::LineHighlightTextColor);
-    selection.format.setProperty(QTextFormat::FullWidthSelection, true);
-    selection.cursor = this->cursorForPosition(e->pos());
-    selection.cursor.clearSelection();
+    _mouseOverSelection.format.setBackground(Common::LineHighlightBGColor);
+    _mouseOverSelection.format.setForeground(Common::LineHighlightTextColor);
+    _mouseOverSelection.format.setProperty(QTextFormat::FullWidthSelection, true);
+    _mouseOverSelection.cursor = this->cursorForPosition(e->pos());
+    _mouseOverSelection.cursor.clearSelection();
+    _mouseOverSelection.lineNumber = _startLineNum + _mouseOverSelection.cursor.blockNumber();
 
-    if(_indexSelection.lineNumber >= _startLineNum && _indexSelection.lineNumber <= _endLineNum){
-        this->setExtraSelections({selection, _indexSelection});
-    } else {
-        this->setExtraSelections({selection});
-    }
+    doHighlighting();
 }
 
 void PagedFileViewWidget::calcNumVisibleLines() {
@@ -201,6 +205,10 @@ void PagedFileViewWidget::readNextBlock() {
     if(_endLineNum - _startLineNum > MAX_NUM_BLOCKS){
         _startLineNum = _endLineNum - MAX_NUM_BLOCKS;
     }
+
+    buildHighlightList();
+    doHighlighting();
+
     const int newScrollbarValue = currScrollbarValue - (_startLineNum - currStartLineNum);
     this->verticalScrollBar()->setValue(newScrollbarValue);
 }
@@ -268,6 +276,9 @@ void PagedFileViewWidget::readPreviousBlock() {
     cursor.movePosition(QTextCursor::End);
     cursor.insertBlock();
 
+    buildHighlightList();
+    doHighlighting();
+
     int newScrollbarValue = currScrollbarValue + (currStartLineNum - _startLineNum);
     this->verticalScrollBar()->setValue(newScrollbarValue);
 }
@@ -301,8 +312,9 @@ void PagedFileViewWidget::gotoLine(unsigned long long lineNum, bool highlight){
     if(lineNum >= _startLineNum && lineNum < _endLineNum){
         this->verticalScrollBar()->setValue(lineNum - _startLineNum);
         if(highlight){
-            highlightLine(lineNum);
+            setHighlightedLine(lineNum);
         }
+        doHighlighting();
         return;
     }
 
@@ -351,12 +363,14 @@ void PagedFileViewWidget::gotoLine(unsigned long long lineNum, bool highlight){
     if(_endLineNum - _startLineNum > MAX_NUM_BLOCKS){
         _startLineNum = _endLineNum - MAX_NUM_BLOCKS;
     }
+    doHighlighting();
     this->verticalScrollBar()->setValue(lineNum - _startLineNum);
 
-
     if(highlight){
-        highlightLine(lineNum);
+        setHighlightedLine(lineNum);
     }
+    buildHighlightList();
+    doHighlighting();
 }
 
 void PagedFileViewWidget::scrollBarMoved(int val) {
@@ -369,7 +383,7 @@ void PagedFileViewWidget::setFontSize(int pointSize) {
     this->setFont(font);
 }
 
-void PagedFileViewWidget::highlightLine(unsigned long long lineNum) {
+void PagedFileViewWidget::setHighlightedLine(unsigned long long lineNum) {
     int lineToHighlight = (int)(lineNum - _startLineNum);
     QTextCursor cursor(document()->findBlockByLineNumber(lineToHighlight));
 
@@ -378,9 +392,7 @@ void PagedFileViewWidget::highlightLine(unsigned long long lineNum) {
     _indexSelection.format.setForeground(Common::LineHighlightTextColor);
     _indexSelection.format.setProperty(QTextFormat::FullWidthSelection, true);
     _indexSelection.cursor = cursor;
-    cursor.clearSelection();
-
-    this->setExtraSelections({_indexSelection});
+    _indexSelection.cursor.clearSelection();
 }
 
 void PagedFileViewWidget::showRightClickMenu(const QPoint& pos) {
@@ -399,12 +411,14 @@ void PagedFileViewWidget::showRightClickMenu(const QPoint& pos) {
     menu.addAction(&copyLineNum);
 
     QAction highlight("Highlight", this);
-    highlight.setShortcut(QKeySequence(Qt::CTRL + Qt::Key_H));
-    highlight.setShortcutVisibleInContextMenu(true);
-    highlight.setEnabled(false);
-
     connect(&highlight, SIGNAL(triggered()), this, SLOT(highlightSelection()));
     menu.addAction(&highlight);
+
+    QAction clearHighlights("Clear highlights", this);
+    connect(&clearHighlights, &QAction::triggered, [this](){
+        _clearHighlights();
+    });
+    menu.addAction(&clearHighlights);
 
     QString selection = this->textCursor().selectedText();
     if(selection.isEmpty()) {
@@ -429,5 +443,58 @@ void PagedFileViewWidget::copyLineNumber(const QPoint& pos) {
 }
 
 void PagedFileViewWidget::highlightSelection() {
+    _highlight(this->textCursor().selectedText());
+}
 
+void PagedFileViewWidget::buildHighlightList(){
+    _highlights.clear();
+
+    int initialPos = firstVisibleBlock().position();
+    QList<const HighlightItem*> items = _getHighlightedItems();
+    for(const HighlightItem* item : items){
+        QTextCursor cursor = this->textCursor();
+        cursor.movePosition(QTextCursor::Start);
+        this->setTextCursor(cursor);
+
+        if(item->getRegex()){
+            QRegExp regex(item->getPattern());
+            while(this->find(regex)){
+                QTextEdit::ExtraSelection selection;
+                selection.format.setBackground(item->getColor());
+                selection.format.setForeground(Qt::black);
+                selection.cursor = this->textCursor();
+                _highlights.push_back(selection);
+            }
+        }else{
+            while(this->find(item->getPattern(), QTextDocument::FindCaseSensitively)){
+                QTextEdit::ExtraSelection selection;
+                selection.format.setBackground(item->getColor());
+                selection.format.setForeground(Qt::black);
+                selection.cursor = this->textCursor();
+                _highlights.push_back(selection);
+            }
+        }
+    }
+
+    QTextCursor cursor = this->textCursor();
+    cursor.setPosition(initialPos);
+    this->setTextCursor(cursor);
+}
+
+void PagedFileViewWidget::doHighlighting() {
+    QList<QTextEdit::ExtraSelection> allHighlights;
+    if(_indexSelection.lineNumber >= _startLineNum && _indexSelection.lineNumber <= _endLineNum){
+        allHighlights.push_back(_indexSelection);
+    }
+    if(_mouseOverSelection.lineNumber >= _startLineNum && _mouseOverSelection.lineNumber <= _endLineNum){
+        allHighlights.push_back(_mouseOverSelection);
+    }
+    allHighlights.append(_highlights);
+
+    this->setExtraSelections(allHighlights);
+}
+
+void PagedFileViewWidget::onHighlightListUpdated() {
+    buildHighlightList();
+    doHighlighting();
 }
