@@ -61,19 +61,16 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     QMenu* openMenu = new QMenu("Open", fileMenu);
     fileMenu->addMenu(openMenu);
 
-    QMenu* closeMenu = new QMenu("Close", fileMenu);
-    fileMenu->addMenu(closeMenu);
-
-    QAction* closeData = new QAction("Current Data", fileMenu);
-    closeData->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_Z));
+    QAction* closeData = new QAction("Close Data", fileMenu);
+    closeData->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_X));
     closeData->setShortcutVisibleInContextMenu(true);
-    closeMenu->addAction(closeData);
+    fileMenu->addAction(closeData);
     connect(closeData, SIGNAL(triggered(void)), this, SLOT(closeCurrentData(void)));
 
-    QAction* closeIndex = new QAction("Current Index", fileMenu);
-    closeIndex->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Z));
+    QAction* closeIndex = new QAction("Close Index", fileMenu);
+    closeIndex->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_X));
     closeIndex->setShortcutVisibleInContextMenu(true);
-    closeMenu->addAction(closeIndex);
+    fileMenu->addAction(closeIndex);
     connect(closeIndex, SIGNAL(triggered(void)), this, SLOT(closeCurrentIndex(void)));
 
     QAction* closeAll = new QAction("Close All", fileMenu);
@@ -89,13 +86,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(exit, SIGNAL(triggered(void)), this, SLOT(exit(void)));
 
     QAction* openFile = new QAction("Data", openMenu);
-    openFile->setShortcuts({QKeySequence(Qt::CTRL + Qt::Key_O), QKeySequence(Qt::CTRL + Qt::Key_D)});
+    openFile->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_D));
     openFile->setShortcutVisibleInContextMenu(true);
     openMenu->addAction(openFile);
     connect(openFile, SIGNAL(triggered(void)), this, SLOT(openFile(void)));
 
     QAction* openIndex = new QAction("Index", openMenu);
-    openIndex->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_I));
+    openIndex->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_R));
     openIndex->setShortcutVisibleInContextMenu(true);
     openMenu->addAction(openIndex);
     connect(openIndex, SIGNAL(triggered(void)), this, SLOT(openIndex(void)));
