@@ -60,7 +60,9 @@ void HighlightItem::updateColor(const QColor& color) {
         "QPushButton {"
             "background-color: "+ strColor +"; border: 1px solid black;"
             "min-width: 50px;"
+            "height: 18px;"
             "padding: 0px;"
+            "margin: 0px;"
        "}"
     );
 }
@@ -89,28 +91,33 @@ HighlightsDialog::HighlightsDialog(std::function<void()> highlightsUpdated, QWid
     setWindowTitle("Highlights");
     setFixedSize(500, 600);
 
-    QHBoxLayout* addItemLayout = new QHBoxLayout();
-    addItemLayout->setContentsMargins(5, 0, 0, 0);
-    addItemLayout->setSpacing(5);
-    mainLayout->addLayout(addItemLayout);
+    QHBoxLayout* menuLayout = new QHBoxLayout();
+    menuLayout->setContentsMargins(0, 0, 0, 0);
+    menuLayout->setSpacing(0);
+    mainLayout->addLayout(menuLayout);
+
+    QHBoxLayout* patternLayout = new QHBoxLayout();
+    patternLayout->setContentsMargins(5, 0, 0, 0);
+    patternLayout->setSpacing(5);
+    menuLayout->addLayout(patternLayout);
 
     QLabel* patternLabel = new QLabel("Pattern:");
-    addItemLayout->addWidget(patternLabel);
+    patternLayout->addWidget(patternLabel);
 
     _pattern = new QLineEdit(this);
-    addItemLayout->addWidget(_pattern);
+    patternLayout->addWidget(_pattern);
 
     _regex = new QCheckBox("Regex", this);
-    addItemLayout->addWidget(_regex);
+    patternLayout->addWidget(_regex);
 
     _addItem = new QPushButton("Add", this);
-    addItemLayout->addWidget(_addItem, 1, Qt::AlignRight);
+    menuLayout->addWidget(_addItem, 1, Qt::AlignRight);
     connect(_addItem, &QPushButton::clicked, [this](){
         addHighlight(_pattern->text(), _regex->isChecked());
     });
 
     _clear = new QPushButton("Clear", this);
-    addItemLayout->addWidget(_clear);
+    menuLayout->addWidget(_clear);
     connect(_clear, &QPushButton::clicked, this, &HighlightsDialog::clear);
 
     _highlightItems = new QListWidget(this);
@@ -135,6 +142,7 @@ void HighlightsDialog::addHighlight(const QString& pattern, bool regex, const QC
     }
 
     QListWidgetItem* item = new QListWidgetItem();
+    item->setSizeHint(QSize(item->sizeHint().width(), 23));
     _highlightItems->addItem(item);
     _highlightItems->setItemWidget(item, new HighlightItem(pattern, regex, color, _highlightsUpdated, this));
 
