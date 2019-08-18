@@ -180,8 +180,8 @@ li > * {
     <li><span><b>Source</b>: Use the Browse button to navigate to the source file you want to perform search 
         operations on.</span></li>
     <li><span><b>Save results to</b>: You can save your search result to re-use it for other searches. 
-        You need to select a <u>directory</u> to save you search results and provide a meaningful <u>file 
-        name</u> to find them later.</span></li>
+        You need to select a <u>directory</u> to store your results to find them later. 
+		"lc_results" is a default results file name, which you can update.</span></li>
     <li><span><b>Limiters</b>: Limiters are used to narrow down the search area.</span>
         <ul>
             <li><span><u>Start line #</u> is the first line LC will refer to when starting the search. 
@@ -202,8 +202,7 @@ li > * {
             <li><span><u>Pattern line</u> contains the pattern to use during search. By default, every 
                 line will be checked for containing the pattern text.</span></li>
             <li><span><u>Regex</u> option if checked - the pattern is treated like a regular expression.</span></li>
-            <li><span>Select <u>Ignore case</u> box, the pattern is applied while ignoring upper/lower 
-                character differences.</span></li>
+            <li><span>Select <u>Highlight results</u> box - search results will be highlighted in the file.</span></li>
         </ul>
     </li>
 </ol>
@@ -316,6 +315,7 @@ li > * {
     To run a script, click <b>“Run”</b> button. The <b>console output</b> window will notify you if 
     the script compiled or failed to compile. If you have made any changes to the script, 
     the <b>“Save”</b> button will turn red as a reminder to save the changes. 
+	If the file is read-only or located in the read-only directory, <b>"Save"</b> button will be disabled. You can instead use <b>"Save As"</b> button to save file in the directory of your choice.
 </p>
 <p><img src="images/script_editor.png" alt="Script editor"></p>
 
