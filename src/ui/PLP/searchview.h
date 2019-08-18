@@ -74,19 +74,19 @@ private:
     const int ROW_LABEL_WIDTH = 300;
     const int NUM_ROWS = 5;
 
-    PLP::CoreI* _plpCore;
+    PLP::CoreI* _plpCore = nullptr;
     bool _multiline = false;
 
-    QLineEdit* _filePath;
-    QLineEdit* _indexPath;
-    QLineEdit* _destDir;
-    QLineEdit* _destName;
-    ULLSpinBox* _fromLineBox;
-    ULLSpinBox* _toLineBox;
-    ULLSpinBox* _numResultsBox;
-    QLineEdit* _searchField;
-    QCheckBox* _regex;
-    QCheckBox* _highlightResults;
+    QLineEdit* _filePath = nullptr;
+    QLineEdit* _indexPath = nullptr;
+    QLineEdit* _destDir = nullptr;
+    QLineEdit* _destName = nullptr;
+    ULLSpinBox* _fromLineBox = nullptr;
+    ULLSpinBox* _toLineBox = nullptr;
+    ULLSpinBox* _numResultsBox = nullptr;
+    QLineEdit* _searchField = nullptr;
+    QCheckBox* _regex = nullptr;
+    QCheckBox* _highlightResults = nullptr;
 
     std::vector<QCheckBox*> _lineEnabledCheckBoxes;
     std::vector<QSpinBox*> _lineOffsetBoxes;

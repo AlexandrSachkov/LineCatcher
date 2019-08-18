@@ -585,7 +585,7 @@ void SearchView::onSearchCompletion(bool success){
     }
 
     QString indexPath = _destDir->text() + "/" + fileName;
-    if(_highlightResults->isChecked()){
+    if(_highlightResults && _highlightResults->isChecked()){
         static_cast<MainWindow*>(parent())->openIndex(indexPath, _searchField->text(), _regex->isChecked());
     }else{
         static_cast<MainWindow*>(parent())->openIndex(indexPath);
