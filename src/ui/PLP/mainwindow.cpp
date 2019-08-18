@@ -221,7 +221,11 @@ void MainWindow::openFile() {
     settings.endGroup();
 
     if(!openFile(path) && !_plpCore->isCancelled()){
-        QMessageBox::critical(this,"Error","Failed to open file: " + path,QMessageBox::Ok);
+        QMessageBox::critical(this,
+          "Error","Failed to open file: " + path +
+          "\nEnsure that directory is writable for index generation",
+          QMessageBox::Ok
+        );
     }
 }
 

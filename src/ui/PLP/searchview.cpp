@@ -107,6 +107,11 @@ void SearchView::createDestinationContent(QLayout* mainLayout){
     QSettings settings("AlexandrSachkov", "LC");
     settings.beginGroup("CommonDirectories");
     QString searchDestDir = settings.value("searchDestDir", settings.value("fileOpenDir", "")).toString();
+    if(!QDir(searchDestDir).exists()){
+        searchDestDir = "";
+        settings.setValue("searchDestDir", searchDestDir);
+    }
+
     settings.endGroup();
 
     QHBoxLayout* openDirLayout = new QHBoxLayout();
@@ -248,13 +253,15 @@ void SearchView::startSearch() {
     unsigned long long maxNumResults = _numResultsBox->value();
 
     //validate user input
-    if(dataPath.simplified().isEmpty()){
-        QMessageBox::information(this,"Error","Source file path cannot be empty",QMessageBox::Ok);
+    QFileInfo dataFileInfo(dataPath.simplified());
+    if(!dataFileInfo.exists()){
+        QMessageBox::information(this,"Error","Source file does not exist",QMessageBox::Ok);
         return;
     }
 
-    if(destDir.simplified().isEmpty()){
-        QMessageBox::information(this,"Error","Save to file directory cannot be empty",QMessageBox::Ok);
+    QFileInfo destFileInfo(destDir.simplified());
+    if(!destFileInfo.exists()){
+        QMessageBox::information(this,"Error","Save to file directory does not exist",QMessageBox::Ok);
         return;
     }
 
@@ -265,6 +272,12 @@ void SearchView::startSearch() {
 
     if(endLine != 0 && startLine > endLine){
         QMessageBox::information(this,"Error","Start line must be smaller or equal to end line",QMessageBox::Ok);
+        return;
+    }
+
+    QFileInfo indexInfo(indexPath.simplified());
+    if(!indexPath.simplified().isEmpty() && !indexInfo.exists()){
+        QMessageBox::information(this,"Error","Index file does not exist",QMessageBox::Ok);
         return;
     }
 
@@ -292,7 +305,10 @@ void SearchView::startSearch() {
     // Create required objects
     CoreObjPtr<PLP::FileReaderI> fileReader = createCoreObjPtr(futureWatcher.result(), _plpCore);
     if(!fileReader){
-        QMessageBox::information(this,"Error","File reader failed to initialize",QMessageBox::Ok);
+        QMessageBox::information(this,
+             "Error","File reader failed to initialize.\n Ensure that directory is writable for index generation",
+             QMessageBox::Ok
+        );
         return;
     }
 
@@ -320,7 +336,7 @@ void SearchView::startSearch() {
         _plpCore
     );
     if(!indexWriter){
-        QMessageBox::information(this,"Error","Index writer failed to initialize",QMessageBox::Ok);
+        QMessageBox::information(this,"Error","Index writer failed to initialize. Ensure that destination is writable",QMessageBox::Ok);
         return;
     }
 
@@ -364,7 +380,11 @@ void SearchView::startRegularSearch(
     }
 
     if(!comparator || !comparator->initialize()){
-        QMessageBox::information(this,"Error","Comparator failed to initialize",QMessageBox::Ok);
+        if(regex){
+            QMessageBox::information(this,"Error","Comparator failed to initialize. Check regex for validity",QMessageBox::Ok);
+        }else{
+            QMessageBox::information(this,"Error","Comparator failed to initialize",QMessageBox::Ok);
+        }
         return;
     }
 
@@ -420,7 +440,7 @@ void SearchView::startMultilineSearch(
             if(_searchPatternBoxes[i]->text().isEmpty()){
                 QMessageBox::information(
                     this,
-                    "PLP",
+                    "Error",
                     "Line #" + QString::number(_lineOffsetBoxes[i]->value()) + " cannot be empty",
                     QMessageBox::Ok
                 );
@@ -446,8 +466,8 @@ void SearchView::startMultilineSearch(
         if(!pair.second->initialize()){
             QMessageBox::information(
                 this,
-                "PLP",
-                "Failed to initialize comparator on Line #" + QString::number(pair.first),
+                "Error",
+                "Failed to initialize comparator on Line #" + QString::number(pair.first) + ". Check regex for validity",
                 QMessageBox::Ok
             );
             return;
