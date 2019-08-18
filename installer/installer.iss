@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Line Catcher"
-#define MyAppVersion "1.0"
+#define MyAppVersion "1.1"
 #define MyAppPublisher "Alexandr Sachkov"
 #define MyAppURL "https://github.com/AlexandrSachkov/LogParser"
 #define MyAppExeName "LineCatcher.exe"
