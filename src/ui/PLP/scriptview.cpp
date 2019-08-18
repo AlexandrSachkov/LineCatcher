@@ -60,8 +60,13 @@ ScriptView::ScriptView(PLP::CoreI* plpCore, QWidget *parent) : QWidget(parent)
     connect(_open, SIGNAL(clicked(void)), this, SLOT(openScript(void)));
 
     _save = new QPushButton("Save", this);
+    _save->setEnabled(false);
     scriptLoadControlLayout->addWidget(_save);
     connect(_save, SIGNAL(clicked(void)), this, SLOT(saveScript(void)));
+
+    _saveAs = new QPushButton("Save As", this);
+    scriptLoadControlLayout->addWidget(_saveAs);
+    connect(_saveAs, &QPushButton::clicked, this, &ScriptView::saveScriptAs);
 
     _run = new QPushButton("Run", this);
     scriptLoadControlLayout->addWidget(_run);
@@ -180,8 +185,13 @@ void ScriptView::openScript(){
     }
     _scriptPath->setText(path);
 
+    _save->setEnabled(false);
     _file.reset(new QFile(path));
     if (_file->open(QIODevice::ReadWrite | QIODevice::Text)) {
+        _scriptEditor->setPlainText(_file->readAll());
+        setScriptModified(false);
+        _save->setEnabled(true);
+    }else if (_file->open(QIODevice::ReadOnly | QIODevice::Text)) {
         _scriptEditor->setPlainText(_file->readAll());
         setScriptModified(false);
     }else{
@@ -215,30 +225,11 @@ bool ScriptView::saveScript() {
     QString script = _scriptEditor->toPlainText().trimmed();
 
     if(path.isEmpty()){
-        QSettings settings("AlexandrSachkov", "LC");
-        settings.beginGroup("CommonDirectories");
-        QString scriptOpenDir = settings.value("scriptOpenDir", "scripts").toString();
-        settings.endGroup();
-
-        QFileDialog fileDialog(this, "Select file to save", scriptOpenDir, tr("Lua (*.lua)"));
-        fileDialog.setFileMode(QFileDialog::AnyFile);
-
-        if (!fileDialog.exec()){
-            return false;
-        }
-
-        QStringList paths = fileDialog.selectedFiles();
-        path = paths[0].trimmed();
-        if(path.isEmpty()){
-            return false;
-        }
-
-        if(!path.endsWith(".lua")){
-            path += ".lua";
-        }
+        _save->setEnabled(false);
+        return false;
     }
 
-    if(!_file){
+    if(!_file || !_file->isOpen()){
         _file.reset(new QFile(path));
         if (!_file->open(QIODevice::ReadWrite | QIODevice::Text)) {
             QMessageBox::critical(this,"Error","Failed to save script", QMessageBox::Ok);
@@ -247,18 +238,56 @@ bool ScriptView::saveScript() {
     }
 
     _file->resize(0);
-    QTextStream out(_file.get());
-    out << script;
-
-    if (out.status() != QTextStream::Ok)
-    {
+    if(-1 == _file->write(script.toUtf8())){
         QMessageBox::critical(this,"Error","Failed to save script", QMessageBox::Ok);
         return false;
     }
 
     setScriptModified(false);
-
     return true;
+}
+
+void ScriptView::saveScriptAs() {
+    QString path = _scriptPath->text().trimmed();
+    QString script = _scriptEditor->toPlainText().trimmed();
+
+    QSettings settings("AlexandrSachkov", "LC");
+    settings.beginGroup("CommonDirectories");
+    QString scriptOpenDir = settings.value("scriptOpenDir", "scripts").toString();
+    settings.endGroup();
+
+    QFileDialog fileDialog(this, "Save as", scriptOpenDir, tr("Lua (*.lua)"));
+    fileDialog.setFileMode(QFileDialog::AnyFile);
+
+    if (!fileDialog.exec()){
+        return;
+    }
+
+    QStringList paths = fileDialog.selectedFiles();
+    path = paths[0].trimmed();
+    if(path.isEmpty()){
+        return;
+    }
+
+    if(!path.endsWith(".lua")){
+        path += ".lua";
+    }
+
+    _file.reset(new QFile(path));
+    if (!_file->open(QIODevice::ReadWrite | QIODevice::Text)) {
+        QMessageBox::critical(this,"Error","Failed to save script.\n Ensure that the directory has write permissions.", QMessageBox::Ok);
+        return;
+    }
+
+    _file->resize(0);
+    if(-1 == _file->write(script.toUtf8())){
+        QMessageBox::critical(this,"Error","Failed to save script", QMessageBox::Ok);
+        return;
+    }
+
+    _scriptPath->setText(path);
+     _save->setEnabled(true);
+    setScriptModified(false);
 }
 
 void ScriptView::clearConsole() {

@@ -54,6 +54,7 @@ private slots:
     void runScript();
     void clearConsole();
     void checkScriptCompleted();
+    void saveScriptAs();
 
 protected:
     void hideEvent(QHideEvent* event);
@@ -73,6 +74,7 @@ private:
 
     QPushButton* _open;
     QPushButton* _save;
+    QPushButton* _saveAs;
     QPushButton* _run;
     QPushButton* _clearConsole;
     QLineEdit* _scriptPath;
