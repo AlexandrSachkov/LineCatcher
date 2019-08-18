@@ -65,6 +65,7 @@ li > * {
             <ol type="a">
                 <li><a href="#openAndView">How-to: Open and view large files</a></li>
                 <li><a href="#regularSearch">How-to: Search and open search results</a></li>
+				<li><a href="#highlighting">How-to: Highlight text</a></li>
                 <li><a href="#multiLineSearch">How-to: Multi-line search</a></li>
                 <li><a href="#scripting">How-to: Scripting</a></li>
                 <li><a href="#settings">How-to: Settings</a></li>
@@ -222,6 +223,33 @@ li > * {
     Line Catcher will also look in the index's local directory for it. Search result files can be set to be
     automatically deleted after closing application by enabling <u>"Cleanup files on closure"</u> setting. 
 </p>
+
+
+<p class="sub_header" id="highlighting">How-to: Highlight text</p>
+<p>Highlighting functionality becomes available once you have opened a data file. 
+   There are three ways to highlight text in the file:</p>
+<ol>   
+    <li><span>Via drop-down menu: select text with your mouse anywhere in the document, right click 
+		and select <b>"Highlight"</b> option in the drop-down menu; </span></li>
+	<li><span>Via <b>Highlights view</b>:</span>
+		<ul>
+			<li><span>Type in the pattern you want to highlight and click “Add”. The pattern will appear
+			as one of the items in the list;</span></li>
+			<li><span>If <u>Regex</u> option is checked, the pattern will be treated like a regular expression. 
+			Type in the regular expression and click “Add” result to the list.</span></li>
+		</ul>	
+	</li>
+	<li><span>Via <b>Search view</b>: while searching for a pattern, check <u>Highlight results</u> to 
+              highlight search results.</span></li>
+</ol>   
+   
+<p><img src="images/highlighting_view.png" alt="Highlighting view"></p>
+
+<p>Each time you highlight text, it will receive a random color. You can change the assigned color by going to
+   <b>Highlights view</b> and clicking on the pattern color that you want to change.<br>
+   Clicking “X” button next to a highlighted pattern will remove the selection, while “Clear All” will remove all highlighted patterns. 
+   When you close the data file, all highlighting will be removed automatically.
+</p> 
 
 
 <p class="sub_header" id="multiLineSearch">How-to: Multi-line search</p>
