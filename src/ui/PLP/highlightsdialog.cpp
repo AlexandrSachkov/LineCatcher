@@ -116,7 +116,7 @@ HighlightsDialog::HighlightsDialog(std::function<void()> highlightsUpdated, QWid
         addHighlight(_pattern->text(), _regex->isChecked());
     });
 
-    _clear = new QPushButton("Clear", this);
+    _clear = new QPushButton("Clear All", this);
     menuLayout->addWidget(_clear);
     connect(_clear, &QPushButton::clicked, this, &HighlightsDialog::clear);
 
