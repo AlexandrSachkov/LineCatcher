@@ -312,6 +312,12 @@ void SearchView::startSearch() {
         return;
     }
 
+    const unsigned long long numLines = fileReader->getNumberOfLines();
+    if(endLine > numLines - 1 || startLine > numLines - 1){
+        QMessageBox::information(this,"Error","Start and end lines must be smaller than: " + QString::number(numLines),QMessageBox::Ok);
+        return;
+    }
+
     CoreObjPtr<PLP::IndexReaderI> indexReader = nullptr;
     if(!indexPath.simplified().isEmpty()){
         indexReader = createCoreObjPtr(_plpCore->createIndexReader(indexPath.toStdString(), 0), _plpCore);
