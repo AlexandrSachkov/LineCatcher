@@ -86,6 +86,7 @@ private:
     ULLSpinBox* _numResultsBox;
     QLineEdit* _searchField;
     QCheckBox* _regex;
+    QCheckBox* _highlightResults;
 
     std::vector<QCheckBox*> _lineEnabledCheckBoxes;
     std::vector<QSpinBox*> _lineOffsetBoxes;

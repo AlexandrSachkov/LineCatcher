@@ -297,7 +297,7 @@ void MainWindow::openIndex() {
     }
 }
 
-void MainWindow::openIndex(const QString& path){
+void MainWindow::openIndex(const QString& path, const QString& highlightPattern, bool regex) {
     CoreObjPtr<PLP::IndexReaderI> indexReader = createCoreObjPtr(
         _plpCore->createIndexReader(path.toStdString(), PLP::OPTIMAL_BLOCK_SIZE_BYTES * 2),
         _plpCore
@@ -328,7 +328,7 @@ void MainWindow::openIndex(const QString& path){
             const QString& existingPath = fileView->getFilePath();
             if(possibleLocation.compare(existingPath) == 0){
                 _fileViewer->setCurrentIndex(i);
-                fileView->openIndex(std::move(indexReader));
+                fileView->openIndex(std::move(indexReader), highlightPattern, regex);
                 setFontSize(_viewerFontSize);
                 return;
             }
@@ -336,6 +336,10 @@ void MainWindow::openIndex(const QString& path){
     }
 
     QMessageBox::critical(this,"Error","Failed to open index: " + path,QMessageBox::Ok);
+}
+
+void MainWindow::openIndex(const QString& path){
+    openIndex(path, "", false);
 }
 
 void MainWindow::showScriptView() {

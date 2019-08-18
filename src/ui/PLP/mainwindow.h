@@ -42,6 +42,7 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     void openIndex(const QString& path);
+    void openIndex(const QString& path, const QString& highlightPattern, bool regex);
 
 public slots:
     void closeTab(int index);

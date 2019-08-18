@@ -169,8 +169,16 @@ void SearchView::createSearchOptionContent(QLayout* mainLayout) {
     _searchField = new QLineEdit(this);
     searchLayout->addRow("Pattern: ", _searchField);
 
+    QHBoxLayout* checkboxLayout = new QHBoxLayout();
+    checkboxLayout->setSpacing(0);
+    searchLayout->addRow(checkboxLayout);
+
     _regex = new QCheckBox("Regex", this);
-    searchLayout->addRow(_regex);
+    _regex->setMaximumWidth(75);
+    checkboxLayout->addWidget(_regex);
+
+    _highlightResults = new QCheckBox("Highlight results", this);
+    checkboxLayout->addWidget(_highlightResults);
 }
 
 void SearchView::createMultilineSearchOptionContent(QLayout* mainLayout){
@@ -557,7 +565,12 @@ void SearchView::onSearchCompletion(bool success){
     }
 
     QString indexPath = _destDir->text() + "/" + fileName;
-    static_cast<MainWindow*>(parent())->openIndex(indexPath);
+    if(_highlightResults->isChecked()){
+        static_cast<MainWindow*>(parent())->openIndex(indexPath, _searchField->text(), _regex->isChecked());
+    }else{
+        static_cast<MainWindow*>(parent())->openIndex(indexPath);
+    }
+
     this->hide();
 }
 

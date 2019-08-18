@@ -137,6 +137,11 @@ const QString& FileView::getFilePath() {
     return _filePath;
 }
 
+void FileView::openIndex(CoreObjPtr<PLP::IndexReaderI> indexReader, const QString& highlightPattern, bool regex) {
+    openIndex(std::move(indexReader));
+    _highlights->addHighlight(highlightPattern, regex);
+}
+
 void FileView::openIndex(CoreObjPtr<PLP::IndexReaderI> indexReader){
     std::wstring path(indexReader->getFilePath());
     QString qPath = QString::fromStdWString(path);
