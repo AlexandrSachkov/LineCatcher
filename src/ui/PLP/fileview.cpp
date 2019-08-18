@@ -46,7 +46,9 @@ FileView::FileView(CoreObjPtr<PLP::FileReaderI> fileReader, QWidget *parent) : Q
     _highlights->hide();
 
     QPushButton* showHighlights = new QPushButton("Highlights", this);
-    optionsLayout->addWidget(showHighlights);
+    showHighlights->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_E));
+    showHighlights->setToolTip("(Ctrl + E)");
+    optionsLayout->addWidget(showHighlights);  
     connect(showHighlights, &QPushButton::clicked, [&, this](){
         _highlights->show();
     });
